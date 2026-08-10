@@ -1,0 +1,342 @@
+{
+  "generator": "generate_dissertation_scenarios.py",
+  "mathematical_model_version": "MATH4003 current PDF",
+  "horizon_days": 90,
+  "seed": 42,
+  "shiploader_count": 2,
+  "maintenance_modes": [
+    "full_shutdown",
+    "partial_30",
+    "partial_70"
+  ],
+  "special_product_ids": [
+    "X1"
+  ],
+  "special_product_id": "X1",
+  "special_product_synthetic_assumptions": {
+    "benchmark_only": true,
+    "not_real_operational_data": true,
+    "footprint_formula": "special-product inventory tonnes / tonnes_per_square_metre + segregation buffer; protected campaigns reserve at least minimum_reserved_footprint_m2"
+  },
+  "scenario_count": 10,
+  "cases": [
+    {
+      "scenario_name": "balanced_control",
+      "file": "balanced_control.json",
+      "description": "Normal supply and demand with maintenance already distributed across the horizon.",
+      "expected_model_value": "A control case: the optimiser should remain feasible and find only small gains over the baseline.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "baseline_and_reference_are_identical": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "peak_export_conflict",
+      "file": "peak_export_conflict.json",
+      "description": "Export demand rises by 30% on days 30-43, while the manual plan places two reclaimers and one shiploader in maintenance.",
+      "expected_model_value": "Move shutdowns away from the export peak to increase loaded tonnes, reduce demand shortfall, and protect the minimum daily throughput.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_has_more_throughput": true,
+          "reference_has_less_unmet_demand": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "overlapping_maintenance",
+      "file": "overlapping_maintenance.json",
+      "description": "The manual plan starts maintenance on two reclaimers and a shiploader at approximately day 36.",
+      "expected_model_value": "Stagger the same mandatory maintenance workload so downstream capacity does not fall below the minimum operational threshold.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_has_fewer_minimum_violations": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "priority_campaign_conflict",
+      "file": "priority_campaign_conflict.json",
+      "description": "A protected synthetic X1 campaign runs on days 50-59. The manual plan shuts its dedicated route, buffer, or cleanout interval.",
+      "expected_model_value": "Schedule maintenance around the protected X1 campaign, maintain the dedicated Z4 footprint and route, and avoid special-product shortfall.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": true,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_reduces_priority_shortfall": true,
+          "baseline_has_special_product_shortfall": true,
+          "reference_has_no_special_product_shortfall": true,
+          "reference_has_no_footprint_violation": true,
+          "reference_has_no_maintenance_conflict": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "yard_overflow_risk",
+      "file": "yard_overflow_risk.json",
+      "description": "The yard starts at 88.5% full and inbound supply increases by 38% on days 21-37. The manual plan simultaneously reduces reclaiming and shiploading capacity.",
+      "expected_model_value": "Move downstream maintenance away from the supply surge to reduce rail curtailment and storage-pressure violations.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_reduces_unaccepted_supply": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "inventory_starvation_risk",
+      "file": "inventory_starvation_risk.json",
+      "description": "The yard starts at only 8% full, demand increases sharply on days 18-35, and the manual plan overlaps upstream unloader and stacker maintenance immediately before and during the peak.",
+      "expected_model_value": "Coordinate upstream maintenance with inventory buffering to prevent stock starvation and downstream throughput loss.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_has_more_throughput": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "tight_lifecycle_windows",
+      "file": "tight_lifecycle_windows.json",
+      "description": "Three downstream jobs have narrow, partially overlapping lifecycle windows. A naive common start causes a capacity collapse.",
+      "expected_model_value": "Find a feasible ordering inside tight windows that a manual earliest-start or common-start rule misses.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_has_fewer_minimum_violations": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "partial_shutdown_choice",
+      "file": "partial_shutdown_choice.json",
+      "description": "A reclaimer maintenance job must occur during sustained strong demand on days 33-46. It can use a short full shutdown, a longer 30%-available mode, or the longest 70%-available mode.",
+      "expected_model_value": "Select the maintenance mode that provides the best trade-off between maintenance duration, retained capacity, and throughput.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "reference_has_more_throughput": true,
+          "reference_has_fewer_minimum_violations": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "fixed_schedule_control",
+      "file": "fixed_schedule_control.json",
+      "description": "Every maintenance start is fixed by setting earliest and latest start to the same day.",
+      "expected_model_value": "A negative control: the integrated optimiser must not claim scheduling benefit when no maintenance flexibility exists.",
+      "expected_feasibility": "feasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "baseline_and_reference_are_identical": true,
+          "metrics_are_identical": true
+        },
+        "all_checks_pass": true
+      }
+    },
+    {
+      "scenario_name": "structurally_infeasible",
+      "file": "structurally_infeasible.json",
+      "description": "Two of three reclaimers have non-movable outages on days 39-48; remaining downstream capacity is below the hard minimum.",
+      "expected_model_value": "Correctly prove infeasibility instead of returning an apparently valid but physically impossible schedule.",
+      "expected_feasibility": "infeasible",
+      "special_product_ids": [
+        "X1"
+      ],
+      "special_product_id": "X1",
+      "special_product_compatible_zone": "Z4",
+      "special_product_required_route_assets": [
+        "TU3",
+        "ST4",
+        "RC3",
+        "SL2"
+      ],
+      "special_product_footprint_assumptions": {
+        "tonnes_per_square_metre": 3.0,
+        "minimum_reserved_footprint_m2": 90000.0,
+        "segregation_buffer_m2": 8000.0
+      },
+      "contains_active_protected_campaign": false,
+      "all_design_checks_pass": true,
+      "design_check_status": {
+        "checks": {
+          "baseline_has_minimum_violation": true,
+          "reference_has_minimum_violation": true
+        },
+        "all_checks_pass": true
+      }
+    }
+  ]
+}

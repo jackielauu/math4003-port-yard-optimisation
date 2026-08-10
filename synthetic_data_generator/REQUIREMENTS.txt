@@ -1,0 +1,2 @@
+Python 3.10 or newer
+No third-party packages are required.
