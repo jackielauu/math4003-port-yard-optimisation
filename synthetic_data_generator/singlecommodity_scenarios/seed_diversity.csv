@@ -1,0 +1,13 @@
+scenario,unique_realizations,seed_count,pass
+F1_system_scale_L,10,10,True
+F1_system_scale_M,10,10,True
+F1_system_scale_H,10,10,True
+F2_mode_tradeoff_L,10,10,True
+F2_mode_tradeoff_M,10,10,True
+F2_mode_tradeoff_H,10,10,True
+F3_yard_flow_L,10,10,True
+F3_yard_flow_M,10,10,True
+F3_yard_flow_H,10,10,True
+F4_operational_conflict_L,10,10,True
+F4_operational_conflict_M,10,10,True
+F4_operational_conflict_H,10,10,True

@@ -1,0 +1,9403 @@
+{
+  "metadata": {
+    "scenario_name": "F1_system_scale_L",
+    "scenario_family": "F1_system_scale",
+    "horizon_days": 90,
+    "seed": 2,
+    "time_granularity": "day",
+    "flow_model": "continuous_rate_based",
+    "data_origin": "generated_from_first_principles",
+    "nominal_stage_rate_tph": {
+      "train_unloader": 5834.0,
+      "stacker": 6876.0,
+      "reclaimer": 5416.0,
+      "shiploader": 4583.0
+    },
+    "nominal_system_rate_tph": 4583.0,
+    "reference_nominal_system_rate_tph": 8124.0,
+    "effective_network_capacity_tph": 4583.0,
+    "reference_effective_network_capacity_tph": 7708.0,
+    "throughput_capacity_basis_tph": 4583.0,
+    "system_scale_factor": 0.5945770627919045,
+    "system_scale_level": "L",
+    "system_scale_profile": {
+      "train_unloader": 2,
+      "stacker": 3,
+      "reclaimer": 2,
+      "shiploader": 1
+    },
+    "operating_hours_per_day": 24.0,
+    "shiploader_count": 1,
+    "mathematical_model_version": "MATH4003 Mathematical Model - current PDF",
+    "maintenance_modes": {
+      "F": {
+        "mode_id": "full_shutdown",
+        "available_capacity": 0.0,
+        "duration_multiplier": 1.0
+      },
+      "P30": {
+        "mode_id": "partial_30",
+        "available_capacity": 0.3,
+        "duration_multiplier": 1.5
+      },
+      "P70": {
+        "mode_id": "partial_70",
+        "available_capacity": 0.7,
+        "duration_multiplier": 3.05
+      }
+    },
+    "objective_formulation": "maximise cumulative throughput minus penalised stockyard overflow; a strict no-overflow variant fixes overflow to zero",
+    "occasion_description": "System-scale L case with 2 train unloaders, 3 stackers, 2 reclaimers, 1 shiploaders, 8 maintenance operations, and the common 3-mode F/P30/P70 set.",
+    "expected_model_value": "Measure how model size and scheduling complexity change as physical network size and maintenance-operation count grow at comparable relative utilisation.",
+    "expected_feasibility": "feasible",
+    "scenario_level": "L",
+    "generation": {
+      "master_seed": 2,
+      "randomization_version": "seeded_realization_v1",
+      "rng_stream_version": "named_streams_v1",
+      "rng_stream_names": [
+        "common/supply",
+        "common/demand",
+        "common/initial_inventory",
+        "common/maintenance_pool",
+        "common/maintenance_windows",
+        "common/throughput",
+        "F4/activity_windows"
+      ],
+      "flow": "structural/config parameters -> family treatment -> seeded realization -> derived parameters -> validation"
+    },
+    "realization": {
+      "maintenance_operation_count": 8,
+      "maintenance_by_stage_counts": {
+        "train_unloader": 2,
+        "stacker": 2,
+        "reclaimer": 3,
+        "shiploader": 1
+      },
+      "initial_inventory_fill_ratios": {
+        "Z1": 0.225863,
+        "Z2": 0.258803,
+        "Z3": 0.18306,
+        "Z4": 0.160573
+      },
+      "maintenance_tasks": {
+        "M_TU1_01": {
+          "asset_id": "TU1",
+          "stage": "train_unloader",
+          "full_duration_days": 4,
+          "earliest_start_day": 13,
+          "latest_start_day": 36,
+          "lifecycle_due_day": 49,
+          "task_class": "major"
+        },
+        "M_TU2_01": {
+          "asset_id": "TU2",
+          "stage": "train_unloader",
+          "full_duration_days": 4,
+          "earliest_start_day": 14,
+          "latest_start_day": 33,
+          "lifecycle_due_day": 47,
+          "task_class": "major"
+        },
+        "M_ST1_01": {
+          "asset_id": "ST1",
+          "stage": "stacker",
+          "full_duration_days": 3,
+          "earliest_start_day": 20,
+          "latest_start_day": 35,
+          "lifecycle_due_day": 47,
+          "task_class": "modular"
+        },
+        "M_ST3_01": {
+          "asset_id": "ST3",
+          "stage": "stacker",
+          "full_duration_days": 2,
+          "earliest_start_day": 59,
+          "latest_start_day": 68,
+          "lifecycle_due_day": 76,
+          "task_class": "modular"
+        },
+        "M_RC1_01": {
+          "asset_id": "RC1",
+          "stage": "reclaimer",
+          "full_duration_days": 4,
+          "earliest_start_day": 26,
+          "latest_start_day": 37,
+          "lifecycle_due_day": 51,
+          "task_class": "major"
+        },
+        "M_RC2_01": {
+          "asset_id": "RC2",
+          "stage": "reclaimer",
+          "full_duration_days": 5,
+          "earliest_start_day": 32,
+          "latest_start_day": 51,
+          "lifecycle_due_day": 69,
+          "task_class": "major"
+        },
+        "M_RC2_02": {
+          "asset_id": "RC2",
+          "stage": "reclaimer",
+          "full_duration_days": 2,
+          "earliest_start_day": 61,
+          "latest_start_day": 67,
+          "lifecycle_due_day": 75,
+          "task_class": "major"
+        },
+        "M_SL1_01": {
+          "asset_id": "SL1",
+          "stage": "shiploader",
+          "full_duration_days": 3,
+          "earliest_start_day": 40,
+          "latest_start_day": 52,
+          "lifecycle_due_day": 64,
+          "task_class": "major"
+        }
+      }
+    }
+  },
+  "products": [
+    {
+      "product_id": "P1",
+      "name": "Normal Product 1",
+      "share_of_volume": 0.38,
+      "grade_specs": [
+        {
+          "element": "FE",
+          "target": 57.5,
+          "min_value": 57.0,
+          "max_value": 58.0,
+          "unit": "%"
+        },
+        {
+          "element": "SIO2",
+          "target": 5.5,
+          "min_value": 5.0,
+          "max_value": 6.0,
+          "unit": "%"
+        },
+        {
+          "element": "AL2O3",
+          "target": 2.1,
+          "min_value": 1.8,
+          "max_value": 2.4,
+          "unit": "%"
+        },
+        {
+          "element": "MN",
+          "target": 0.75,
+          "min_value": 0.4,
+          "max_value": 1.1,
+          "unit": "%"
+        },
+        {
+          "element": "P",
+          "target": 0.063,
+          "min_value": 0.055,
+          "max_value": 0.07,
+          "unit": "%"
+        },
+        {
+          "element": "AS",
+          "target": 0.005,
+          "min_value": 0.002,
+          "max_value": 0.01,
+          "unit": "%"
+        },
+        {
+          "element": "LOI",
+          "target": 7.7,
+          "min_value": 7.2,
+          "max_value": 8.2,
+          "unit": "%"
+        }
+      ],
+      "is_special": false,
+      "blending_allowed": true
+    },
+    {
+      "product_id": "P2",
+      "name": "Normal Product 2",
+      "share_of_volume": 0.3,
+      "grade_specs": [
+        {
+          "element": "FE",
+          "target": 56.8,
+          "min_value": 56.3,
+          "max_value": 57.3,
+          "unit": "%"
+        },
+        {
+          "element": "SIO2",
+          "target": 5.9,
+          "min_value": 5.5,
+          "max_value": 6.5,
+          "unit": "%"
+        },
+        {
+          "element": "AL2O3",
+          "target": 2.7,
+          "min_value": 2.4,
+          "max_value": 3.2,
+          "unit": "%"
+        },
+        {
+          "element": "MN",
+          "target": 0.8,
+          "min_value": 0.5,
+          "max_value": 1.3,
+          "unit": "%"
+        },
+        {
+          "element": "P",
+          "target": 0.061,
+          "min_value": 0.055,
+          "max_value": 0.068,
+          "unit": "%"
+        },
+        {
+          "element": "AS",
+          "target": 0.006,
+          "min_value": 0.002,
+          "max_value": 0.012,
+          "unit": "%"
+        },
+        {
+          "element": "LOI",
+          "target": 7.4,
+          "min_value": 7.0,
+          "max_value": 8.0,
+          "unit": "%"
+        }
+      ],
+      "is_special": false,
+      "blending_allowed": true
+    },
+    {
+      "product_id": "P3",
+      "name": "Normal Product 3",
+      "share_of_volume": 0.2,
+      "grade_specs": [
+        {
+          "element": "FE",
+          "target": 60.3,
+          "min_value": 59.7,
+          "max_value": 60.8,
+          "unit": "%"
+        },
+        {
+          "element": "SIO2",
+          "target": 4.3,
+          "min_value": 3.8,
+          "max_value": 4.8,
+          "unit": "%"
+        },
+        {
+          "element": "AL2O3",
+          "target": 2.4,
+          "min_value": 2.1,
+          "max_value": 2.7,
+          "unit": "%"
+        },
+        {
+          "element": "MN",
+          "target": 0.06,
+          "min_value": 0.04,
+          "max_value": 0.09,
+          "unit": "%"
+        },
+        {
+          "element": "P",
+          "target": 0.133,
+          "min_value": 0.12,
+          "max_value": 0.145,
+          "unit": "%"
+        },
+        {
+          "element": "AS",
+          "target": 0.003,
+          "min_value": 0.002,
+          "max_value": 0.005,
+          "unit": "%"
+        },
+        {
+          "element": "LOI",
+          "target": 5.3,
+          "min_value": 5.0,
+          "max_value": 5.7,
+          "unit": "%"
+        }
+      ],
+      "is_special": false,
+      "blending_allowed": true
+    },
+    {
+      "product_id": "X1",
+      "name": "Special Product X1",
+      "share_of_volume": 0.12,
+      "grade_specs": [
+        {
+          "element": "FE",
+          "target": 57.2,
+          "min_value": 56.8,
+          "max_value": 57.6,
+          "unit": "%"
+        },
+        {
+          "element": "SIO2",
+          "target": 5.7,
+          "min_value": 5.2,
+          "max_value": 6.2,
+          "unit": "%"
+        },
+        {
+          "element": "AL2O3",
+          "target": 1.8,
+          "min_value": 1.6,
+          "max_value": 2.0,
+          "unit": "%"
+        },
+        {
+          "element": "MN",
+          "target": 0.025,
+          "min_value": 0.02,
+          "max_value": 0.035,
+          "unit": "%"
+        },
+        {
+          "element": "P",
+          "target": 0.072,
+          "min_value": 0.065,
+          "max_value": 0.08,
+          "unit": "%"
+        },
+        {
+          "element": "AS",
+          "target": 0.003,
+          "min_value": 0.002,
+          "max_value": 0.005,
+          "unit": "%"
+        },
+        {
+          "element": "LOI",
+          "target": 9.6,
+          "min_value": 9.0,
+          "max_value": 10.2,
+          "unit": "%"
+        }
+      ],
+      "is_special": true,
+      "blending_allowed": false
+    }
+  ],
+  "special_product_requirements": [
+    {
+      "product_id": "X1",
+      "tonnes_per_square_metre": 3.2,
+      "minimum_reserved_footprint_m2": 53511.9356512714,
+      "segregation_buffer_m2": 8000.0,
+      "compatible_zones": [
+        "Z4"
+      ],
+      "required_assets": [
+        "TU2",
+        "ST3",
+        "RC2",
+        "SL1"
+      ],
+      "compatible_arcs": [
+        "RAIL_SOURCE__TU2",
+        "TU2__ST3",
+        "ST3__Z4",
+        "Z4__RC2",
+        "RC2__SL1",
+        "SL1__VESSEL_SINK"
+      ],
+      "minimum_campaign_tonnes": 149833.41982355993,
+      "minimum_contiguous_days": 9,
+      "earliest_campaign_start_day": 25,
+      "latest_campaign_start_day": 64,
+      "pre_campaign_buffer_days": 2,
+      "post_campaign_buffer_days": 2,
+      "cleanout_before_days": 1,
+      "cleanout_after_days": 1,
+      "maintenance_incompatible": true,
+      "blending_allowed": false,
+      "minimum_build_tonnes": 99888.94654903995,
+      "build_complete_before_reclaim": true
+    }
+  ],
+  "days": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61,
+    62,
+    63,
+    64,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88,
+    89
+  ],
+  "zones": [
+    {
+      "zone_id": "Z1",
+      "capacity_tonnes": 386475.091,
+      "allowed_products": [
+        "P1",
+        "P2"
+      ],
+      "footprint_capacity_m2": 154590.036,
+      "minimum_inventory_tonnes": 27053.256,
+      "overflow_penalty_per_tonne": 1.0
+    },
+    {
+      "zone_id": "Z2",
+      "capacity_tonnes": 445932.797,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ],
+      "footprint_capacity_m2": 142698.495,
+      "minimum_inventory_tonnes": 26755.968,
+      "overflow_penalty_per_tonne": 1.0
+    },
+    {
+      "zone_id": "Z3",
+      "capacity_tonnes": 344854.696,
+      "allowed_products": [
+        "P2",
+        "P3"
+      ],
+      "footprint_capacity_m2": 130806.954,
+      "minimum_inventory_tonnes": 20691.282,
+      "overflow_penalty_per_tonne": 1.0
+    },
+    {
+      "zone_id": "Z4",
+      "capacity_tonnes": 297288.531,
+      "allowed_products": [
+        "X1"
+      ],
+      "footprint_capacity_m2": 109996.757,
+      "minimum_inventory_tonnes": 19323.755,
+      "overflow_penalty_per_tonne": 1.0
+    }
+  ],
+  "assets": [
+    {
+      "asset_id": "TU1",
+      "stage": "train_unloader",
+      "nominal_rate_tph": 2917.0,
+      "description": "Train unloader 1"
+    },
+    {
+      "asset_id": "TU2",
+      "stage": "train_unloader",
+      "nominal_rate_tph": 2917.0,
+      "description": "Train unloader 2"
+    },
+    {
+      "asset_id": "ST1",
+      "stage": "stacker",
+      "nominal_rate_tph": 2292.0,
+      "description": "Stacker 1"
+    },
+    {
+      "asset_id": "ST2",
+      "stage": "stacker",
+      "nominal_rate_tph": 2292.0,
+      "description": "Stacker 2"
+    },
+    {
+      "asset_id": "ST3",
+      "stage": "stacker",
+      "nominal_rate_tph": 2292.0,
+      "description": "Stacker 3"
+    },
+    {
+      "asset_id": "RC1",
+      "stage": "reclaimer",
+      "nominal_rate_tph": 2708.0,
+      "description": "Reclaimer 1"
+    },
+    {
+      "asset_id": "RC2",
+      "stage": "reclaimer",
+      "nominal_rate_tph": 2708.0,
+      "description": "Reclaimer 2"
+    },
+    {
+      "asset_id": "SL1",
+      "stage": "shiploader",
+      "nominal_rate_tph": 4583.0,
+      "description": "Shiploader 1"
+    }
+  ],
+  "arcs": [
+    {
+      "arc_id": "RAIL_SOURCE__TU1",
+      "from_node": "RAIL_SOURCE",
+      "to_node": "TU1",
+      "capacity_tph": 2917.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "RAIL_SOURCE__TU2",
+      "from_node": "RAIL_SOURCE",
+      "to_node": "TU2",
+      "capacity_tph": 2917.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "TU1__ST1",
+      "from_node": "TU1",
+      "to_node": "ST1",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "TU2__ST2",
+      "from_node": "TU2",
+      "to_node": "ST2",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "TU1__ST2",
+      "from_node": "TU1",
+      "to_node": "ST2",
+      "capacity_tph": 1875.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "TU2__ST3",
+      "from_node": "TU2",
+      "to_node": "ST3",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "TU1__ST3",
+      "from_node": "TU1",
+      "to_node": "ST3",
+      "capacity_tph": 1875.0,
+      "allowed_products": [
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "ST1__Z1",
+      "from_node": "ST1",
+      "to_node": "Z1",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P1",
+        "P2"
+      ]
+    },
+    {
+      "arc_id": "ST1__Z2",
+      "from_node": "ST1",
+      "to_node": "Z2",
+      "capacity_tph": 1875.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "ST2__Z2",
+      "from_node": "ST2",
+      "to_node": "Z2",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "ST2__Z3",
+      "from_node": "ST2",
+      "to_node": "Z3",
+      "capacity_tph": 1875.0,
+      "allowed_products": [
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "ST3__Z3",
+      "from_node": "ST3",
+      "to_node": "Z3",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "ST3__Z4",
+      "from_node": "ST3",
+      "to_node": "Z4",
+      "capacity_tph": 2292.0,
+      "allowed_products": [
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "Z1__RC1",
+      "from_node": "Z1",
+      "to_node": "RC1",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "P1",
+        "P2"
+      ]
+    },
+    {
+      "arc_id": "Z1__RC2",
+      "from_node": "Z1",
+      "to_node": "RC2",
+      "capacity_tph": 1875.0,
+      "allowed_products": [
+        "P1",
+        "P2"
+      ]
+    },
+    {
+      "arc_id": "Z2__RC2",
+      "from_node": "Z2",
+      "to_node": "RC2",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "Z3__RC2",
+      "from_node": "Z3",
+      "to_node": "RC2",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "arc_id": "Z4__RC2",
+      "from_node": "Z4",
+      "to_node": "RC2",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "RC1__SL1",
+      "from_node": "RC1",
+      "to_node": "SL1",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "RC2__SL1",
+      "from_node": "RC2",
+      "to_node": "SL1",
+      "capacity_tph": 2708.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3",
+        "X1"
+      ]
+    },
+    {
+      "arc_id": "SL1__VESSEL_SINK",
+      "from_node": "SL1",
+      "to_node": "VESSEL_SINK",
+      "capacity_tph": 4583.0,
+      "allowed_products": [
+        "P1",
+        "P2",
+        "P3",
+        "X1"
+      ]
+    }
+  ],
+  "initial_inventory": {
+    "Z1": {
+      "P1": 48802.063,
+      "P2": 38488.337
+    },
+    "Z2": {
+      "P1": 47887.525,
+      "P2": 42473.879,
+      "P3": 25047.404
+    },
+    "Z3": {
+      "P2": 38027.837,
+      "P3": 25101.223
+    },
+    "Z4": {
+      "X1": 47736.4
+    }
+  },
+  "inbound_supply": [
+    {
+      "day": 0,
+      "product_id": "P1",
+      "tonnes": 42478.168
+    },
+    {
+      "day": 0,
+      "product_id": "P2",
+      "tonnes": 33250.077
+    },
+    {
+      "day": 0,
+      "product_id": "P3",
+      "tonnes": 21525.723
+    },
+    {
+      "day": 0,
+      "product_id": "X1",
+      "tonnes": 13675.48
+    },
+    {
+      "day": 1,
+      "product_id": "P1",
+      "tonnes": 40397.947
+    },
+    {
+      "day": 1,
+      "product_id": "P2",
+      "tonnes": 32152.473
+    },
+    {
+      "day": 1,
+      "product_id": "P3",
+      "tonnes": 22499.776
+    },
+    {
+      "day": 1,
+      "product_id": "X1",
+      "tonnes": 12765.36
+    },
+    {
+      "day": 2,
+      "product_id": "P1",
+      "tonnes": 41160.054
+    },
+    {
+      "day": 2,
+      "product_id": "P2",
+      "tonnes": 33462.086
+    },
+    {
+      "day": 2,
+      "product_id": "P3",
+      "tonnes": 22929.28
+    },
+    {
+      "day": 2,
+      "product_id": "X1",
+      "tonnes": 13424.007
+    },
+    {
+      "day": 3,
+      "product_id": "P1",
+      "tonnes": 41162.987
+    },
+    {
+      "day": 3,
+      "product_id": "P2",
+      "tonnes": 30046.452
+    },
+    {
+      "day": 3,
+      "product_id": "P3",
+      "tonnes": 20405.17
+    },
+    {
+      "day": 3,
+      "product_id": "X1",
+      "tonnes": 12696.183
+    },
+    {
+      "day": 4,
+      "product_id": "P1",
+      "tonnes": 41500.877
+    },
+    {
+      "day": 4,
+      "product_id": "P2",
+      "tonnes": 30841.43
+    },
+    {
+      "day": 4,
+      "product_id": "P3",
+      "tonnes": 22041.308
+    },
+    {
+      "day": 4,
+      "product_id": "X1",
+      "tonnes": 12515.77
+    },
+    {
+      "day": 5,
+      "product_id": "P1",
+      "tonnes": 40150.423
+    },
+    {
+      "day": 5,
+      "product_id": "P2",
+      "tonnes": 29976.356
+    },
+    {
+      "day": 5,
+      "product_id": "P3",
+      "tonnes": 19839.397
+    },
+    {
+      "day": 5,
+      "product_id": "X1",
+      "tonnes": 11934.837
+    },
+    {
+      "day": 6,
+      "product_id": "P1",
+      "tonnes": 38723.306
+    },
+    {
+      "day": 6,
+      "product_id": "P2",
+      "tonnes": 31209.571
+    },
+    {
+      "day": 6,
+      "product_id": "P3",
+      "tonnes": 21767.926
+    },
+    {
+      "day": 6,
+      "product_id": "X1",
+      "tonnes": 12408.071
+    },
+    {
+      "day": 7,
+      "product_id": "P1",
+      "tonnes": 39510.987
+    },
+    {
+      "day": 7,
+      "product_id": "P2",
+      "tonnes": 32770.723
+    },
+    {
+      "day": 7,
+      "product_id": "P3",
+      "tonnes": 22384.53
+    },
+    {
+      "day": 7,
+      "product_id": "X1",
+      "tonnes": 13008.133
+    },
+    {
+      "day": 8,
+      "product_id": "P1",
+      "tonnes": 43679.178
+    },
+    {
+      "day": 8,
+      "product_id": "P2",
+      "tonnes": 33246.341
+    },
+    {
+      "day": 8,
+      "product_id": "P3",
+      "tonnes": 22216.367
+    },
+    {
+      "day": 8,
+      "product_id": "X1",
+      "tonnes": 14151.012
+    },
+    {
+      "day": 9,
+      "product_id": "P1",
+      "tonnes": 42519.124
+    },
+    {
+      "day": 9,
+      "product_id": "P2",
+      "tonnes": 33348.987
+    },
+    {
+      "day": 9,
+      "product_id": "P3",
+      "tonnes": 23710.483
+    },
+    {
+      "day": 9,
+      "product_id": "X1",
+      "tonnes": 14325.475
+    },
+    {
+      "day": 10,
+      "product_id": "P1",
+      "tonnes": 39400.242
+    },
+    {
+      "day": 10,
+      "product_id": "P2",
+      "tonnes": 30756.874
+    },
+    {
+      "day": 10,
+      "product_id": "P3",
+      "tonnes": 21236.349
+    },
+    {
+      "day": 10,
+      "product_id": "X1",
+      "tonnes": 13271.46
+    },
+    {
+      "day": 11,
+      "product_id": "P1",
+      "tonnes": 40656.37
+    },
+    {
+      "day": 11,
+      "product_id": "P2",
+      "tonnes": 30279.361
+    },
+    {
+      "day": 11,
+      "product_id": "P3",
+      "tonnes": 21415.677
+    },
+    {
+      "day": 11,
+      "product_id": "X1",
+      "tonnes": 12570.276
+    },
+    {
+      "day": 12,
+      "product_id": "P1",
+      "tonnes": 38638.018
+    },
+    {
+      "day": 12,
+      "product_id": "P2",
+      "tonnes": 29813.878
+    },
+    {
+      "day": 12,
+      "product_id": "P3",
+      "tonnes": 20164.6
+    },
+    {
+      "day": 12,
+      "product_id": "X1",
+      "tonnes": 11826.918
+    },
+    {
+      "day": 13,
+      "product_id": "P1",
+      "tonnes": 39809.064
+    },
+    {
+      "day": 13,
+      "product_id": "P2",
+      "tonnes": 31174.975
+    },
+    {
+      "day": 13,
+      "product_id": "P3",
+      "tonnes": 21796.389
+    },
+    {
+      "day": 13,
+      "product_id": "X1",
+      "tonnes": 12292.973
+    },
+    {
+      "day": 14,
+      "product_id": "P1",
+      "tonnes": 39332.827
+    },
+    {
+      "day": 14,
+      "product_id": "P2",
+      "tonnes": 30638.423
+    },
+    {
+      "day": 14,
+      "product_id": "P3",
+      "tonnes": 21189.369
+    },
+    {
+      "day": 14,
+      "product_id": "X1",
+      "tonnes": 12554.189
+    },
+    {
+      "day": 15,
+      "product_id": "P1",
+      "tonnes": 41113.939
+    },
+    {
+      "day": 15,
+      "product_id": "P2",
+      "tonnes": 32125.922
+    },
+    {
+      "day": 15,
+      "product_id": "P3",
+      "tonnes": 21914.273
+    },
+    {
+      "day": 15,
+      "product_id": "X1",
+      "tonnes": 12712.998
+    },
+    {
+      "day": 16,
+      "product_id": "P1",
+      "tonnes": 42727.454
+    },
+    {
+      "day": 16,
+      "product_id": "P2",
+      "tonnes": 33572.808
+    },
+    {
+      "day": 16,
+      "product_id": "P3",
+      "tonnes": 21249.613
+    },
+    {
+      "day": 16,
+      "product_id": "X1",
+      "tonnes": 12870.492
+    },
+    {
+      "day": 17,
+      "product_id": "P1",
+      "tonnes": 41524.611
+    },
+    {
+      "day": 17,
+      "product_id": "P2",
+      "tonnes": 31498.679
+    },
+    {
+      "day": 17,
+      "product_id": "P3",
+      "tonnes": 22166.198
+    },
+    {
+      "day": 17,
+      "product_id": "X1",
+      "tonnes": 12579.626
+    },
+    {
+      "day": 18,
+      "product_id": "P1",
+      "tonnes": 37813.668
+    },
+    {
+      "day": 18,
+      "product_id": "P2",
+      "tonnes": 30167.204
+    },
+    {
+      "day": 18,
+      "product_id": "P3",
+      "tonnes": 19512.219
+    },
+    {
+      "day": 18,
+      "product_id": "X1",
+      "tonnes": 12336.181
+    },
+    {
+      "day": 19,
+      "product_id": "P1",
+      "tonnes": 38377.537
+    },
+    {
+      "day": 19,
+      "product_id": "P2",
+      "tonnes": 29831.914
+    },
+    {
+      "day": 19,
+      "product_id": "P3",
+      "tonnes": 20165.213
+    },
+    {
+      "day": 19,
+      "product_id": "X1",
+      "tonnes": 12522.816
+    },
+    {
+      "day": 20,
+      "product_id": "P1",
+      "tonnes": 39582.308
+    },
+    {
+      "day": 20,
+      "product_id": "P2",
+      "tonnes": 30936.525
+    },
+    {
+      "day": 20,
+      "product_id": "P3",
+      "tonnes": 20210.258
+    },
+    {
+      "day": 20,
+      "product_id": "X1",
+      "tonnes": 12603.699
+    },
+    {
+      "day": 21,
+      "product_id": "P1",
+      "tonnes": 40106.883
+    },
+    {
+      "day": 21,
+      "product_id": "P2",
+      "tonnes": 33675.59
+    },
+    {
+      "day": 21,
+      "product_id": "P3",
+      "tonnes": 21054.942
+    },
+    {
+      "day": 21,
+      "product_id": "X1",
+      "tonnes": 12417.427
+    },
+    {
+      "day": 22,
+      "product_id": "P1",
+      "tonnes": 41009.176
+    },
+    {
+      "day": 22,
+      "product_id": "P2",
+      "tonnes": 33433.243
+    },
+    {
+      "day": 22,
+      "product_id": "P3",
+      "tonnes": 22033.238
+    },
+    {
+      "day": 22,
+      "product_id": "X1",
+      "tonnes": 13441.009
+    },
+    {
+      "day": 23,
+      "product_id": "P1",
+      "tonnes": 42430.916
+    },
+    {
+      "day": 23,
+      "product_id": "P2",
+      "tonnes": 31275.826
+    },
+    {
+      "day": 23,
+      "product_id": "P3",
+      "tonnes": 21614.285
+    },
+    {
+      "day": 23,
+      "product_id": "X1",
+      "tonnes": 13486.734
+    },
+    {
+      "day": 24,
+      "product_id": "P1",
+      "tonnes": 39504.207
+    },
+    {
+      "day": 24,
+      "product_id": "P2",
+      "tonnes": 31605.784
+    },
+    {
+      "day": 24,
+      "product_id": "P3",
+      "tonnes": 21694.074
+    },
+    {
+      "day": 24,
+      "product_id": "X1",
+      "tonnes": 12439.333
+    },
+    {
+      "day": 25,
+      "product_id": "P1",
+      "tonnes": 37551.966
+    },
+    {
+      "day": 25,
+      "product_id": "P2",
+      "tonnes": 30208.929
+    },
+    {
+      "day": 25,
+      "product_id": "P3",
+      "tonnes": 21395.988
+    },
+    {
+      "day": 25,
+      "product_id": "X1",
+      "tonnes": 12891.514
+    },
+    {
+      "day": 26,
+      "product_id": "P1",
+      "tonnes": 35561.481
+    },
+    {
+      "day": 26,
+      "product_id": "P2",
+      "tonnes": 30462.221
+    },
+    {
+      "day": 26,
+      "product_id": "P3",
+      "tonnes": 20500.562
+    },
+    {
+      "day": 26,
+      "product_id": "X1",
+      "tonnes": 11703.46
+    },
+    {
+      "day": 27,
+      "product_id": "P1",
+      "tonnes": 39108.844
+    },
+    {
+      "day": 27,
+      "product_id": "P2",
+      "tonnes": 33461.859
+    },
+    {
+      "day": 27,
+      "product_id": "P3",
+      "tonnes": 20351.48
+    },
+    {
+      "day": 27,
+      "product_id": "X1",
+      "tonnes": 12991.201
+    },
+    {
+      "day": 28,
+      "product_id": "P1",
+      "tonnes": 40234.131
+    },
+    {
+      "day": 28,
+      "product_id": "P2",
+      "tonnes": 33608.266
+    },
+    {
+      "day": 28,
+      "product_id": "P3",
+      "tonnes": 20729.33
+    },
+    {
+      "day": 28,
+      "product_id": "X1",
+      "tonnes": 12805.936
+    },
+    {
+      "day": 29,
+      "product_id": "P1",
+      "tonnes": 40036.735
+    },
+    {
+      "day": 29,
+      "product_id": "P2",
+      "tonnes": 33962.31
+    },
+    {
+      "day": 29,
+      "product_id": "P3",
+      "tonnes": 22357.445
+    },
+    {
+      "day": 29,
+      "product_id": "X1",
+      "tonnes": 13006.016
+    },
+    {
+      "day": 30,
+      "product_id": "P1",
+      "tonnes": 40300.428
+    },
+    {
+      "day": 30,
+      "product_id": "P2",
+      "tonnes": 32877.324
+    },
+    {
+      "day": 30,
+      "product_id": "P3",
+      "tonnes": 20459.153
+    },
+    {
+      "day": 30,
+      "product_id": "X1",
+      "tonnes": 12163.178
+    },
+    {
+      "day": 31,
+      "product_id": "P1",
+      "tonnes": 39217.737
+    },
+    {
+      "day": 31,
+      "product_id": "P2",
+      "tonnes": 30529.125
+    },
+    {
+      "day": 31,
+      "product_id": "P3",
+      "tonnes": 21543.786
+    },
+    {
+      "day": 31,
+      "product_id": "X1",
+      "tonnes": 12075.474
+    },
+    {
+      "day": 32,
+      "product_id": "P1",
+      "tonnes": 39640.393
+    },
+    {
+      "day": 32,
+      "product_id": "P2",
+      "tonnes": 31239.835
+    },
+    {
+      "day": 32,
+      "product_id": "P3",
+      "tonnes": 21828.543
+    },
+    {
+      "day": 32,
+      "product_id": "X1",
+      "tonnes": 12894.333
+    },
+    {
+      "day": 33,
+      "product_id": "P1",
+      "tonnes": 41940.585
+    },
+    {
+      "day": 33,
+      "product_id": "P2",
+      "tonnes": 30563.855
+    },
+    {
+      "day": 33,
+      "product_id": "P3",
+      "tonnes": 21266.299
+    },
+    {
+      "day": 33,
+      "product_id": "X1",
+      "tonnes": 12066.029
+    },
+    {
+      "day": 34,
+      "product_id": "P1",
+      "tonnes": 41315.099
+    },
+    {
+      "day": 34,
+      "product_id": "P2",
+      "tonnes": 30712.862
+    },
+    {
+      "day": 34,
+      "product_id": "P3",
+      "tonnes": 20022.173
+    },
+    {
+      "day": 34,
+      "product_id": "X1",
+      "tonnes": 12490.621
+    },
+    {
+      "day": 35,
+      "product_id": "P1",
+      "tonnes": 41639.24
+    },
+    {
+      "day": 35,
+      "product_id": "P2",
+      "tonnes": 32968.943
+    },
+    {
+      "day": 35,
+      "product_id": "P3",
+      "tonnes": 22963.062
+    },
+    {
+      "day": 35,
+      "product_id": "X1",
+      "tonnes": 13695.827
+    },
+    {
+      "day": 36,
+      "product_id": "P1",
+      "tonnes": 39625.18
+    },
+    {
+      "day": 36,
+      "product_id": "P2",
+      "tonnes": 33450.459
+    },
+    {
+      "day": 36,
+      "product_id": "P3",
+      "tonnes": 22749.13
+    },
+    {
+      "day": 36,
+      "product_id": "X1",
+      "tonnes": 12990.989
+    },
+    {
+      "day": 37,
+      "product_id": "P1",
+      "tonnes": 40626.727
+    },
+    {
+      "day": 37,
+      "product_id": "P2",
+      "tonnes": 34043.723
+    },
+    {
+      "day": 37,
+      "product_id": "P3",
+      "tonnes": 22609.05
+    },
+    {
+      "day": 37,
+      "product_id": "X1",
+      "tonnes": 13002.303
+    },
+    {
+      "day": 38,
+      "product_id": "P1",
+      "tonnes": 43078.072
+    },
+    {
+      "day": 38,
+      "product_id": "P2",
+      "tonnes": 32858.372
+    },
+    {
+      "day": 38,
+      "product_id": "P3",
+      "tonnes": 22870.836
+    },
+    {
+      "day": 38,
+      "product_id": "X1",
+      "tonnes": 12692.229
+    },
+    {
+      "day": 39,
+      "product_id": "P1",
+      "tonnes": 38893.299
+    },
+    {
+      "day": 39,
+      "product_id": "P2",
+      "tonnes": 32037.303
+    },
+    {
+      "day": 39,
+      "product_id": "P3",
+      "tonnes": 20479.117
+    },
+    {
+      "day": 39,
+      "product_id": "X1",
+      "tonnes": 12935.869
+    },
+    {
+      "day": 40,
+      "product_id": "P1",
+      "tonnes": 40181.205
+    },
+    {
+      "day": 40,
+      "product_id": "P2",
+      "tonnes": 30087.566
+    },
+    {
+      "day": 40,
+      "product_id": "P3",
+      "tonnes": 19862.157
+    },
+    {
+      "day": 40,
+      "product_id": "X1",
+      "tonnes": 12555.745
+    },
+    {
+      "day": 41,
+      "product_id": "P1",
+      "tonnes": 38329.089
+    },
+    {
+      "day": 41,
+      "product_id": "P2",
+      "tonnes": 30412.24
+    },
+    {
+      "day": 41,
+      "product_id": "P3",
+      "tonnes": 21861.476
+    },
+    {
+      "day": 41,
+      "product_id": "X1",
+      "tonnes": 13001.311
+    },
+    {
+      "day": 42,
+      "product_id": "P1",
+      "tonnes": 41126.127
+    },
+    {
+      "day": 42,
+      "product_id": "P2",
+      "tonnes": 32369.707
+    },
+    {
+      "day": 42,
+      "product_id": "P3",
+      "tonnes": 21448.758
+    },
+    {
+      "day": 42,
+      "product_id": "X1",
+      "tonnes": 12156.328
+    },
+    {
+      "day": 43,
+      "product_id": "P1",
+      "tonnes": 39623.851
+    },
+    {
+      "day": 43,
+      "product_id": "P2",
+      "tonnes": 33086.869
+    },
+    {
+      "day": 43,
+      "product_id": "P3",
+      "tonnes": 21789.468
+    },
+    {
+      "day": 43,
+      "product_id": "X1",
+      "tonnes": 12299.376
+    },
+    {
+      "day": 44,
+      "product_id": "P1",
+      "tonnes": 43298.385
+    },
+    {
+      "day": 44,
+      "product_id": "P2",
+      "tonnes": 32020.81
+    },
+    {
+      "day": 44,
+      "product_id": "P3",
+      "tonnes": 22252.364
+    },
+    {
+      "day": 44,
+      "product_id": "X1",
+      "tonnes": 13503.128
+    },
+    {
+      "day": 45,
+      "product_id": "P1",
+      "tonnes": 39312.484
+    },
+    {
+      "day": 45,
+      "product_id": "P2",
+      "tonnes": 32008.178
+    },
+    {
+      "day": 45,
+      "product_id": "P3",
+      "tonnes": 20601.349
+    },
+    {
+      "day": 45,
+      "product_id": "X1",
+      "tonnes": 12808.949
+    },
+    {
+      "day": 46,
+      "product_id": "P1",
+      "tonnes": 40544.043
+    },
+    {
+      "day": 46,
+      "product_id": "P2",
+      "tonnes": 31594.612
+    },
+    {
+      "day": 46,
+      "product_id": "P3",
+      "tonnes": 20391.188
+    },
+    {
+      "day": 46,
+      "product_id": "X1",
+      "tonnes": 13107.537
+    },
+    {
+      "day": 47,
+      "product_id": "P1",
+      "tonnes": 37685.543
+    },
+    {
+      "day": 47,
+      "product_id": "P2",
+      "tonnes": 29661.407
+    },
+    {
+      "day": 47,
+      "product_id": "P3",
+      "tonnes": 20401.587
+    },
+    {
+      "day": 47,
+      "product_id": "X1",
+      "tonnes": 11666.399
+    },
+    {
+      "day": 48,
+      "product_id": "P1",
+      "tonnes": 39044.228
+    },
+    {
+      "day": 48,
+      "product_id": "P2",
+      "tonnes": 30754.245
+    },
+    {
+      "day": 48,
+      "product_id": "P3",
+      "tonnes": 22224.806
+    },
+    {
+      "day": 48,
+      "product_id": "X1",
+      "tonnes": 12246.293
+    },
+    {
+      "day": 49,
+      "product_id": "P1",
+      "tonnes": 39268.656
+    },
+    {
+      "day": 49,
+      "product_id": "P2",
+      "tonnes": 31302.271
+    },
+    {
+      "day": 49,
+      "product_id": "P3",
+      "tonnes": 20205.566
+    },
+    {
+      "day": 49,
+      "product_id": "X1",
+      "tonnes": 12583.048
+    },
+    {
+      "day": 50,
+      "product_id": "P1",
+      "tonnes": 39069.447
+    },
+    {
+      "day": 50,
+      "product_id": "P2",
+      "tonnes": 31598.391
+    },
+    {
+      "day": 50,
+      "product_id": "P3",
+      "tonnes": 20989.601
+    },
+    {
+      "day": 50,
+      "product_id": "X1",
+      "tonnes": 13227.575
+    },
+    {
+      "day": 51,
+      "product_id": "P1",
+      "tonnes": 40009.822
+    },
+    {
+      "day": 51,
+      "product_id": "P2",
+      "tonnes": 32467.61
+    },
+    {
+      "day": 51,
+      "product_id": "P3",
+      "tonnes": 22219.857
+    },
+    {
+      "day": 51,
+      "product_id": "X1",
+      "tonnes": 12556.526
+    },
+    {
+      "day": 52,
+      "product_id": "P1",
+      "tonnes": 38218.214
+    },
+    {
+      "day": 52,
+      "product_id": "P2",
+      "tonnes": 29964.375
+    },
+    {
+      "day": 52,
+      "product_id": "P3",
+      "tonnes": 20931.519
+    },
+    {
+      "day": 52,
+      "product_id": "X1",
+      "tonnes": 12304.78
+    },
+    {
+      "day": 53,
+      "product_id": "P1",
+      "tonnes": 39321.004
+    },
+    {
+      "day": 53,
+      "product_id": "P2",
+      "tonnes": 29611.724
+    },
+    {
+      "day": 53,
+      "product_id": "P3",
+      "tonnes": 19647.967
+    },
+    {
+      "day": 53,
+      "product_id": "X1",
+      "tonnes": 12416.311
+    },
+    {
+      "day": 54,
+      "product_id": "P1",
+      "tonnes": 35827.386
+    },
+    {
+      "day": 54,
+      "product_id": "P2",
+      "tonnes": 29431.396
+    },
+    {
+      "day": 54,
+      "product_id": "P3",
+      "tonnes": 20094.752
+    },
+    {
+      "day": 54,
+      "product_id": "X1",
+      "tonnes": 11129.078
+    },
+    {
+      "day": 55,
+      "product_id": "P1",
+      "tonnes": 38827.108
+    },
+    {
+      "day": 55,
+      "product_id": "P2",
+      "tonnes": 30422.501
+    },
+    {
+      "day": 55,
+      "product_id": "P3",
+      "tonnes": 19868.221
+    },
+    {
+      "day": 55,
+      "product_id": "X1",
+      "tonnes": 11343.74
+    },
+    {
+      "day": 56,
+      "product_id": "P1",
+      "tonnes": 41104.172
+    },
+    {
+      "day": 56,
+      "product_id": "P2",
+      "tonnes": 29564.452
+    },
+    {
+      "day": 56,
+      "product_id": "P3",
+      "tonnes": 20276.231
+    },
+    {
+      "day": 56,
+      "product_id": "X1",
+      "tonnes": 12095.919
+    },
+    {
+      "day": 57,
+      "product_id": "P1",
+      "tonnes": 43131.136
+    },
+    {
+      "day": 57,
+      "product_id": "P2",
+      "tonnes": 31756.928
+    },
+    {
+      "day": 57,
+      "product_id": "P3",
+      "tonnes": 23017.156
+    },
+    {
+      "day": 57,
+      "product_id": "X1",
+      "tonnes": 12808.913
+    },
+    {
+      "day": 58,
+      "product_id": "P1",
+      "tonnes": 41687.277
+    },
+    {
+      "day": 58,
+      "product_id": "P2",
+      "tonnes": 31857.608
+    },
+    {
+      "day": 58,
+      "product_id": "P3",
+      "tonnes": 22864.268
+    },
+    {
+      "day": 58,
+      "product_id": "X1",
+      "tonnes": 13209.069
+    },
+    {
+      "day": 59,
+      "product_id": "P1",
+      "tonnes": 38893.97
+    },
+    {
+      "day": 59,
+      "product_id": "P2",
+      "tonnes": 31678.776
+    },
+    {
+      "day": 59,
+      "product_id": "P3",
+      "tonnes": 20610.868
+    },
+    {
+      "day": 59,
+      "product_id": "X1",
+      "tonnes": 12251.903
+    },
+    {
+      "day": 60,
+      "product_id": "P1",
+      "tonnes": 40291.803
+    },
+    {
+      "day": 60,
+      "product_id": "P2",
+      "tonnes": 32665.901
+    },
+    {
+      "day": 60,
+      "product_id": "P3",
+      "tonnes": 20684.973
+    },
+    {
+      "day": 60,
+      "product_id": "X1",
+      "tonnes": 12418.702
+    },
+    {
+      "day": 61,
+      "product_id": "P1",
+      "tonnes": 40487.322
+    },
+    {
+      "day": 61,
+      "product_id": "P2",
+      "tonnes": 30147.934
+    },
+    {
+      "day": 61,
+      "product_id": "P3",
+      "tonnes": 20454.253
+    },
+    {
+      "day": 61,
+      "product_id": "X1",
+      "tonnes": 12054.063
+    },
+    {
+      "day": 62,
+      "product_id": "P1",
+      "tonnes": 40378.07
+    },
+    {
+      "day": 62,
+      "product_id": "P2",
+      "tonnes": 33047.74
+    },
+    {
+      "day": 62,
+      "product_id": "P3",
+      "tonnes": 22607.324
+    },
+    {
+      "day": 62,
+      "product_id": "X1",
+      "tonnes": 12657.123
+    },
+    {
+      "day": 63,
+      "product_id": "P1",
+      "tonnes": 41590.724
+    },
+    {
+      "day": 63,
+      "product_id": "P2",
+      "tonnes": 33882.298
+    },
+    {
+      "day": 63,
+      "product_id": "P3",
+      "tonnes": 22625.943
+    },
+    {
+      "day": 63,
+      "product_id": "X1",
+      "tonnes": 12601.392
+    },
+    {
+      "day": 64,
+      "product_id": "P1",
+      "tonnes": 42235.295
+    },
+    {
+      "day": 64,
+      "product_id": "P2",
+      "tonnes": 35711.387
+    },
+    {
+      "day": 64,
+      "product_id": "P3",
+      "tonnes": 22016.165
+    },
+    {
+      "day": 64,
+      "product_id": "X1",
+      "tonnes": 13355.823
+    },
+    {
+      "day": 65,
+      "product_id": "P1",
+      "tonnes": 43991.647
+    },
+    {
+      "day": 65,
+      "product_id": "P2",
+      "tonnes": 33713.117
+    },
+    {
+      "day": 65,
+      "product_id": "P3",
+      "tonnes": 22361.197
+    },
+    {
+      "day": 65,
+      "product_id": "X1",
+      "tonnes": 13308.19
+    },
+    {
+      "day": 66,
+      "product_id": "P1",
+      "tonnes": 40772.565
+    },
+    {
+      "day": 66,
+      "product_id": "P2",
+      "tonnes": 32385.064
+    },
+    {
+      "day": 66,
+      "product_id": "P3",
+      "tonnes": 22518.263
+    },
+    {
+      "day": 66,
+      "product_id": "X1",
+      "tonnes": 12946.786
+    },
+    {
+      "day": 67,
+      "product_id": "P1",
+      "tonnes": 41921.827
+    },
+    {
+      "day": 67,
+      "product_id": "P2",
+      "tonnes": 31467.767
+    },
+    {
+      "day": 67,
+      "product_id": "P3",
+      "tonnes": 21762.368
+    },
+    {
+      "day": 67,
+      "product_id": "X1",
+      "tonnes": 12308.108
+    },
+    {
+      "day": 68,
+      "product_id": "P1",
+      "tonnes": 39237.177
+    },
+    {
+      "day": 68,
+      "product_id": "P2",
+      "tonnes": 32071.612
+    },
+    {
+      "day": 68,
+      "product_id": "P3",
+      "tonnes": 19967.388
+    },
+    {
+      "day": 68,
+      "product_id": "X1",
+      "tonnes": 12858.905
+    },
+    {
+      "day": 69,
+      "product_id": "P1",
+      "tonnes": 39567.704
+    },
+    {
+      "day": 69,
+      "product_id": "P2",
+      "tonnes": 31594.345
+    },
+    {
+      "day": 69,
+      "product_id": "P3",
+      "tonnes": 20997.058
+    },
+    {
+      "day": 69,
+      "product_id": "X1",
+      "tonnes": 13342.097
+    },
+    {
+      "day": 70,
+      "product_id": "P1",
+      "tonnes": 41866.159
+    },
+    {
+      "day": 70,
+      "product_id": "P2",
+      "tonnes": 33002.223
+    },
+    {
+      "day": 70,
+      "product_id": "P3",
+      "tonnes": 20969.683
+    },
+    {
+      "day": 70,
+      "product_id": "X1",
+      "tonnes": 12934.824
+    },
+    {
+      "day": 71,
+      "product_id": "P1",
+      "tonnes": 42253.989
+    },
+    {
+      "day": 71,
+      "product_id": "P2",
+      "tonnes": 34784.974
+    },
+    {
+      "day": 71,
+      "product_id": "P3",
+      "tonnes": 22954.352
+    },
+    {
+      "day": 71,
+      "product_id": "X1",
+      "tonnes": 14170.895
+    },
+    {
+      "day": 72,
+      "product_id": "P1",
+      "tonnes": 40071.807
+    },
+    {
+      "day": 72,
+      "product_id": "P2",
+      "tonnes": 34259.772
+    },
+    {
+      "day": 72,
+      "product_id": "P3",
+      "tonnes": 21761.263
+    },
+    {
+      "day": 72,
+      "product_id": "X1",
+      "tonnes": 13853.831
+    },
+    {
+      "day": 73,
+      "product_id": "P1",
+      "tonnes": 39231.663
+    },
+    {
+      "day": 73,
+      "product_id": "P2",
+      "tonnes": 33246.565
+    },
+    {
+      "day": 73,
+      "product_id": "P3",
+      "tonnes": 20664.76
+    },
+    {
+      "day": 73,
+      "product_id": "X1",
+      "tonnes": 12281.727
+    },
+    {
+      "day": 74,
+      "product_id": "P1",
+      "tonnes": 38902.505
+    },
+    {
+      "day": 74,
+      "product_id": "P2",
+      "tonnes": 30377.796
+    },
+    {
+      "day": 74,
+      "product_id": "P3",
+      "tonnes": 19168.071
+    },
+    {
+      "day": 74,
+      "product_id": "X1",
+      "tonnes": 11537.352
+    },
+    {
+      "day": 75,
+      "product_id": "P1",
+      "tonnes": 37465.403
+    },
+    {
+      "day": 75,
+      "product_id": "P2",
+      "tonnes": 28833.449
+    },
+    {
+      "day": 75,
+      "product_id": "P3",
+      "tonnes": 20687.954
+    },
+    {
+      "day": 75,
+      "product_id": "X1",
+      "tonnes": 12079.112
+    },
+    {
+      "day": 76,
+      "product_id": "P1",
+      "tonnes": 40022.681
+    },
+    {
+      "day": 76,
+      "product_id": "P2",
+      "tonnes": 31682.557
+    },
+    {
+      "day": 76,
+      "product_id": "P3",
+      "tonnes": 19774.314
+    },
+    {
+      "day": 76,
+      "product_id": "X1",
+      "tonnes": 12633.313
+    },
+    {
+      "day": 77,
+      "product_id": "P1",
+      "tonnes": 39296.298
+    },
+    {
+      "day": 77,
+      "product_id": "P2",
+      "tonnes": 30254.026
+    },
+    {
+      "day": 77,
+      "product_id": "P3",
+      "tonnes": 21108.852
+    },
+    {
+      "day": 77,
+      "product_id": "X1",
+      "tonnes": 12136.938
+    },
+    {
+      "day": 78,
+      "product_id": "P1",
+      "tonnes": 40850.285
+    },
+    {
+      "day": 78,
+      "product_id": "P2",
+      "tonnes": 31545.561
+    },
+    {
+      "day": 78,
+      "product_id": "P3",
+      "tonnes": 21063.657
+    },
+    {
+      "day": 78,
+      "product_id": "X1",
+      "tonnes": 13329.252
+    },
+    {
+      "day": 79,
+      "product_id": "P1",
+      "tonnes": 40512.805
+    },
+    {
+      "day": 79,
+      "product_id": "P2",
+      "tonnes": 29602.035
+    },
+    {
+      "day": 79,
+      "product_id": "P3",
+      "tonnes": 21198.116
+    },
+    {
+      "day": 79,
+      "product_id": "X1",
+      "tonnes": 12437.115
+    },
+    {
+      "day": 80,
+      "product_id": "P1",
+      "tonnes": 40263.537
+    },
+    {
+      "day": 80,
+      "product_id": "P2",
+      "tonnes": 31738.131
+    },
+    {
+      "day": 80,
+      "product_id": "P3",
+      "tonnes": 19274.223
+    },
+    {
+      "day": 80,
+      "product_id": "X1",
+      "tonnes": 12773.124
+    },
+    {
+      "day": 81,
+      "product_id": "P1",
+      "tonnes": 38091.131
+    },
+    {
+      "day": 81,
+      "product_id": "P2",
+      "tonnes": 30276.541
+    },
+    {
+      "day": 81,
+      "product_id": "P3",
+      "tonnes": 19612.571
+    },
+    {
+      "day": 81,
+      "product_id": "X1",
+      "tonnes": 11570.563
+    },
+    {
+      "day": 82,
+      "product_id": "P1",
+      "tonnes": 38827.379
+    },
+    {
+      "day": 82,
+      "product_id": "P2",
+      "tonnes": 30191.959
+    },
+    {
+      "day": 82,
+      "product_id": "P3",
+      "tonnes": 20636.888
+    },
+    {
+      "day": 82,
+      "product_id": "X1",
+      "tonnes": 12384.29
+    },
+    {
+      "day": 83,
+      "product_id": "P1",
+      "tonnes": 40366.29
+    },
+    {
+      "day": 83,
+      "product_id": "P2",
+      "tonnes": 31079.558
+    },
+    {
+      "day": 83,
+      "product_id": "P3",
+      "tonnes": 20836.265
+    },
+    {
+      "day": 83,
+      "product_id": "X1",
+      "tonnes": 12171.231
+    },
+    {
+      "day": 84,
+      "product_id": "P1",
+      "tonnes": 38077.733
+    },
+    {
+      "day": 84,
+      "product_id": "P2",
+      "tonnes": 31410.181
+    },
+    {
+      "day": 84,
+      "product_id": "P3",
+      "tonnes": 20591.539
+    },
+    {
+      "day": 84,
+      "product_id": "X1",
+      "tonnes": 12499.432
+    },
+    {
+      "day": 85,
+      "product_id": "P1",
+      "tonnes": 40738.507
+    },
+    {
+      "day": 85,
+      "product_id": "P2",
+      "tonnes": 31323.729
+    },
+    {
+      "day": 85,
+      "product_id": "P3",
+      "tonnes": 20755.005
+    },
+    {
+      "day": 85,
+      "product_id": "X1",
+      "tonnes": 13092.62
+    },
+    {
+      "day": 86,
+      "product_id": "P1",
+      "tonnes": 40659.346
+    },
+    {
+      "day": 86,
+      "product_id": "P2",
+      "tonnes": 32667.707
+    },
+    {
+      "day": 86,
+      "product_id": "P3",
+      "tonnes": 22718.474
+    },
+    {
+      "day": 86,
+      "product_id": "X1",
+      "tonnes": 13090.546
+    },
+    {
+      "day": 87,
+      "product_id": "P1",
+      "tonnes": 39306.948
+    },
+    {
+      "day": 87,
+      "product_id": "P2",
+      "tonnes": 32897.289
+    },
+    {
+      "day": 87,
+      "product_id": "P3",
+      "tonnes": 20823.305
+    },
+    {
+      "day": 87,
+      "product_id": "X1",
+      "tonnes": 12855.888
+    },
+    {
+      "day": 88,
+      "product_id": "P1",
+      "tonnes": 39404.109
+    },
+    {
+      "day": 88,
+      "product_id": "P2",
+      "tonnes": 31101.943
+    },
+    {
+      "day": 88,
+      "product_id": "P3",
+      "tonnes": 20061.808
+    },
+    {
+      "day": 88,
+      "product_id": "X1",
+      "tonnes": 12022.138
+    },
+    {
+      "day": 89,
+      "product_id": "P1",
+      "tonnes": 38011.565
+    },
+    {
+      "day": 89,
+      "product_id": "P2",
+      "tonnes": 30777.787
+    },
+    {
+      "day": 89,
+      "product_id": "P3",
+      "tonnes": 21566.423
+    },
+    {
+      "day": 89,
+      "product_id": "X1",
+      "tonnes": 12655.094
+    }
+  ],
+  "outbound_demand": [
+    {
+      "day": 0,
+      "product_id": "P1",
+      "tonnes": 43786.289
+    },
+    {
+      "day": 0,
+      "product_id": "P2",
+      "tonnes": 36532.797
+    },
+    {
+      "day": 0,
+      "product_id": "P3",
+      "tonnes": 23329.392
+    },
+    {
+      "day": 0,
+      "product_id": "X1",
+      "tonnes": 13486.496
+    },
+    {
+      "day": 1,
+      "product_id": "P1",
+      "tonnes": 41734.176
+    },
+    {
+      "day": 1,
+      "product_id": "P2",
+      "tonnes": 33548.258
+    },
+    {
+      "day": 1,
+      "product_id": "P3",
+      "tonnes": 23649.377
+    },
+    {
+      "day": 1,
+      "product_id": "X1",
+      "tonnes": 13648.794
+    },
+    {
+      "day": 2,
+      "product_id": "P1",
+      "tonnes": 39787.049
+    },
+    {
+      "day": 2,
+      "product_id": "P2",
+      "tonnes": 31672.137
+    },
+    {
+      "day": 2,
+      "product_id": "P3",
+      "tonnes": 21952.21
+    },
+    {
+      "day": 2,
+      "product_id": "X1",
+      "tonnes": 12598.699
+    },
+    {
+      "day": 3,
+      "product_id": "P1",
+      "tonnes": 43630.209
+    },
+    {
+      "day": 3,
+      "product_id": "P2",
+      "tonnes": 32540.897
+    },
+    {
+      "day": 3,
+      "product_id": "P3",
+      "tonnes": 22856.139
+    },
+    {
+      "day": 3,
+      "product_id": "X1",
+      "tonnes": 13098.066
+    },
+    {
+      "day": 4,
+      "product_id": "P1",
+      "tonnes": 41291.133
+    },
+    {
+      "day": 4,
+      "product_id": "P2",
+      "tonnes": 32399.209
+    },
+    {
+      "day": 4,
+      "product_id": "P3",
+      "tonnes": 22137.33
+    },
+    {
+      "day": 4,
+      "product_id": "X1",
+      "tonnes": 12637.769
+    },
+    {
+      "day": 5,
+      "product_id": "P1",
+      "tonnes": 43227.973
+    },
+    {
+      "day": 5,
+      "product_id": "P2",
+      "tonnes": 33091.118
+    },
+    {
+      "day": 5,
+      "product_id": "P3",
+      "tonnes": 21945.422
+    },
+    {
+      "day": 5,
+      "product_id": "X1",
+      "tonnes": 13879.605
+    },
+    {
+      "day": 6,
+      "product_id": "P1",
+      "tonnes": 42079.123
+    },
+    {
+      "day": 6,
+      "product_id": "P2",
+      "tonnes": 34259.913
+    },
+    {
+      "day": 6,
+      "product_id": "P3",
+      "tonnes": 22236.696
+    },
+    {
+      "day": 6,
+      "product_id": "X1",
+      "tonnes": 13842.402
+    },
+    {
+      "day": 7,
+      "product_id": "P1",
+      "tonnes": 43466.32
+    },
+    {
+      "day": 7,
+      "product_id": "P2",
+      "tonnes": 36351.362
+    },
+    {
+      "day": 7,
+      "product_id": "P3",
+      "tonnes": 23810.247
+    },
+    {
+      "day": 7,
+      "product_id": "X1",
+      "tonnes": 13487.609
+    },
+    {
+      "day": 8,
+      "product_id": "P1",
+      "tonnes": 41416.648
+    },
+    {
+      "day": 8,
+      "product_id": "P2",
+      "tonnes": 35089.889
+    },
+    {
+      "day": 8,
+      "product_id": "P3",
+      "tonnes": 22366.854
+    },
+    {
+      "day": 8,
+      "product_id": "X1",
+      "tonnes": 13728.665
+    },
+    {
+      "day": 9,
+      "product_id": "P1",
+      "tonnes": 42445.091
+    },
+    {
+      "day": 9,
+      "product_id": "P2",
+      "tonnes": 31870.054
+    },
+    {
+      "day": 9,
+      "product_id": "P3",
+      "tonnes": 20551.225
+    },
+    {
+      "day": 9,
+      "product_id": "X1",
+      "tonnes": 13073.679
+    },
+    {
+      "day": 10,
+      "product_id": "P1",
+      "tonnes": 41066.479
+    },
+    {
+      "day": 10,
+      "product_id": "P2",
+      "tonnes": 32222.111
+    },
+    {
+      "day": 10,
+      "product_id": "P3",
+      "tonnes": 20760.577
+    },
+    {
+      "day": 10,
+      "product_id": "X1",
+      "tonnes": 12150.753
+    },
+    {
+      "day": 11,
+      "product_id": "P1",
+      "tonnes": 42076.077
+    },
+    {
+      "day": 11,
+      "product_id": "P2",
+      "tonnes": 32188.319
+    },
+    {
+      "day": 11,
+      "product_id": "P3",
+      "tonnes": 22169.953
+    },
+    {
+      "day": 11,
+      "product_id": "X1",
+      "tonnes": 12910.644
+    },
+    {
+      "day": 12,
+      "product_id": "P1",
+      "tonnes": 42142.289
+    },
+    {
+      "day": 12,
+      "product_id": "P2",
+      "tonnes": 32708.013
+    },
+    {
+      "day": 12,
+      "product_id": "P3",
+      "tonnes": 20713.825
+    },
+    {
+      "day": 12,
+      "product_id": "X1",
+      "tonnes": 12438.541
+    },
+    {
+      "day": 13,
+      "product_id": "P1",
+      "tonnes": 42777.633
+    },
+    {
+      "day": 13,
+      "product_id": "P2",
+      "tonnes": 32565.164
+    },
+    {
+      "day": 13,
+      "product_id": "P3",
+      "tonnes": 22806.67
+    },
+    {
+      "day": 13,
+      "product_id": "X1",
+      "tonnes": 12633.069
+    },
+    {
+      "day": 14,
+      "product_id": "P1",
+      "tonnes": 42177.588
+    },
+    {
+      "day": 14,
+      "product_id": "P2",
+      "tonnes": 31727.851
+    },
+    {
+      "day": 14,
+      "product_id": "P3",
+      "tonnes": 22650.576
+    },
+    {
+      "day": 14,
+      "product_id": "X1",
+      "tonnes": 12314.597
+    },
+    {
+      "day": 15,
+      "product_id": "P1",
+      "tonnes": 40364.776
+    },
+    {
+      "day": 15,
+      "product_id": "P2",
+      "tonnes": 33573.436
+    },
+    {
+      "day": 15,
+      "product_id": "P3",
+      "tonnes": 22022.801
+    },
+    {
+      "day": 15,
+      "product_id": "X1",
+      "tonnes": 12728.408
+    },
+    {
+      "day": 16,
+      "product_id": "P1",
+      "tonnes": 39287.41
+    },
+    {
+      "day": 16,
+      "product_id": "P2",
+      "tonnes": 31304.223
+    },
+    {
+      "day": 16,
+      "product_id": "P3",
+      "tonnes": 19200.933
+    },
+    {
+      "day": 16,
+      "product_id": "X1",
+      "tonnes": 11527.763
+    },
+    {
+      "day": 17,
+      "product_id": "P1",
+      "tonnes": 37499.628
+    },
+    {
+      "day": 17,
+      "product_id": "P2",
+      "tonnes": 31015.617
+    },
+    {
+      "day": 17,
+      "product_id": "P3",
+      "tonnes": 20850.359
+    },
+    {
+      "day": 17,
+      "product_id": "X1",
+      "tonnes": 12283.928
+    },
+    {
+      "day": 18,
+      "product_id": "P1",
+      "tonnes": 40650.454
+    },
+    {
+      "day": 18,
+      "product_id": "P2",
+      "tonnes": 32512.677
+    },
+    {
+      "day": 18,
+      "product_id": "P3",
+      "tonnes": 20913.782
+    },
+    {
+      "day": 18,
+      "product_id": "X1",
+      "tonnes": 12162.018
+    },
+    {
+      "day": 19,
+      "product_id": "P1",
+      "tonnes": 40706.384
+    },
+    {
+      "day": 19,
+      "product_id": "P2",
+      "tonnes": 31295.138
+    },
+    {
+      "day": 19,
+      "product_id": "P3",
+      "tonnes": 20612.456
+    },
+    {
+      "day": 19,
+      "product_id": "X1",
+      "tonnes": 12680.888
+    },
+    {
+      "day": 20,
+      "product_id": "P1",
+      "tonnes": 43132.856
+    },
+    {
+      "day": 20,
+      "product_id": "P2",
+      "tonnes": 34619.244
+    },
+    {
+      "day": 20,
+      "product_id": "P3",
+      "tonnes": 23040.272
+    },
+    {
+      "day": 20,
+      "product_id": "X1",
+      "tonnes": 13506.041
+    },
+    {
+      "day": 21,
+      "product_id": "P1",
+      "tonnes": 41737.575
+    },
+    {
+      "day": 21,
+      "product_id": "P2",
+      "tonnes": 30991.767
+    },
+    {
+      "day": 21,
+      "product_id": "P3",
+      "tonnes": 21874.061
+    },
+    {
+      "day": 21,
+      "product_id": "X1",
+      "tonnes": 12371.653
+    },
+    {
+      "day": 22,
+      "product_id": "P1",
+      "tonnes": 39899.557
+    },
+    {
+      "day": 22,
+      "product_id": "P2",
+      "tonnes": 32112.266
+    },
+    {
+      "day": 22,
+      "product_id": "P3",
+      "tonnes": 21208.114
+    },
+    {
+      "day": 22,
+      "product_id": "X1",
+      "tonnes": 13051.261
+    },
+    {
+      "day": 23,
+      "product_id": "P1",
+      "tonnes": 41123.43
+    },
+    {
+      "day": 23,
+      "product_id": "P2",
+      "tonnes": 31256.64
+    },
+    {
+      "day": 23,
+      "product_id": "P3",
+      "tonnes": 20964.652
+    },
+    {
+      "day": 23,
+      "product_id": "X1",
+      "tonnes": 13701.484
+    },
+    {
+      "day": 24,
+      "product_id": "P1",
+      "tonnes": 38399.456
+    },
+    {
+      "day": 24,
+      "product_id": "P2",
+      "tonnes": 31805.468
+    },
+    {
+      "day": 24,
+      "product_id": "P3",
+      "tonnes": 21521.444
+    },
+    {
+      "day": 24,
+      "product_id": "X1",
+      "tonnes": 12326.211
+    },
+    {
+      "day": 25,
+      "product_id": "P1",
+      "tonnes": 41148.921
+    },
+    {
+      "day": 25,
+      "product_id": "P2",
+      "tonnes": 32687.264
+    },
+    {
+      "day": 25,
+      "product_id": "P3",
+      "tonnes": 22633.737
+    },
+    {
+      "day": 25,
+      "product_id": "X1",
+      "tonnes": 13268.053
+    },
+    {
+      "day": 26,
+      "product_id": "P1",
+      "tonnes": 42897.693
+    },
+    {
+      "day": 26,
+      "product_id": "P2",
+      "tonnes": 35472.643
+    },
+    {
+      "day": 26,
+      "product_id": "P3",
+      "tonnes": 22949.306
+    },
+    {
+      "day": 26,
+      "product_id": "X1",
+      "tonnes": 13520.238
+    },
+    {
+      "day": 27,
+      "product_id": "P1",
+      "tonnes": 41928.984
+    },
+    {
+      "day": 27,
+      "product_id": "P2",
+      "tonnes": 32417.651
+    },
+    {
+      "day": 27,
+      "product_id": "P3",
+      "tonnes": 23569.486
+    },
+    {
+      "day": 27,
+      "product_id": "X1",
+      "tonnes": 13353.597
+    },
+    {
+      "day": 28,
+      "product_id": "P1",
+      "tonnes": 41031.74
+    },
+    {
+      "day": 28,
+      "product_id": "P2",
+      "tonnes": 35198.294
+    },
+    {
+      "day": 28,
+      "product_id": "P3",
+      "tonnes": 22413.247
+    },
+    {
+      "day": 28,
+      "product_id": "X1",
+      "tonnes": 13978.971
+    },
+    {
+      "day": 29,
+      "product_id": "P1",
+      "tonnes": 40967.136
+    },
+    {
+      "day": 29,
+      "product_id": "P2",
+      "tonnes": 32432.4
+    },
+    {
+      "day": 29,
+      "product_id": "P3",
+      "tonnes": 23086.837
+    },
+    {
+      "day": 29,
+      "product_id": "X1",
+      "tonnes": 13623.213
+    },
+    {
+      "day": 30,
+      "product_id": "P1",
+      "tonnes": 41850.386
+    },
+    {
+      "day": 30,
+      "product_id": "P2",
+      "tonnes": 32120.28
+    },
+    {
+      "day": 30,
+      "product_id": "P3",
+      "tonnes": 22359.098
+    },
+    {
+      "day": 30,
+      "product_id": "X1",
+      "tonnes": 13561.682
+    },
+    {
+      "day": 31,
+      "product_id": "P1",
+      "tonnes": 40479.283
+    },
+    {
+      "day": 31,
+      "product_id": "P2",
+      "tonnes": 30374.656
+    },
+    {
+      "day": 31,
+      "product_id": "P3",
+      "tonnes": 21037.853
+    },
+    {
+      "day": 31,
+      "product_id": "X1",
+      "tonnes": 12886.417
+    },
+    {
+      "day": 32,
+      "product_id": "P1",
+      "tonnes": 41216.192
+    },
+    {
+      "day": 32,
+      "product_id": "P2",
+      "tonnes": 31173.764
+    },
+    {
+      "day": 32,
+      "product_id": "P3",
+      "tonnes": 20458.218
+    },
+    {
+      "day": 32,
+      "product_id": "X1",
+      "tonnes": 13396.167
+    },
+    {
+      "day": 33,
+      "product_id": "P1",
+      "tonnes": 41080.516
+    },
+    {
+      "day": 33,
+      "product_id": "P2",
+      "tonnes": 32241.035
+    },
+    {
+      "day": 33,
+      "product_id": "P3",
+      "tonnes": 22806.187
+    },
+    {
+      "day": 33,
+      "product_id": "X1",
+      "tonnes": 13777.429
+    },
+    {
+      "day": 34,
+      "product_id": "P1",
+      "tonnes": 44313.702
+    },
+    {
+      "day": 34,
+      "product_id": "P2",
+      "tonnes": 35619.913
+    },
+    {
+      "day": 34,
+      "product_id": "P3",
+      "tonnes": 24841.756
+    },
+    {
+      "day": 34,
+      "product_id": "X1",
+      "tonnes": 14609.09
+    },
+    {
+      "day": 35,
+      "product_id": "P1",
+      "tonnes": 42682.891
+    },
+    {
+      "day": 35,
+      "product_id": "P2",
+      "tonnes": 34925.664
+    },
+    {
+      "day": 35,
+      "product_id": "P3",
+      "tonnes": 22239.179
+    },
+    {
+      "day": 35,
+      "product_id": "X1",
+      "tonnes": 13887.834
+    },
+    {
+      "day": 36,
+      "product_id": "P1",
+      "tonnes": 41868.982
+    },
+    {
+      "day": 36,
+      "product_id": "P2",
+      "tonnes": 34599.978
+    },
+    {
+      "day": 36,
+      "product_id": "P3",
+      "tonnes": 22925.733
+    },
+    {
+      "day": 36,
+      "product_id": "X1",
+      "tonnes": 13976.14
+    },
+    {
+      "day": 37,
+      "product_id": "P1",
+      "tonnes": 40925.649
+    },
+    {
+      "day": 37,
+      "product_id": "P2",
+      "tonnes": 31207.329
+    },
+    {
+      "day": 37,
+      "product_id": "P3",
+      "tonnes": 21017.741
+    },
+    {
+      "day": 37,
+      "product_id": "X1",
+      "tonnes": 12122.584
+    },
+    {
+      "day": 38,
+      "product_id": "P1",
+      "tonnes": 42222.343
+    },
+    {
+      "day": 38,
+      "product_id": "P2",
+      "tonnes": 32763.241
+    },
+    {
+      "day": 38,
+      "product_id": "P3",
+      "tonnes": 22003.699
+    },
+    {
+      "day": 38,
+      "product_id": "X1",
+      "tonnes": 12848.279
+    },
+    {
+      "day": 39,
+      "product_id": "P1",
+      "tonnes": 40932.971
+    },
+    {
+      "day": 39,
+      "product_id": "P2",
+      "tonnes": 31900.17
+    },
+    {
+      "day": 39,
+      "product_id": "P3",
+      "tonnes": 20407.56
+    },
+    {
+      "day": 39,
+      "product_id": "X1",
+      "tonnes": 13034.314
+    },
+    {
+      "day": 40,
+      "product_id": "P1",
+      "tonnes": 41551.483
+    },
+    {
+      "day": 40,
+      "product_id": "P2",
+      "tonnes": 33197.523
+    },
+    {
+      "day": 40,
+      "product_id": "P3",
+      "tonnes": 20958.795
+    },
+    {
+      "day": 40,
+      "product_id": "X1",
+      "tonnes": 12774.04
+    },
+    {
+      "day": 41,
+      "product_id": "P1",
+      "tonnes": 43237.007
+    },
+    {
+      "day": 41,
+      "product_id": "P2",
+      "tonnes": 33603.627
+    },
+    {
+      "day": 41,
+      "product_id": "P3",
+      "tonnes": 23757.474
+    },
+    {
+      "day": 41,
+      "product_id": "X1",
+      "tonnes": 14182.475
+    },
+    {
+      "day": 42,
+      "product_id": "P1",
+      "tonnes": 42047.532
+    },
+    {
+      "day": 42,
+      "product_id": "P2",
+      "tonnes": 34795.746
+    },
+    {
+      "day": 42,
+      "product_id": "P3",
+      "tonnes": 24071.575
+    },
+    {
+      "day": 42,
+      "product_id": "X1",
+      "tonnes": 14270.666
+    },
+    {
+      "day": 43,
+      "product_id": "P1",
+      "tonnes": 42282.038
+    },
+    {
+      "day": 43,
+      "product_id": "P2",
+      "tonnes": 33401.091
+    },
+    {
+      "day": 43,
+      "product_id": "P3",
+      "tonnes": 21027.592
+    },
+    {
+      "day": 43,
+      "product_id": "X1",
+      "tonnes": 13200.333
+    },
+    {
+      "day": 44,
+      "product_id": "P1",
+      "tonnes": 41449.341
+    },
+    {
+      "day": 44,
+      "product_id": "P2",
+      "tonnes": 32880.488
+    },
+    {
+      "day": 44,
+      "product_id": "P3",
+      "tonnes": 20875.144
+    },
+    {
+      "day": 44,
+      "product_id": "X1",
+      "tonnes": 12755.104
+    },
+    {
+      "day": 45,
+      "product_id": "P1",
+      "tonnes": 39390.636
+    },
+    {
+      "day": 45,
+      "product_id": "P2",
+      "tonnes": 31917.241
+    },
+    {
+      "day": 45,
+      "product_id": "P3",
+      "tonnes": 20529.345
+    },
+    {
+      "day": 45,
+      "product_id": "X1",
+      "tonnes": 12883.48
+    },
+    {
+      "day": 46,
+      "product_id": "P1",
+      "tonnes": 38854.429
+    },
+    {
+      "day": 46,
+      "product_id": "P2",
+      "tonnes": 31743.241
+    },
+    {
+      "day": 46,
+      "product_id": "P3",
+      "tonnes": 20969.897
+    },
+    {
+      "day": 46,
+      "product_id": "X1",
+      "tonnes": 12645.162
+    },
+    {
+      "day": 47,
+      "product_id": "P1",
+      "tonnes": 43256.877
+    },
+    {
+      "day": 47,
+      "product_id": "P2",
+      "tonnes": 34164.626
+    },
+    {
+      "day": 47,
+      "product_id": "P3",
+      "tonnes": 21064.908
+    },
+    {
+      "day": 47,
+      "product_id": "X1",
+      "tonnes": 12983.633
+    },
+    {
+      "day": 48,
+      "product_id": "P1",
+      "tonnes": 42757.675
+    },
+    {
+      "day": 48,
+      "product_id": "P2",
+      "tonnes": 31912.023
+    },
+    {
+      "day": 48,
+      "product_id": "P3",
+      "tonnes": 21638.832
+    },
+    {
+      "day": 48,
+      "product_id": "X1",
+      "tonnes": 12875.603
+    },
+    {
+      "day": 49,
+      "product_id": "P1",
+      "tonnes": 41769.015
+    },
+    {
+      "day": 49,
+      "product_id": "P2",
+      "tonnes": 32693.195
+    },
+    {
+      "day": 49,
+      "product_id": "P3",
+      "tonnes": 22162.162
+    },
+    {
+      "day": 49,
+      "product_id": "X1",
+      "tonnes": 13825.07
+    },
+    {
+      "day": 50,
+      "product_id": "P1",
+      "tonnes": 40607.791
+    },
+    {
+      "day": 50,
+      "product_id": "P2",
+      "tonnes": 34232.965
+    },
+    {
+      "day": 50,
+      "product_id": "P3",
+      "tonnes": 22795.202
+    },
+    {
+      "day": 50,
+      "product_id": "X1",
+      "tonnes": 13368.946
+    },
+    {
+      "day": 51,
+      "product_id": "P1",
+      "tonnes": 37575.849
+    },
+    {
+      "day": 51,
+      "product_id": "P2",
+      "tonnes": 31381.706
+    },
+    {
+      "day": 51,
+      "product_id": "P3",
+      "tonnes": 20779.19
+    },
+    {
+      "day": 51,
+      "product_id": "X1",
+      "tonnes": 11838.254
+    },
+    {
+      "day": 52,
+      "product_id": "P1",
+      "tonnes": 38068.481
+    },
+    {
+      "day": 52,
+      "product_id": "P2",
+      "tonnes": 30688.232
+    },
+    {
+      "day": 52,
+      "product_id": "P3",
+      "tonnes": 21283.316
+    },
+    {
+      "day": 52,
+      "product_id": "X1",
+      "tonnes": 11974.674
+    },
+    {
+      "day": 53,
+      "product_id": "P1",
+      "tonnes": 40740.98
+    },
+    {
+      "day": 53,
+      "product_id": "P2",
+      "tonnes": 31366.451
+    },
+    {
+      "day": 53,
+      "product_id": "P3",
+      "tonnes": 20828.276
+    },
+    {
+      "day": 53,
+      "product_id": "X1",
+      "tonnes": 12831.287
+    },
+    {
+      "day": 54,
+      "product_id": "P1",
+      "tonnes": 40456.73
+    },
+    {
+      "day": 54,
+      "product_id": "P2",
+      "tonnes": 33903.364
+    },
+    {
+      "day": 54,
+      "product_id": "P3",
+      "tonnes": 21313.205
+    },
+    {
+      "day": 54,
+      "product_id": "X1",
+      "tonnes": 13583.627
+    },
+    {
+      "day": 55,
+      "product_id": "P1",
+      "tonnes": 41589.027
+    },
+    {
+      "day": 55,
+      "product_id": "P2",
+      "tonnes": 34406.258
+    },
+    {
+      "day": 55,
+      "product_id": "P3",
+      "tonnes": 22091.595
+    },
+    {
+      "day": 55,
+      "product_id": "X1",
+      "tonnes": 12960.588
+    },
+    {
+      "day": 56,
+      "product_id": "P1",
+      "tonnes": 42183.348
+    },
+    {
+      "day": 56,
+      "product_id": "P2",
+      "tonnes": 36049.366
+    },
+    {
+      "day": 56,
+      "product_id": "P3",
+      "tonnes": 22090.336
+    },
+    {
+      "day": 56,
+      "product_id": "X1",
+      "tonnes": 13985.541
+    },
+    {
+      "day": 57,
+      "product_id": "P1",
+      "tonnes": 43209.412
+    },
+    {
+      "day": 57,
+      "product_id": "P2",
+      "tonnes": 34791.854
+    },
+    {
+      "day": 57,
+      "product_id": "P3",
+      "tonnes": 23334.168
+    },
+    {
+      "day": 57,
+      "product_id": "X1",
+      "tonnes": 13534.181
+    },
+    {
+      "day": 58,
+      "product_id": "P1",
+      "tonnes": 40211.086
+    },
+    {
+      "day": 58,
+      "product_id": "P2",
+      "tonnes": 33425.017
+    },
+    {
+      "day": 58,
+      "product_id": "P3",
+      "tonnes": 23002.234
+    },
+    {
+      "day": 58,
+      "product_id": "X1",
+      "tonnes": 13392.651
+    },
+    {
+      "day": 59,
+      "product_id": "P1",
+      "tonnes": 40096.566
+    },
+    {
+      "day": 59,
+      "product_id": "P2",
+      "tonnes": 32093.851
+    },
+    {
+      "day": 59,
+      "product_id": "P3",
+      "tonnes": 20377.707
+    },
+    {
+      "day": 59,
+      "product_id": "X1",
+      "tonnes": 12808.633
+    },
+    {
+      "day": 60,
+      "product_id": "P1",
+      "tonnes": 42277.499
+    },
+    {
+      "day": 60,
+      "product_id": "P2",
+      "tonnes": 32883.631
+    },
+    {
+      "day": 60,
+      "product_id": "P3",
+      "tonnes": 20808.019
+    },
+    {
+      "day": 60,
+      "product_id": "X1",
+      "tonnes": 12795.833
+    },
+    {
+      "day": 61,
+      "product_id": "P1",
+      "tonnes": 43328.872
+    },
+    {
+      "day": 61,
+      "product_id": "P2",
+      "tonnes": 33093.808
+    },
+    {
+      "day": 61,
+      "product_id": "P3",
+      "tonnes": 21939.851
+    },
+    {
+      "day": 61,
+      "product_id": "X1",
+      "tonnes": 13075.936
+    },
+    {
+      "day": 62,
+      "product_id": "P1",
+      "tonnes": 44965.665
+    },
+    {
+      "day": 62,
+      "product_id": "P2",
+      "tonnes": 34714.399
+    },
+    {
+      "day": 62,
+      "product_id": "P3",
+      "tonnes": 22940.062
+    },
+    {
+      "day": 62,
+      "product_id": "X1",
+      "tonnes": 13381.42
+    },
+    {
+      "day": 63,
+      "product_id": "P1",
+      "tonnes": 43821.627
+    },
+    {
+      "day": 63,
+      "product_id": "P2",
+      "tonnes": 36545.315
+    },
+    {
+      "day": 63,
+      "product_id": "P3",
+      "tonnes": 22826.712
+    },
+    {
+      "day": 63,
+      "product_id": "X1",
+      "tonnes": 13724.157
+    },
+    {
+      "day": 64,
+      "product_id": "P1",
+      "tonnes": 43723.585
+    },
+    {
+      "day": 64,
+      "product_id": "P2",
+      "tonnes": 32173.837
+    },
+    {
+      "day": 64,
+      "product_id": "P3",
+      "tonnes": 22600.996
+    },
+    {
+      "day": 64,
+      "product_id": "X1",
+      "tonnes": 13384.738
+    },
+    {
+      "day": 65,
+      "product_id": "P1",
+      "tonnes": 39247.675
+    },
+    {
+      "day": 65,
+      "product_id": "P2",
+      "tonnes": 31149.564
+    },
+    {
+      "day": 65,
+      "product_id": "P3",
+      "tonnes": 22474.818
+    },
+    {
+      "day": 65,
+      "product_id": "X1",
+      "tonnes": 12656.658
+    },
+    {
+      "day": 66,
+      "product_id": "P1",
+      "tonnes": 41214.988
+    },
+    {
+      "day": 66,
+      "product_id": "P2",
+      "tonnes": 33093.078
+    },
+    {
+      "day": 66,
+      "product_id": "P3",
+      "tonnes": 22081.034
+    },
+    {
+      "day": 66,
+      "product_id": "X1",
+      "tonnes": 13172.412
+    },
+    {
+      "day": 67,
+      "product_id": "P1",
+      "tonnes": 43435.061
+    },
+    {
+      "day": 67,
+      "product_id": "P2",
+      "tonnes": 34582.975
+    },
+    {
+      "day": 67,
+      "product_id": "P3",
+      "tonnes": 21369.068
+    },
+    {
+      "day": 67,
+      "product_id": "X1",
+      "tonnes": 13243.056
+    },
+    {
+      "day": 68,
+      "product_id": "P1",
+      "tonnes": 45167.164
+    },
+    {
+      "day": 68,
+      "product_id": "P2",
+      "tonnes": 33876.038
+    },
+    {
+      "day": 68,
+      "product_id": "P3",
+      "tonnes": 22413.706
+    },
+    {
+      "day": 68,
+      "product_id": "X1",
+      "tonnes": 13283.853
+    },
+    {
+      "day": 69,
+      "product_id": "P1",
+      "tonnes": 42418.791
+    },
+    {
+      "day": 69,
+      "product_id": "P2",
+      "tonnes": 35128.956
+    },
+    {
+      "day": 69,
+      "product_id": "P3",
+      "tonnes": 24175.105
+    },
+    {
+      "day": 69,
+      "product_id": "X1",
+      "tonnes": 13653.41
+    },
+    {
+      "day": 70,
+      "product_id": "P1",
+      "tonnes": 43350.385
+    },
+    {
+      "day": 70,
+      "product_id": "P2",
+      "tonnes": 34232.888
+    },
+    {
+      "day": 70,
+      "product_id": "P3",
+      "tonnes": 21555.508
+    },
+    {
+      "day": 70,
+      "product_id": "X1",
+      "tonnes": 13518.437
+    },
+    {
+      "day": 71,
+      "product_id": "P1",
+      "tonnes": 40682.133
+    },
+    {
+      "day": 71,
+      "product_id": "P2",
+      "tonnes": 34971.105
+    },
+    {
+      "day": 71,
+      "product_id": "P3",
+      "tonnes": 21647.708
+    },
+    {
+      "day": 71,
+      "product_id": "X1",
+      "tonnes": 13075.076
+    },
+    {
+      "day": 72,
+      "product_id": "P1",
+      "tonnes": 37369.678
+    },
+    {
+      "day": 72,
+      "product_id": "P2",
+      "tonnes": 31324.189
+    },
+    {
+      "day": 72,
+      "product_id": "P3",
+      "tonnes": 21584.766
+    },
+    {
+      "day": 72,
+      "product_id": "X1",
+      "tonnes": 12360.861
+    },
+    {
+      "day": 73,
+      "product_id": "P1",
+      "tonnes": 40165.815
+    },
+    {
+      "day": 73,
+      "product_id": "P2",
+      "tonnes": 30893.621
+    },
+    {
+      "day": 73,
+      "product_id": "P3",
+      "tonnes": 19853.556
+    },
+    {
+      "day": 73,
+      "product_id": "X1",
+      "tonnes": 12576.984
+    },
+    {
+      "day": 74,
+      "product_id": "P1",
+      "tonnes": 38637.643
+    },
+    {
+      "day": 74,
+      "product_id": "P2",
+      "tonnes": 32421.942
+    },
+    {
+      "day": 74,
+      "product_id": "P3",
+      "tonnes": 20527.701
+    },
+    {
+      "day": 74,
+      "product_id": "X1",
+      "tonnes": 12411.512
+    },
+    {
+      "day": 75,
+      "product_id": "P1",
+      "tonnes": 39544.908
+    },
+    {
+      "day": 75,
+      "product_id": "P2",
+      "tonnes": 31956.295
+    },
+    {
+      "day": 75,
+      "product_id": "P3",
+      "tonnes": 20638.588
+    },
+    {
+      "day": 75,
+      "product_id": "X1",
+      "tonnes": 12735.938
+    },
+    {
+      "day": 76,
+      "product_id": "P1",
+      "tonnes": 42542.273
+    },
+    {
+      "day": 76,
+      "product_id": "P2",
+      "tonnes": 32813.529
+    },
+    {
+      "day": 76,
+      "product_id": "P3",
+      "tonnes": 22474.901
+    },
+    {
+      "day": 76,
+      "product_id": "X1",
+      "tonnes": 13193.498
+    },
+    {
+      "day": 77,
+      "product_id": "P1",
+      "tonnes": 42396.228
+    },
+    {
+      "day": 77,
+      "product_id": "P2",
+      "tonnes": 33531.522
+    },
+    {
+      "day": 77,
+      "product_id": "P3",
+      "tonnes": 20987.014
+    },
+    {
+      "day": 77,
+      "product_id": "X1",
+      "tonnes": 13354.054
+    },
+    {
+      "day": 78,
+      "product_id": "P1",
+      "tonnes": 40181.433
+    },
+    {
+      "day": 78,
+      "product_id": "P2",
+      "tonnes": 31591.024
+    },
+    {
+      "day": 78,
+      "product_id": "P3",
+      "tonnes": 21874.113
+    },
+    {
+      "day": 78,
+      "product_id": "X1",
+      "tonnes": 13308.625
+    },
+    {
+      "day": 79,
+      "product_id": "P1",
+      "tonnes": 38887.524
+    },
+    {
+      "day": 79,
+      "product_id": "P2",
+      "tonnes": 29210.445
+    },
+    {
+      "day": 79,
+      "product_id": "P3",
+      "tonnes": 20826.015
+    },
+    {
+      "day": 79,
+      "product_id": "X1",
+      "tonnes": 11946.344
+    },
+    {
+      "day": 80,
+      "product_id": "P1",
+      "tonnes": 39451.69
+    },
+    {
+      "day": 80,
+      "product_id": "P2",
+      "tonnes": 30749.061
+    },
+    {
+      "day": 80,
+      "product_id": "P3",
+      "tonnes": 21606.182
+    },
+    {
+      "day": 80,
+      "product_id": "X1",
+      "tonnes": 13339.29
+    },
+    {
+      "day": 81,
+      "product_id": "P1",
+      "tonnes": 40019.971
+    },
+    {
+      "day": 81,
+      "product_id": "P2",
+      "tonnes": 30766.292
+    },
+    {
+      "day": 81,
+      "product_id": "P3",
+      "tonnes": 19889.22
+    },
+    {
+      "day": 81,
+      "product_id": "X1",
+      "tonnes": 12357.13
+    },
+    {
+      "day": 82,
+      "product_id": "P1",
+      "tonnes": 41917.636
+    },
+    {
+      "day": 82,
+      "product_id": "P2",
+      "tonnes": 33289.584
+    },
+    {
+      "day": 82,
+      "product_id": "P3",
+      "tonnes": 22756.952
+    },
+    {
+      "day": 82,
+      "product_id": "X1",
+      "tonnes": 13855.46
+    },
+    {
+      "day": 83,
+      "product_id": "P1",
+      "tonnes": 40119.131
+    },
+    {
+      "day": 83,
+      "product_id": "P2",
+      "tonnes": 34528.32
+    },
+    {
+      "day": 83,
+      "product_id": "P3",
+      "tonnes": 21405.046
+    },
+    {
+      "day": 83,
+      "product_id": "X1",
+      "tonnes": 13458.496
+    },
+    {
+      "day": 84,
+      "product_id": "P1",
+      "tonnes": 43041.619
+    },
+    {
+      "day": 84,
+      "product_id": "P2",
+      "tonnes": 34795.369
+    },
+    {
+      "day": 84,
+      "product_id": "P3",
+      "tonnes": 22343.664
+    },
+    {
+      "day": 84,
+      "product_id": "X1",
+      "tonnes": 13690.231
+    },
+    {
+      "day": 85,
+      "product_id": "P1",
+      "tonnes": 40825.397
+    },
+    {
+      "day": 85,
+      "product_id": "P2",
+      "tonnes": 33998.245
+    },
+    {
+      "day": 85,
+      "product_id": "P3",
+      "tonnes": 23316.857
+    },
+    {
+      "day": 85,
+      "product_id": "X1",
+      "tonnes": 13422.051
+    },
+    {
+      "day": 86,
+      "product_id": "P1",
+      "tonnes": 42884.522
+    },
+    {
+      "day": 86,
+      "product_id": "P2",
+      "tonnes": 32919.988
+    },
+    {
+      "day": 86,
+      "product_id": "P3",
+      "tonnes": 21732.188
+    },
+    {
+      "day": 86,
+      "product_id": "X1",
+      "tonnes": 12981.437
+    },
+    {
+      "day": 87,
+      "product_id": "P1",
+      "tonnes": 42228.28
+    },
+    {
+      "day": 87,
+      "product_id": "P2",
+      "tonnes": 33564.171
+    },
+    {
+      "day": 87,
+      "product_id": "P3",
+      "tonnes": 21371.306
+    },
+    {
+      "day": 87,
+      "product_id": "X1",
+      "tonnes": 13017.048
+    },
+    {
+      "day": 88,
+      "product_id": "P1",
+      "tonnes": 42085.776
+    },
+    {
+      "day": 88,
+      "product_id": "P2",
+      "tonnes": 32021.336
+    },
+    {
+      "day": 88,
+      "product_id": "P3",
+      "tonnes": 22220.452
+    },
+    {
+      "day": 88,
+      "product_id": "X1",
+      "tonnes": 12491.126
+    },
+    {
+      "day": 89,
+      "product_id": "P1",
+      "tonnes": 41940.759
+    },
+    {
+      "day": 89,
+      "product_id": "P2",
+      "tonnes": 33262.29
+    },
+    {
+      "day": 89,
+      "product_id": "P3",
+      "tonnes": 22680.594
+    },
+    {
+      "day": 89,
+      "product_id": "X1",
+      "tonnes": 13866.702
+    }
+  ],
+  "minimum_throughput_rate_tph": {
+    "0": 2466.501,
+    "1": 2507.485,
+    "2": 2514.064,
+    "3": 2474.474,
+    "4": 2492.658,
+    "5": 2431.231,
+    "6": 2450.389,
+    "7": 2411.29,
+    "8": 2414.088,
+    "9": 2430.818,
+    "10": 2446.59,
+    "11": 2487.0,
+    "12": 2471.187,
+    "13": 2459.545,
+    "14": 2426.689,
+    "15": 3116.183,
+    "16": 3098.378,
+    "17": 3110.651,
+    "18": 3180.134,
+    "19": 3201.405,
+    "20": 3211.694,
+    "21": 3201.829,
+    "22": 3144.99,
+    "23": 3118.182,
+    "24": 3101.777,
+    "25": 3071.683,
+    "26": 3117.924,
+    "27": 3129.634,
+    "28": 3146.833,
+    "29": 3180.271,
+    "30": 3183.988,
+    "31": 3152.068,
+    "32": 3152.852,
+    "33": 3098.373,
+    "34": 3096.417,
+    "35": 3917.407,
+    "36": 3952.86,
+    "37": 3938.293,
+    "38": 3954.453,
+    "39": 3969.339,
+    "40": 3943.821,
+    "41": 3913.335,
+    "42": 3854.305,
+    "43": 3879.252,
+    "44": 3863.957,
+    "45": 3875.28,
+    "46": 3905.823,
+    "47": 3957.754,
+    "48": 3963.185,
+    "49": 3924.107,
+    "50": 2894.606,
+    "51": 2882.727,
+    "52": 2907.465,
+    "53": 2902.991,
+    "54": 2951.687,
+    "55": 2950.288,
+    "56": 2959.701,
+    "57": 2927.889,
+    "58": 2898.08,
+    "59": 2906.993,
+    "60": 2837.107,
+    "61": 2870.023,
+    "62": 2869.366,
+    "63": 2901.07,
+    "64": 2946.275,
+    "65": 3676.619,
+    "66": 3695.765,
+    "67": 3641.44,
+    "68": 3668.562,
+    "69": 3615.15,
+    "70": 3645.902,
+    "71": 3639.231,
+    "72": 3666.649,
+    "73": 3653.275,
+    "74": 3702.265,
+    "75": 3686.808,
+    "76": 3653.768,
+    "77": 3621.573,
+    "78": 2741.92,
+    "79": 2717.555,
+    "80": 2774.833,
+    "81": 2806.872,
+    "82": 2800.569,
+    "83": 2811.951,
+    "84": 2807.737,
+    "85": 2828.536,
+    "86": 2810.36,
+    "87": 2793.207,
+    "88": 2759.1,
+    "89": 2809.321
+  },
+  "operating_hours_per_day": 24.0,
+  "maintenance_tasks": [
+    {
+      "task_id": "M_TU1_01",
+      "asset_id": "TU1",
+      "earliest_start_day": 13,
+      "latest_start_day": 36,
+      "lifecycle_due_day": 49,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 4,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 6,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 13,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    },
+    {
+      "task_id": "M_TU2_01",
+      "asset_id": "TU2",
+      "earliest_start_day": 14,
+      "latest_start_day": 33,
+      "lifecycle_due_day": 47,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 4,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 6,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 13,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    },
+    {
+      "task_id": "M_ST1_01",
+      "asset_id": "ST1",
+      "earliest_start_day": 20,
+      "latest_start_day": 35,
+      "lifecycle_due_day": 47,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 3,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 5,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 10,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "modular"
+    },
+    {
+      "task_id": "M_ST3_01",
+      "asset_id": "ST3",
+      "earliest_start_day": 59,
+      "latest_start_day": 68,
+      "lifecycle_due_day": 76,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 2,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 3,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 7,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "modular"
+    },
+    {
+      "task_id": "M_RC1_01",
+      "asset_id": "RC1",
+      "earliest_start_day": 26,
+      "latest_start_day": 37,
+      "lifecycle_due_day": 51,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 4,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 6,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 13,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    },
+    {
+      "task_id": "M_RC2_01",
+      "asset_id": "RC2",
+      "earliest_start_day": 32,
+      "latest_start_day": 51,
+      "lifecycle_due_day": 69,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 5,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 8,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 16,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    },
+    {
+      "task_id": "M_RC2_02",
+      "asset_id": "RC2",
+      "earliest_start_day": 61,
+      "latest_start_day": 67,
+      "lifecycle_due_day": 75,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 2,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 3,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 7,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    },
+    {
+      "task_id": "M_SL1_01",
+      "asset_id": "SL1",
+      "earliest_start_day": 40,
+      "latest_start_day": 52,
+      "lifecycle_due_day": 64,
+      "modes": [
+        {
+          "mode_id": "full_shutdown",
+          "duration_days": 3,
+          "capacity_factor_during_work": 0.0,
+          "relative_cost": 1.0
+        },
+        {
+          "mode_id": "partial_30",
+          "duration_days": 5,
+          "capacity_factor_during_work": 0.3,
+          "relative_cost": 1.15
+        },
+        {
+          "mode_id": "partial_70",
+          "duration_days": 10,
+          "capacity_factor_during_work": 0.7,
+          "relative_cost": 1.35
+        }
+      ],
+      "mandatory": true,
+      "task_class": "major"
+    }
+  ],
+  "committed_outages": [],
+  "priority_activities": [],
+  "objective_parameters": {
+    "throughput_reward_per_tonne": 1.0,
+    "unmet_demand_penalty_per_tonne": 3.0,
+    "minimum_throughput_shortfall_penalty_per_tonne": 8.0,
+    "unaccepted_supply_penalty_per_tonne": 1.0,
+    "priority_shortfall_penalty_per_tonne": 20.0,
+    "maintenance_mode_cost_weight": 1000.0
+  },
+  "model_ready_data": {
+    "D": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "N": [
+      "RAIL_SOURCE",
+      "TU1",
+      "TU2",
+      "ST1",
+      "ST2",
+      "ST3",
+      "RC1",
+      "RC2",
+      "SL1",
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4",
+      "VESSEL_SINK"
+    ],
+    "E": [
+      "RAIL_SOURCE__TU1",
+      "RAIL_SOURCE__TU2",
+      "TU1__ST1",
+      "TU2__ST2",
+      "TU1__ST2",
+      "TU2__ST3",
+      "TU1__ST3",
+      "ST1__Z1",
+      "ST1__Z2",
+      "ST2__Z2",
+      "ST2__Z3",
+      "ST3__Z3",
+      "ST3__Z4",
+      "Z1__RC1",
+      "Z1__RC2",
+      "Z2__RC2",
+      "Z3__RC2",
+      "Z4__RC2",
+      "RC1__SL1",
+      "RC2__SL1",
+      "SL1__VESSEL_SINK"
+    ],
+    "A": [
+      "TU1",
+      "TU2",
+      "ST1",
+      "ST2",
+      "ST3",
+      "RC1",
+      "RC2",
+      "SL1"
+    ],
+    "A_NS": [
+      "TU1",
+      "TU2",
+      "ST1",
+      "ST2",
+      "ST3",
+      "RC1",
+      "RC2",
+      "SL1"
+    ],
+    "P_STOCKYARD": [
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4"
+    ],
+    "G": [
+      "P1",
+      "P2",
+      "P3",
+      "X1"
+    ],
+    "M_OPERATIONS": [
+      "M_TU1_01",
+      "M_TU2_01",
+      "M_ST1_01",
+      "M_ST3_01",
+      "M_RC1_01",
+      "M_RC2_01",
+      "M_RC2_02",
+      "M_SL1_01"
+    ],
+    "M_a": {
+      "TU1": [
+        "M_TU1_01"
+      ],
+      "TU2": [
+        "M_TU2_01"
+      ],
+      "ST1": [
+        "M_ST1_01"
+      ],
+      "ST2": [],
+      "ST3": [
+        "M_ST3_01"
+      ],
+      "RC1": [
+        "M_RC1_01"
+      ],
+      "RC2": [
+        "M_RC2_01",
+        "M_RC2_02"
+      ],
+      "SL1": [
+        "M_SL1_01"
+      ]
+    },
+    "H": [],
+    "W_m": {
+      "M_TU1_01": [
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36
+      ],
+      "M_TU2_01": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33
+      ],
+      "M_ST1_01": [
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35
+      ],
+      "M_ST3_01": [
+        59,
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "M_RC1_01": [
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37
+      ],
+      "M_RC2_01": [
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "M_RC2_02": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67
+      ],
+      "M_SL1_01": [
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52
+      ]
+    },
+    "W_h": {},
+    "K": [
+      "full_shutdown",
+      "partial_30",
+      "partial_70"
+    ],
+    "K_symbol": {
+      "full_shutdown": "F",
+      "partial_30": "P30",
+      "partial_70": "P70"
+    },
+    "predecessors": {
+      "RAIL_SOURCE": [],
+      "TU1": [
+        "RAIL_SOURCE"
+      ],
+      "TU2": [
+        "RAIL_SOURCE"
+      ],
+      "ST1": [
+        "TU1"
+      ],
+      "ST2": [
+        "TU2",
+        "TU1"
+      ],
+      "ST3": [
+        "TU2",
+        "TU1"
+      ],
+      "RC1": [
+        "Z1"
+      ],
+      "RC2": [
+        "Z1",
+        "Z2",
+        "Z3",
+        "Z4"
+      ],
+      "SL1": [
+        "RC1",
+        "RC2"
+      ],
+      "Z1": [
+        "ST1"
+      ],
+      "Z2": [
+        "ST1",
+        "ST2"
+      ],
+      "Z3": [
+        "ST2",
+        "ST3"
+      ],
+      "Z4": [
+        "ST3"
+      ],
+      "VESSEL_SINK": [
+        "SL1"
+      ]
+    },
+    "successors": {
+      "RAIL_SOURCE": [
+        "TU1",
+        "TU2"
+      ],
+      "TU1": [
+        "ST1",
+        "ST2",
+        "ST3"
+      ],
+      "TU2": [
+        "ST2",
+        "ST3"
+      ],
+      "ST1": [
+        "Z1",
+        "Z2"
+      ],
+      "ST2": [
+        "Z2",
+        "Z3"
+      ],
+      "ST3": [
+        "Z3",
+        "Z4"
+      ],
+      "RC1": [
+        "SL1"
+      ],
+      "RC2": [
+        "SL1"
+      ],
+      "SL1": [
+        "VESSEL_SINK"
+      ],
+      "Z1": [
+        "RC1",
+        "RC2"
+      ],
+      "Z2": [
+        "RC2"
+      ],
+      "Z3": [
+        "RC2"
+      ],
+      "Z4": [
+        "RC2"
+      ],
+      "VESSEL_SINK": []
+    },
+    "T": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89
+    ],
+    "P": [
+      "P1",
+      "P2",
+      "P3",
+      "X1"
+    ],
+    "Z": [
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4"
+    ],
+    "J": [
+      "M_TU1_01",
+      "M_TU2_01",
+      "M_ST1_01",
+      "M_ST3_01",
+      "M_RC1_01",
+      "M_RC2_01",
+      "M_RC2_02",
+      "M_SL1_01"
+    ],
+    "M": {
+      "M_TU1_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_TU2_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_ST1_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_ST3_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_RC1_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_RC2_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_RC2_02": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ],
+      "M_SL1_01": [
+        "full_shutdown",
+        "partial_30",
+        "partial_70"
+      ]
+    },
+    "product_name": {
+      "P1": "Normal Product 1",
+      "P2": "Normal Product 2",
+      "P3": "Normal Product 3",
+      "X1": "Special Product X1"
+    },
+    "product_share_of_volume": {
+      "P1": 0.38,
+      "P2": 0.3,
+      "P3": 0.2,
+      "X1": 0.12
+    },
+    "SPECIAL_PRODUCTS": [
+      "X1"
+    ],
+    "product_is_special": {
+      "P1": 0,
+      "P2": 0,
+      "P3": 0,
+      "X1": 1
+    },
+    "product_blending_allowed": {
+      "P1": 1,
+      "P2": 1,
+      "P3": 1,
+      "X1": 0
+    },
+    "product_grade_specs": {
+      "P1": {
+        "FE": {
+          "target": 57.5,
+          "min": 57.0,
+          "max": 58.0,
+          "unit": "%"
+        },
+        "SIO2": {
+          "target": 5.5,
+          "min": 5.0,
+          "max": 6.0,
+          "unit": "%"
+        },
+        "AL2O3": {
+          "target": 2.1,
+          "min": 1.8,
+          "max": 2.4,
+          "unit": "%"
+        },
+        "MN": {
+          "target": 0.75,
+          "min": 0.4,
+          "max": 1.1,
+          "unit": "%"
+        },
+        "P": {
+          "target": 0.063,
+          "min": 0.055,
+          "max": 0.07,
+          "unit": "%"
+        },
+        "AS": {
+          "target": 0.005,
+          "min": 0.002,
+          "max": 0.01,
+          "unit": "%"
+        },
+        "LOI": {
+          "target": 7.7,
+          "min": 7.2,
+          "max": 8.2,
+          "unit": "%"
+        }
+      },
+      "P2": {
+        "FE": {
+          "target": 56.8,
+          "min": 56.3,
+          "max": 57.3,
+          "unit": "%"
+        },
+        "SIO2": {
+          "target": 5.9,
+          "min": 5.5,
+          "max": 6.5,
+          "unit": "%"
+        },
+        "AL2O3": {
+          "target": 2.7,
+          "min": 2.4,
+          "max": 3.2,
+          "unit": "%"
+        },
+        "MN": {
+          "target": 0.8,
+          "min": 0.5,
+          "max": 1.3,
+          "unit": "%"
+        },
+        "P": {
+          "target": 0.061,
+          "min": 0.055,
+          "max": 0.068,
+          "unit": "%"
+        },
+        "AS": {
+          "target": 0.006,
+          "min": 0.002,
+          "max": 0.012,
+          "unit": "%"
+        },
+        "LOI": {
+          "target": 7.4,
+          "min": 7.0,
+          "max": 8.0,
+          "unit": "%"
+        }
+      },
+      "P3": {
+        "FE": {
+          "target": 60.3,
+          "min": 59.7,
+          "max": 60.8,
+          "unit": "%"
+        },
+        "SIO2": {
+          "target": 4.3,
+          "min": 3.8,
+          "max": 4.8,
+          "unit": "%"
+        },
+        "AL2O3": {
+          "target": 2.4,
+          "min": 2.1,
+          "max": 2.7,
+          "unit": "%"
+        },
+        "MN": {
+          "target": 0.06,
+          "min": 0.04,
+          "max": 0.09,
+          "unit": "%"
+        },
+        "P": {
+          "target": 0.133,
+          "min": 0.12,
+          "max": 0.145,
+          "unit": "%"
+        },
+        "AS": {
+          "target": 0.003,
+          "min": 0.002,
+          "max": 0.005,
+          "unit": "%"
+        },
+        "LOI": {
+          "target": 5.3,
+          "min": 5.0,
+          "max": 5.7,
+          "unit": "%"
+        }
+      },
+      "X1": {
+        "FE": {
+          "target": 57.2,
+          "min": 56.8,
+          "max": 57.6,
+          "unit": "%"
+        },
+        "SIO2": {
+          "target": 5.7,
+          "min": 5.2,
+          "max": 6.2,
+          "unit": "%"
+        },
+        "AL2O3": {
+          "target": 1.8,
+          "min": 1.6,
+          "max": 2.0,
+          "unit": "%"
+        },
+        "MN": {
+          "target": 0.025,
+          "min": 0.02,
+          "max": 0.035,
+          "unit": "%"
+        },
+        "P": {
+          "target": 0.072,
+          "min": 0.065,
+          "max": 0.08,
+          "unit": "%"
+        },
+        "AS": {
+          "target": 0.003,
+          "min": 0.002,
+          "max": 0.005,
+          "unit": "%"
+        },
+        "LOI": {
+          "target": 9.6,
+          "min": 9.0,
+          "max": 10.2,
+          "unit": "%"
+        }
+      }
+    },
+    "stage": {
+      "TU1": "train_unloader",
+      "TU2": "train_unloader",
+      "ST1": "stacker",
+      "ST2": "stacker",
+      "ST3": "stacker",
+      "RC1": "reclaimer",
+      "RC2": "reclaimer",
+      "SL1": "shiploader"
+    },
+    "asset_rate_tph": {
+      "TU1::0": 2917.0,
+      "TU1::1": 2917.0,
+      "TU1::2": 2917.0,
+      "TU1::3": 2917.0,
+      "TU1::4": 2917.0,
+      "TU1::5": 2917.0,
+      "TU1::6": 2917.0,
+      "TU1::7": 2917.0,
+      "TU1::8": 2917.0,
+      "TU1::9": 2917.0,
+      "TU1::10": 2917.0,
+      "TU1::11": 2917.0,
+      "TU1::12": 2917.0,
+      "TU1::13": 2917.0,
+      "TU1::14": 2917.0,
+      "TU1::15": 2917.0,
+      "TU1::16": 2917.0,
+      "TU1::17": 2917.0,
+      "TU1::18": 2917.0,
+      "TU1::19": 2917.0,
+      "TU1::20": 2917.0,
+      "TU1::21": 2917.0,
+      "TU1::22": 2917.0,
+      "TU1::23": 2917.0,
+      "TU1::24": 2917.0,
+      "TU1::25": 2917.0,
+      "TU1::26": 2917.0,
+      "TU1::27": 2917.0,
+      "TU1::28": 2917.0,
+      "TU1::29": 2917.0,
+      "TU1::30": 2917.0,
+      "TU1::31": 2917.0,
+      "TU1::32": 2917.0,
+      "TU1::33": 2917.0,
+      "TU1::34": 2917.0,
+      "TU1::35": 2917.0,
+      "TU1::36": 2917.0,
+      "TU1::37": 2917.0,
+      "TU1::38": 2917.0,
+      "TU1::39": 2917.0,
+      "TU1::40": 2917.0,
+      "TU1::41": 2917.0,
+      "TU1::42": 2917.0,
+      "TU1::43": 2917.0,
+      "TU1::44": 2917.0,
+      "TU1::45": 2917.0,
+      "TU1::46": 2917.0,
+      "TU1::47": 2917.0,
+      "TU1::48": 2917.0,
+      "TU1::49": 2917.0,
+      "TU1::50": 2917.0,
+      "TU1::51": 2917.0,
+      "TU1::52": 2917.0,
+      "TU1::53": 2917.0,
+      "TU1::54": 2917.0,
+      "TU1::55": 2917.0,
+      "TU1::56": 2917.0,
+      "TU1::57": 2917.0,
+      "TU1::58": 2917.0,
+      "TU1::59": 2917.0,
+      "TU1::60": 2917.0,
+      "TU1::61": 2917.0,
+      "TU1::62": 2917.0,
+      "TU1::63": 2917.0,
+      "TU1::64": 2917.0,
+      "TU1::65": 2917.0,
+      "TU1::66": 2917.0,
+      "TU1::67": 2917.0,
+      "TU1::68": 2917.0,
+      "TU1::69": 2917.0,
+      "TU1::70": 2917.0,
+      "TU1::71": 2917.0,
+      "TU1::72": 2917.0,
+      "TU1::73": 2917.0,
+      "TU1::74": 2917.0,
+      "TU1::75": 2917.0,
+      "TU1::76": 2917.0,
+      "TU1::77": 2917.0,
+      "TU1::78": 2917.0,
+      "TU1::79": 2917.0,
+      "TU1::80": 2917.0,
+      "TU1::81": 2917.0,
+      "TU1::82": 2917.0,
+      "TU1::83": 2917.0,
+      "TU1::84": 2917.0,
+      "TU1::85": 2917.0,
+      "TU1::86": 2917.0,
+      "TU1::87": 2917.0,
+      "TU1::88": 2917.0,
+      "TU1::89": 2917.0,
+      "TU2::0": 2917.0,
+      "TU2::1": 2917.0,
+      "TU2::2": 2917.0,
+      "TU2::3": 2917.0,
+      "TU2::4": 2917.0,
+      "TU2::5": 2917.0,
+      "TU2::6": 2917.0,
+      "TU2::7": 2917.0,
+      "TU2::8": 2917.0,
+      "TU2::9": 2917.0,
+      "TU2::10": 2917.0,
+      "TU2::11": 2917.0,
+      "TU2::12": 2917.0,
+      "TU2::13": 2917.0,
+      "TU2::14": 2917.0,
+      "TU2::15": 2917.0,
+      "TU2::16": 2917.0,
+      "TU2::17": 2917.0,
+      "TU2::18": 2917.0,
+      "TU2::19": 2917.0,
+      "TU2::20": 2917.0,
+      "TU2::21": 2917.0,
+      "TU2::22": 2917.0,
+      "TU2::23": 2917.0,
+      "TU2::24": 2917.0,
+      "TU2::25": 2917.0,
+      "TU2::26": 2917.0,
+      "TU2::27": 2917.0,
+      "TU2::28": 2917.0,
+      "TU2::29": 2917.0,
+      "TU2::30": 2917.0,
+      "TU2::31": 2917.0,
+      "TU2::32": 2917.0,
+      "TU2::33": 2917.0,
+      "TU2::34": 2917.0,
+      "TU2::35": 2917.0,
+      "TU2::36": 2917.0,
+      "TU2::37": 2917.0,
+      "TU2::38": 2917.0,
+      "TU2::39": 2917.0,
+      "TU2::40": 2917.0,
+      "TU2::41": 2917.0,
+      "TU2::42": 2917.0,
+      "TU2::43": 2917.0,
+      "TU2::44": 2917.0,
+      "TU2::45": 2917.0,
+      "TU2::46": 2917.0,
+      "TU2::47": 2917.0,
+      "TU2::48": 2917.0,
+      "TU2::49": 2917.0,
+      "TU2::50": 2917.0,
+      "TU2::51": 2917.0,
+      "TU2::52": 2917.0,
+      "TU2::53": 2917.0,
+      "TU2::54": 2917.0,
+      "TU2::55": 2917.0,
+      "TU2::56": 2917.0,
+      "TU2::57": 2917.0,
+      "TU2::58": 2917.0,
+      "TU2::59": 2917.0,
+      "TU2::60": 2917.0,
+      "TU2::61": 2917.0,
+      "TU2::62": 2917.0,
+      "TU2::63": 2917.0,
+      "TU2::64": 2917.0,
+      "TU2::65": 2917.0,
+      "TU2::66": 2917.0,
+      "TU2::67": 2917.0,
+      "TU2::68": 2917.0,
+      "TU2::69": 2917.0,
+      "TU2::70": 2917.0,
+      "TU2::71": 2917.0,
+      "TU2::72": 2917.0,
+      "TU2::73": 2917.0,
+      "TU2::74": 2917.0,
+      "TU2::75": 2917.0,
+      "TU2::76": 2917.0,
+      "TU2::77": 2917.0,
+      "TU2::78": 2917.0,
+      "TU2::79": 2917.0,
+      "TU2::80": 2917.0,
+      "TU2::81": 2917.0,
+      "TU2::82": 2917.0,
+      "TU2::83": 2917.0,
+      "TU2::84": 2917.0,
+      "TU2::85": 2917.0,
+      "TU2::86": 2917.0,
+      "TU2::87": 2917.0,
+      "TU2::88": 2917.0,
+      "TU2::89": 2917.0,
+      "ST1::0": 2292.0,
+      "ST1::1": 2292.0,
+      "ST1::2": 2292.0,
+      "ST1::3": 2292.0,
+      "ST1::4": 2292.0,
+      "ST1::5": 2292.0,
+      "ST1::6": 2292.0,
+      "ST1::7": 2292.0,
+      "ST1::8": 2292.0,
+      "ST1::9": 2292.0,
+      "ST1::10": 2292.0,
+      "ST1::11": 2292.0,
+      "ST1::12": 2292.0,
+      "ST1::13": 2292.0,
+      "ST1::14": 2292.0,
+      "ST1::15": 2292.0,
+      "ST1::16": 2292.0,
+      "ST1::17": 2292.0,
+      "ST1::18": 2292.0,
+      "ST1::19": 2292.0,
+      "ST1::20": 2292.0,
+      "ST1::21": 2292.0,
+      "ST1::22": 2292.0,
+      "ST1::23": 2292.0,
+      "ST1::24": 2292.0,
+      "ST1::25": 2292.0,
+      "ST1::26": 2292.0,
+      "ST1::27": 2292.0,
+      "ST1::28": 2292.0,
+      "ST1::29": 2292.0,
+      "ST1::30": 2292.0,
+      "ST1::31": 2292.0,
+      "ST1::32": 2292.0,
+      "ST1::33": 2292.0,
+      "ST1::34": 2292.0,
+      "ST1::35": 2292.0,
+      "ST1::36": 2292.0,
+      "ST1::37": 2292.0,
+      "ST1::38": 2292.0,
+      "ST1::39": 2292.0,
+      "ST1::40": 2292.0,
+      "ST1::41": 2292.0,
+      "ST1::42": 2292.0,
+      "ST1::43": 2292.0,
+      "ST1::44": 2292.0,
+      "ST1::45": 2292.0,
+      "ST1::46": 2292.0,
+      "ST1::47": 2292.0,
+      "ST1::48": 2292.0,
+      "ST1::49": 2292.0,
+      "ST1::50": 2292.0,
+      "ST1::51": 2292.0,
+      "ST1::52": 2292.0,
+      "ST1::53": 2292.0,
+      "ST1::54": 2292.0,
+      "ST1::55": 2292.0,
+      "ST1::56": 2292.0,
+      "ST1::57": 2292.0,
+      "ST1::58": 2292.0,
+      "ST1::59": 2292.0,
+      "ST1::60": 2292.0,
+      "ST1::61": 2292.0,
+      "ST1::62": 2292.0,
+      "ST1::63": 2292.0,
+      "ST1::64": 2292.0,
+      "ST1::65": 2292.0,
+      "ST1::66": 2292.0,
+      "ST1::67": 2292.0,
+      "ST1::68": 2292.0,
+      "ST1::69": 2292.0,
+      "ST1::70": 2292.0,
+      "ST1::71": 2292.0,
+      "ST1::72": 2292.0,
+      "ST1::73": 2292.0,
+      "ST1::74": 2292.0,
+      "ST1::75": 2292.0,
+      "ST1::76": 2292.0,
+      "ST1::77": 2292.0,
+      "ST1::78": 2292.0,
+      "ST1::79": 2292.0,
+      "ST1::80": 2292.0,
+      "ST1::81": 2292.0,
+      "ST1::82": 2292.0,
+      "ST1::83": 2292.0,
+      "ST1::84": 2292.0,
+      "ST1::85": 2292.0,
+      "ST1::86": 2292.0,
+      "ST1::87": 2292.0,
+      "ST1::88": 2292.0,
+      "ST1::89": 2292.0,
+      "ST2::0": 2292.0,
+      "ST2::1": 2292.0,
+      "ST2::2": 2292.0,
+      "ST2::3": 2292.0,
+      "ST2::4": 2292.0,
+      "ST2::5": 2292.0,
+      "ST2::6": 2292.0,
+      "ST2::7": 2292.0,
+      "ST2::8": 2292.0,
+      "ST2::9": 2292.0,
+      "ST2::10": 2292.0,
+      "ST2::11": 2292.0,
+      "ST2::12": 2292.0,
+      "ST2::13": 2292.0,
+      "ST2::14": 2292.0,
+      "ST2::15": 2292.0,
+      "ST2::16": 2292.0,
+      "ST2::17": 2292.0,
+      "ST2::18": 2292.0,
+      "ST2::19": 2292.0,
+      "ST2::20": 2292.0,
+      "ST2::21": 2292.0,
+      "ST2::22": 2292.0,
+      "ST2::23": 2292.0,
+      "ST2::24": 2292.0,
+      "ST2::25": 2292.0,
+      "ST2::26": 2292.0,
+      "ST2::27": 2292.0,
+      "ST2::28": 2292.0,
+      "ST2::29": 2292.0,
+      "ST2::30": 2292.0,
+      "ST2::31": 2292.0,
+      "ST2::32": 2292.0,
+      "ST2::33": 2292.0,
+      "ST2::34": 2292.0,
+      "ST2::35": 2292.0,
+      "ST2::36": 2292.0,
+      "ST2::37": 2292.0,
+      "ST2::38": 2292.0,
+      "ST2::39": 2292.0,
+      "ST2::40": 2292.0,
+      "ST2::41": 2292.0,
+      "ST2::42": 2292.0,
+      "ST2::43": 2292.0,
+      "ST2::44": 2292.0,
+      "ST2::45": 2292.0,
+      "ST2::46": 2292.0,
+      "ST2::47": 2292.0,
+      "ST2::48": 2292.0,
+      "ST2::49": 2292.0,
+      "ST2::50": 2292.0,
+      "ST2::51": 2292.0,
+      "ST2::52": 2292.0,
+      "ST2::53": 2292.0,
+      "ST2::54": 2292.0,
+      "ST2::55": 2292.0,
+      "ST2::56": 2292.0,
+      "ST2::57": 2292.0,
+      "ST2::58": 2292.0,
+      "ST2::59": 2292.0,
+      "ST2::60": 2292.0,
+      "ST2::61": 2292.0,
+      "ST2::62": 2292.0,
+      "ST2::63": 2292.0,
+      "ST2::64": 2292.0,
+      "ST2::65": 2292.0,
+      "ST2::66": 2292.0,
+      "ST2::67": 2292.0,
+      "ST2::68": 2292.0,
+      "ST2::69": 2292.0,
+      "ST2::70": 2292.0,
+      "ST2::71": 2292.0,
+      "ST2::72": 2292.0,
+      "ST2::73": 2292.0,
+      "ST2::74": 2292.0,
+      "ST2::75": 2292.0,
+      "ST2::76": 2292.0,
+      "ST2::77": 2292.0,
+      "ST2::78": 2292.0,
+      "ST2::79": 2292.0,
+      "ST2::80": 2292.0,
+      "ST2::81": 2292.0,
+      "ST2::82": 2292.0,
+      "ST2::83": 2292.0,
+      "ST2::84": 2292.0,
+      "ST2::85": 2292.0,
+      "ST2::86": 2292.0,
+      "ST2::87": 2292.0,
+      "ST2::88": 2292.0,
+      "ST2::89": 2292.0,
+      "ST3::0": 2292.0,
+      "ST3::1": 2292.0,
+      "ST3::2": 2292.0,
+      "ST3::3": 2292.0,
+      "ST3::4": 2292.0,
+      "ST3::5": 2292.0,
+      "ST3::6": 2292.0,
+      "ST3::7": 2292.0,
+      "ST3::8": 2292.0,
+      "ST3::9": 2292.0,
+      "ST3::10": 2292.0,
+      "ST3::11": 2292.0,
+      "ST3::12": 2292.0,
+      "ST3::13": 2292.0,
+      "ST3::14": 2292.0,
+      "ST3::15": 2292.0,
+      "ST3::16": 2292.0,
+      "ST3::17": 2292.0,
+      "ST3::18": 2292.0,
+      "ST3::19": 2292.0,
+      "ST3::20": 2292.0,
+      "ST3::21": 2292.0,
+      "ST3::22": 2292.0,
+      "ST3::23": 2292.0,
+      "ST3::24": 2292.0,
+      "ST3::25": 2292.0,
+      "ST3::26": 2292.0,
+      "ST3::27": 2292.0,
+      "ST3::28": 2292.0,
+      "ST3::29": 2292.0,
+      "ST3::30": 2292.0,
+      "ST3::31": 2292.0,
+      "ST3::32": 2292.0,
+      "ST3::33": 2292.0,
+      "ST3::34": 2292.0,
+      "ST3::35": 2292.0,
+      "ST3::36": 2292.0,
+      "ST3::37": 2292.0,
+      "ST3::38": 2292.0,
+      "ST3::39": 2292.0,
+      "ST3::40": 2292.0,
+      "ST3::41": 2292.0,
+      "ST3::42": 2292.0,
+      "ST3::43": 2292.0,
+      "ST3::44": 2292.0,
+      "ST3::45": 2292.0,
+      "ST3::46": 2292.0,
+      "ST3::47": 2292.0,
+      "ST3::48": 2292.0,
+      "ST3::49": 2292.0,
+      "ST3::50": 2292.0,
+      "ST3::51": 2292.0,
+      "ST3::52": 2292.0,
+      "ST3::53": 2292.0,
+      "ST3::54": 2292.0,
+      "ST3::55": 2292.0,
+      "ST3::56": 2292.0,
+      "ST3::57": 2292.0,
+      "ST3::58": 2292.0,
+      "ST3::59": 2292.0,
+      "ST3::60": 2292.0,
+      "ST3::61": 2292.0,
+      "ST3::62": 2292.0,
+      "ST3::63": 2292.0,
+      "ST3::64": 2292.0,
+      "ST3::65": 2292.0,
+      "ST3::66": 2292.0,
+      "ST3::67": 2292.0,
+      "ST3::68": 2292.0,
+      "ST3::69": 2292.0,
+      "ST3::70": 2292.0,
+      "ST3::71": 2292.0,
+      "ST3::72": 2292.0,
+      "ST3::73": 2292.0,
+      "ST3::74": 2292.0,
+      "ST3::75": 2292.0,
+      "ST3::76": 2292.0,
+      "ST3::77": 2292.0,
+      "ST3::78": 2292.0,
+      "ST3::79": 2292.0,
+      "ST3::80": 2292.0,
+      "ST3::81": 2292.0,
+      "ST3::82": 2292.0,
+      "ST3::83": 2292.0,
+      "ST3::84": 2292.0,
+      "ST3::85": 2292.0,
+      "ST3::86": 2292.0,
+      "ST3::87": 2292.0,
+      "ST3::88": 2292.0,
+      "ST3::89": 2292.0,
+      "RC1::0": 2708.0,
+      "RC1::1": 2708.0,
+      "RC1::2": 2708.0,
+      "RC1::3": 2708.0,
+      "RC1::4": 2708.0,
+      "RC1::5": 2708.0,
+      "RC1::6": 2708.0,
+      "RC1::7": 2708.0,
+      "RC1::8": 2708.0,
+      "RC1::9": 2708.0,
+      "RC1::10": 2708.0,
+      "RC1::11": 2708.0,
+      "RC1::12": 2708.0,
+      "RC1::13": 2708.0,
+      "RC1::14": 2708.0,
+      "RC1::15": 2708.0,
+      "RC1::16": 2708.0,
+      "RC1::17": 2708.0,
+      "RC1::18": 2708.0,
+      "RC1::19": 2708.0,
+      "RC1::20": 2708.0,
+      "RC1::21": 2708.0,
+      "RC1::22": 2708.0,
+      "RC1::23": 2708.0,
+      "RC1::24": 2708.0,
+      "RC1::25": 2708.0,
+      "RC1::26": 2708.0,
+      "RC1::27": 2708.0,
+      "RC1::28": 2708.0,
+      "RC1::29": 2708.0,
+      "RC1::30": 2708.0,
+      "RC1::31": 2708.0,
+      "RC1::32": 2708.0,
+      "RC1::33": 2708.0,
+      "RC1::34": 2708.0,
+      "RC1::35": 2708.0,
+      "RC1::36": 2708.0,
+      "RC1::37": 2708.0,
+      "RC1::38": 2708.0,
+      "RC1::39": 2708.0,
+      "RC1::40": 2708.0,
+      "RC1::41": 2708.0,
+      "RC1::42": 2708.0,
+      "RC1::43": 2708.0,
+      "RC1::44": 2708.0,
+      "RC1::45": 2708.0,
+      "RC1::46": 2708.0,
+      "RC1::47": 2708.0,
+      "RC1::48": 2708.0,
+      "RC1::49": 2708.0,
+      "RC1::50": 2708.0,
+      "RC1::51": 2708.0,
+      "RC1::52": 2708.0,
+      "RC1::53": 2708.0,
+      "RC1::54": 2708.0,
+      "RC1::55": 2708.0,
+      "RC1::56": 2708.0,
+      "RC1::57": 2708.0,
+      "RC1::58": 2708.0,
+      "RC1::59": 2708.0,
+      "RC1::60": 2708.0,
+      "RC1::61": 2708.0,
+      "RC1::62": 2708.0,
+      "RC1::63": 2708.0,
+      "RC1::64": 2708.0,
+      "RC1::65": 2708.0,
+      "RC1::66": 2708.0,
+      "RC1::67": 2708.0,
+      "RC1::68": 2708.0,
+      "RC1::69": 2708.0,
+      "RC1::70": 2708.0,
+      "RC1::71": 2708.0,
+      "RC1::72": 2708.0,
+      "RC1::73": 2708.0,
+      "RC1::74": 2708.0,
+      "RC1::75": 2708.0,
+      "RC1::76": 2708.0,
+      "RC1::77": 2708.0,
+      "RC1::78": 2708.0,
+      "RC1::79": 2708.0,
+      "RC1::80": 2708.0,
+      "RC1::81": 2708.0,
+      "RC1::82": 2708.0,
+      "RC1::83": 2708.0,
+      "RC1::84": 2708.0,
+      "RC1::85": 2708.0,
+      "RC1::86": 2708.0,
+      "RC1::87": 2708.0,
+      "RC1::88": 2708.0,
+      "RC1::89": 2708.0,
+      "RC2::0": 2708.0,
+      "RC2::1": 2708.0,
+      "RC2::2": 2708.0,
+      "RC2::3": 2708.0,
+      "RC2::4": 2708.0,
+      "RC2::5": 2708.0,
+      "RC2::6": 2708.0,
+      "RC2::7": 2708.0,
+      "RC2::8": 2708.0,
+      "RC2::9": 2708.0,
+      "RC2::10": 2708.0,
+      "RC2::11": 2708.0,
+      "RC2::12": 2708.0,
+      "RC2::13": 2708.0,
+      "RC2::14": 2708.0,
+      "RC2::15": 2708.0,
+      "RC2::16": 2708.0,
+      "RC2::17": 2708.0,
+      "RC2::18": 2708.0,
+      "RC2::19": 2708.0,
+      "RC2::20": 2708.0,
+      "RC2::21": 2708.0,
+      "RC2::22": 2708.0,
+      "RC2::23": 2708.0,
+      "RC2::24": 2708.0,
+      "RC2::25": 2708.0,
+      "RC2::26": 2708.0,
+      "RC2::27": 2708.0,
+      "RC2::28": 2708.0,
+      "RC2::29": 2708.0,
+      "RC2::30": 2708.0,
+      "RC2::31": 2708.0,
+      "RC2::32": 2708.0,
+      "RC2::33": 2708.0,
+      "RC2::34": 2708.0,
+      "RC2::35": 2708.0,
+      "RC2::36": 2708.0,
+      "RC2::37": 2708.0,
+      "RC2::38": 2708.0,
+      "RC2::39": 2708.0,
+      "RC2::40": 2708.0,
+      "RC2::41": 2708.0,
+      "RC2::42": 2708.0,
+      "RC2::43": 2708.0,
+      "RC2::44": 2708.0,
+      "RC2::45": 2708.0,
+      "RC2::46": 2708.0,
+      "RC2::47": 2708.0,
+      "RC2::48": 2708.0,
+      "RC2::49": 2708.0,
+      "RC2::50": 2708.0,
+      "RC2::51": 2708.0,
+      "RC2::52": 2708.0,
+      "RC2::53": 2708.0,
+      "RC2::54": 2708.0,
+      "RC2::55": 2708.0,
+      "RC2::56": 2708.0,
+      "RC2::57": 2708.0,
+      "RC2::58": 2708.0,
+      "RC2::59": 2708.0,
+      "RC2::60": 2708.0,
+      "RC2::61": 2708.0,
+      "RC2::62": 2708.0,
+      "RC2::63": 2708.0,
+      "RC2::64": 2708.0,
+      "RC2::65": 2708.0,
+      "RC2::66": 2708.0,
+      "RC2::67": 2708.0,
+      "RC2::68": 2708.0,
+      "RC2::69": 2708.0,
+      "RC2::70": 2708.0,
+      "RC2::71": 2708.0,
+      "RC2::72": 2708.0,
+      "RC2::73": 2708.0,
+      "RC2::74": 2708.0,
+      "RC2::75": 2708.0,
+      "RC2::76": 2708.0,
+      "RC2::77": 2708.0,
+      "RC2::78": 2708.0,
+      "RC2::79": 2708.0,
+      "RC2::80": 2708.0,
+      "RC2::81": 2708.0,
+      "RC2::82": 2708.0,
+      "RC2::83": 2708.0,
+      "RC2::84": 2708.0,
+      "RC2::85": 2708.0,
+      "RC2::86": 2708.0,
+      "RC2::87": 2708.0,
+      "RC2::88": 2708.0,
+      "RC2::89": 2708.0,
+      "SL1::0": 4583.0,
+      "SL1::1": 4583.0,
+      "SL1::2": 4583.0,
+      "SL1::3": 4583.0,
+      "SL1::4": 4583.0,
+      "SL1::5": 4583.0,
+      "SL1::6": 4583.0,
+      "SL1::7": 4583.0,
+      "SL1::8": 4583.0,
+      "SL1::9": 4583.0,
+      "SL1::10": 4583.0,
+      "SL1::11": 4583.0,
+      "SL1::12": 4583.0,
+      "SL1::13": 4583.0,
+      "SL1::14": 4583.0,
+      "SL1::15": 4583.0,
+      "SL1::16": 4583.0,
+      "SL1::17": 4583.0,
+      "SL1::18": 4583.0,
+      "SL1::19": 4583.0,
+      "SL1::20": 4583.0,
+      "SL1::21": 4583.0,
+      "SL1::22": 4583.0,
+      "SL1::23": 4583.0,
+      "SL1::24": 4583.0,
+      "SL1::25": 4583.0,
+      "SL1::26": 4583.0,
+      "SL1::27": 4583.0,
+      "SL1::28": 4583.0,
+      "SL1::29": 4583.0,
+      "SL1::30": 4583.0,
+      "SL1::31": 4583.0,
+      "SL1::32": 4583.0,
+      "SL1::33": 4583.0,
+      "SL1::34": 4583.0,
+      "SL1::35": 4583.0,
+      "SL1::36": 4583.0,
+      "SL1::37": 4583.0,
+      "SL1::38": 4583.0,
+      "SL1::39": 4583.0,
+      "SL1::40": 4583.0,
+      "SL1::41": 4583.0,
+      "SL1::42": 4583.0,
+      "SL1::43": 4583.0,
+      "SL1::44": 4583.0,
+      "SL1::45": 4583.0,
+      "SL1::46": 4583.0,
+      "SL1::47": 4583.0,
+      "SL1::48": 4583.0,
+      "SL1::49": 4583.0,
+      "SL1::50": 4583.0,
+      "SL1::51": 4583.0,
+      "SL1::52": 4583.0,
+      "SL1::53": 4583.0,
+      "SL1::54": 4583.0,
+      "SL1::55": 4583.0,
+      "SL1::56": 4583.0,
+      "SL1::57": 4583.0,
+      "SL1::58": 4583.0,
+      "SL1::59": 4583.0,
+      "SL1::60": 4583.0,
+      "SL1::61": 4583.0,
+      "SL1::62": 4583.0,
+      "SL1::63": 4583.0,
+      "SL1::64": 4583.0,
+      "SL1::65": 4583.0,
+      "SL1::66": 4583.0,
+      "SL1::67": 4583.0,
+      "SL1::68": 4583.0,
+      "SL1::69": 4583.0,
+      "SL1::70": 4583.0,
+      "SL1::71": 4583.0,
+      "SL1::72": 4583.0,
+      "SL1::73": 4583.0,
+      "SL1::74": 4583.0,
+      "SL1::75": 4583.0,
+      "SL1::76": 4583.0,
+      "SL1::77": 4583.0,
+      "SL1::78": 4583.0,
+      "SL1::79": 4583.0,
+      "SL1::80": 4583.0,
+      "SL1::81": 4583.0,
+      "SL1::82": 4583.0,
+      "SL1::83": 4583.0,
+      "SL1::84": 4583.0,
+      "SL1::85": 4583.0,
+      "SL1::86": 4583.0,
+      "SL1::87": 4583.0,
+      "SL1::88": 4583.0,
+      "SL1::89": 4583.0
+    },
+    "asset_capacity_tpd": {
+      "TU1": 70008.0,
+      "TU2": 70008.0,
+      "ST1": 55008.0,
+      "ST2": 55008.0,
+      "ST3": 55008.0,
+      "RC1": 64992.0,
+      "RC2": 64992.0,
+      "SL1": 109992.0
+    },
+    "arc_from": {
+      "RAIL_SOURCE__TU1": "RAIL_SOURCE",
+      "RAIL_SOURCE__TU2": "RAIL_SOURCE",
+      "TU1__ST1": "TU1",
+      "TU2__ST2": "TU2",
+      "TU1__ST2": "TU1",
+      "TU2__ST3": "TU2",
+      "TU1__ST3": "TU1",
+      "ST1__Z1": "ST1",
+      "ST1__Z2": "ST1",
+      "ST2__Z2": "ST2",
+      "ST2__Z3": "ST2",
+      "ST3__Z3": "ST3",
+      "ST3__Z4": "ST3",
+      "Z1__RC1": "Z1",
+      "Z1__RC2": "Z1",
+      "Z2__RC2": "Z2",
+      "Z3__RC2": "Z3",
+      "Z4__RC2": "Z4",
+      "RC1__SL1": "RC1",
+      "RC2__SL1": "RC2",
+      "SL1__VESSEL_SINK": "SL1"
+    },
+    "arc_to": {
+      "RAIL_SOURCE__TU1": "TU1",
+      "RAIL_SOURCE__TU2": "TU2",
+      "TU1__ST1": "ST1",
+      "TU2__ST2": "ST2",
+      "TU1__ST2": "ST2",
+      "TU2__ST3": "ST3",
+      "TU1__ST3": "ST3",
+      "ST1__Z1": "Z1",
+      "ST1__Z2": "Z2",
+      "ST2__Z2": "Z2",
+      "ST2__Z3": "Z3",
+      "ST3__Z3": "Z3",
+      "ST3__Z4": "Z4",
+      "Z1__RC1": "RC1",
+      "Z1__RC2": "RC2",
+      "Z2__RC2": "RC2",
+      "Z3__RC2": "RC2",
+      "Z4__RC2": "RC2",
+      "RC1__SL1": "SL1",
+      "RC2__SL1": "SL1",
+      "SL1__VESSEL_SINK": "VESSEL_SINK"
+    },
+    "arc_rate_tph": {
+      "RAIL_SOURCE__TU1": 2917.0,
+      "RAIL_SOURCE__TU2": 2917.0,
+      "TU1__ST1": 2292.0,
+      "TU2__ST2": 2292.0,
+      "TU1__ST2": 1875.0,
+      "TU2__ST3": 2292.0,
+      "TU1__ST3": 1875.0,
+      "ST1__Z1": 2292.0,
+      "ST1__Z2": 1875.0,
+      "ST2__Z2": 2292.0,
+      "ST2__Z3": 1875.0,
+      "ST3__Z3": 2292.0,
+      "ST3__Z4": 2292.0,
+      "Z1__RC1": 2708.0,
+      "Z1__RC2": 1875.0,
+      "Z2__RC2": 2708.0,
+      "Z3__RC2": 2708.0,
+      "Z4__RC2": 2708.0,
+      "RC1__SL1": 2708.0,
+      "RC2__SL1": 2708.0,
+      "SL1__VESSEL_SINK": 4583.0
+    },
+    "arc_capacity_tpd": {
+      "RAIL_SOURCE__TU1": 70008.0,
+      "RAIL_SOURCE__TU2": 70008.0,
+      "TU1__ST1": 55008.0,
+      "TU2__ST2": 55008.0,
+      "TU1__ST2": 45000.0,
+      "TU2__ST3": 55008.0,
+      "TU1__ST3": 45000.0,
+      "ST1__Z1": 55008.0,
+      "ST1__Z2": 45000.0,
+      "ST2__Z2": 55008.0,
+      "ST2__Z3": 45000.0,
+      "ST3__Z3": 55008.0,
+      "ST3__Z4": 55008.0,
+      "Z1__RC1": 64992.0,
+      "Z1__RC2": 45000.0,
+      "Z2__RC2": 64992.0,
+      "Z3__RC2": 64992.0,
+      "Z4__RC2": 64992.0,
+      "RC1__SL1": 64992.0,
+      "RC2__SL1": 64992.0,
+      "SL1__VESSEL_SINK": 109992.0
+    },
+    "arc_allowed_product": {
+      "RAIL_SOURCE__TU1::P1": 1,
+      "RAIL_SOURCE__TU1::P2": 1,
+      "RAIL_SOURCE__TU1::P3": 1,
+      "RAIL_SOURCE__TU1::X1": 1,
+      "RAIL_SOURCE__TU2::P1": 1,
+      "RAIL_SOURCE__TU2::P2": 1,
+      "RAIL_SOURCE__TU2::P3": 1,
+      "RAIL_SOURCE__TU2::X1": 1,
+      "TU1__ST1::P1": 1,
+      "TU1__ST1::P2": 1,
+      "TU1__ST1::P3": 1,
+      "TU1__ST1::X1": 0,
+      "TU2__ST2::P1": 1,
+      "TU2__ST2::P2": 1,
+      "TU2__ST2::P3": 1,
+      "TU2__ST2::X1": 0,
+      "TU1__ST2::P1": 1,
+      "TU1__ST2::P2": 1,
+      "TU1__ST2::P3": 1,
+      "TU1__ST2::X1": 0,
+      "TU2__ST3::P1": 0,
+      "TU2__ST3::P2": 1,
+      "TU2__ST3::P3": 1,
+      "TU2__ST3::X1": 1,
+      "TU1__ST3::P1": 0,
+      "TU1__ST3::P2": 1,
+      "TU1__ST3::P3": 1,
+      "TU1__ST3::X1": 1,
+      "ST1__Z1::P1": 1,
+      "ST1__Z1::P2": 1,
+      "ST1__Z1::P3": 0,
+      "ST1__Z1::X1": 0,
+      "ST1__Z2::P1": 1,
+      "ST1__Z2::P2": 1,
+      "ST1__Z2::P3": 1,
+      "ST1__Z2::X1": 0,
+      "ST2__Z2::P1": 1,
+      "ST2__Z2::P2": 1,
+      "ST2__Z2::P3": 1,
+      "ST2__Z2::X1": 0,
+      "ST2__Z3::P1": 0,
+      "ST2__Z3::P2": 1,
+      "ST2__Z3::P3": 1,
+      "ST2__Z3::X1": 0,
+      "ST3__Z3::P1": 0,
+      "ST3__Z3::P2": 1,
+      "ST3__Z3::P3": 1,
+      "ST3__Z3::X1": 0,
+      "ST3__Z4::P1": 0,
+      "ST3__Z4::P2": 0,
+      "ST3__Z4::P3": 0,
+      "ST3__Z4::X1": 1,
+      "Z1__RC1::P1": 1,
+      "Z1__RC1::P2": 1,
+      "Z1__RC1::P3": 0,
+      "Z1__RC1::X1": 0,
+      "Z1__RC2::P1": 1,
+      "Z1__RC2::P2": 1,
+      "Z1__RC2::P3": 0,
+      "Z1__RC2::X1": 0,
+      "Z2__RC2::P1": 1,
+      "Z2__RC2::P2": 1,
+      "Z2__RC2::P3": 1,
+      "Z2__RC2::X1": 0,
+      "Z3__RC2::P1": 0,
+      "Z3__RC2::P2": 1,
+      "Z3__RC2::P3": 1,
+      "Z3__RC2::X1": 0,
+      "Z4__RC2::P1": 0,
+      "Z4__RC2::P2": 0,
+      "Z4__RC2::P3": 0,
+      "Z4__RC2::X1": 1,
+      "RC1__SL1::P1": 1,
+      "RC1__SL1::P2": 1,
+      "RC1__SL1::P3": 1,
+      "RC1__SL1::X1": 1,
+      "RC2__SL1::P1": 1,
+      "RC2__SL1::P2": 1,
+      "RC2__SL1::P3": 1,
+      "RC2__SL1::X1": 1,
+      "SL1__VESSEL_SINK::P1": 1,
+      "SL1__VESSEL_SINK::P2": 1,
+      "SL1__VESSEL_SINK::P3": 1,
+      "SL1__VESSEL_SINK::X1": 1
+    },
+    "product_arc_compatible": {
+      "P1::RAIL_SOURCE__TU1": 1,
+      "P1::RAIL_SOURCE__TU2": 1,
+      "P1::TU1__ST1": 1,
+      "P1::TU2__ST2": 1,
+      "P1::TU1__ST2": 1,
+      "P1::TU2__ST3": 0,
+      "P1::TU1__ST3": 0,
+      "P1::ST1__Z1": 1,
+      "P1::ST1__Z2": 1,
+      "P1::ST2__Z2": 1,
+      "P1::ST2__Z3": 0,
+      "P1::ST3__Z3": 0,
+      "P1::ST3__Z4": 0,
+      "P1::Z1__RC1": 1,
+      "P1::Z1__RC2": 1,
+      "P1::Z2__RC2": 1,
+      "P1::Z3__RC2": 0,
+      "P1::Z4__RC2": 0,
+      "P1::RC1__SL1": 1,
+      "P1::RC2__SL1": 1,
+      "P1::SL1__VESSEL_SINK": 1,
+      "P2::RAIL_SOURCE__TU1": 1,
+      "P2::RAIL_SOURCE__TU2": 1,
+      "P2::TU1__ST1": 1,
+      "P2::TU2__ST2": 1,
+      "P2::TU1__ST2": 1,
+      "P2::TU2__ST3": 1,
+      "P2::TU1__ST3": 1,
+      "P2::ST1__Z1": 1,
+      "P2::ST1__Z2": 1,
+      "P2::ST2__Z2": 1,
+      "P2::ST2__Z3": 1,
+      "P2::ST3__Z3": 1,
+      "P2::ST3__Z4": 0,
+      "P2::Z1__RC1": 1,
+      "P2::Z1__RC2": 1,
+      "P2::Z2__RC2": 1,
+      "P2::Z3__RC2": 1,
+      "P2::Z4__RC2": 0,
+      "P2::RC1__SL1": 1,
+      "P2::RC2__SL1": 1,
+      "P2::SL1__VESSEL_SINK": 1,
+      "P3::RAIL_SOURCE__TU1": 1,
+      "P3::RAIL_SOURCE__TU2": 1,
+      "P3::TU1__ST1": 1,
+      "P3::TU2__ST2": 1,
+      "P3::TU1__ST2": 1,
+      "P3::TU2__ST3": 1,
+      "P3::TU1__ST3": 1,
+      "P3::ST1__Z1": 0,
+      "P3::ST1__Z2": 1,
+      "P3::ST2__Z2": 1,
+      "P3::ST2__Z3": 1,
+      "P3::ST3__Z3": 1,
+      "P3::ST3__Z4": 0,
+      "P3::Z1__RC1": 0,
+      "P3::Z1__RC2": 0,
+      "P3::Z2__RC2": 1,
+      "P3::Z3__RC2": 1,
+      "P3::Z4__RC2": 0,
+      "P3::RC1__SL1": 1,
+      "P3::RC2__SL1": 1,
+      "P3::SL1__VESSEL_SINK": 1,
+      "X1::RAIL_SOURCE__TU1": 0,
+      "X1::RAIL_SOURCE__TU2": 1,
+      "X1::TU1__ST1": 0,
+      "X1::TU2__ST2": 0,
+      "X1::TU1__ST2": 0,
+      "X1::TU2__ST3": 1,
+      "X1::TU1__ST3": 0,
+      "X1::ST1__Z1": 0,
+      "X1::ST1__Z2": 0,
+      "X1::ST2__Z2": 0,
+      "X1::ST2__Z3": 0,
+      "X1::ST3__Z3": 0,
+      "X1::ST3__Z4": 1,
+      "X1::Z1__RC1": 0,
+      "X1::Z1__RC2": 0,
+      "X1::Z2__RC2": 0,
+      "X1::Z3__RC2": 0,
+      "X1::Z4__RC2": 1,
+      "X1::RC1__SL1": 0,
+      "X1::RC2__SL1": 1,
+      "X1::SL1__VESSEL_SINK": 1
+    },
+    "zone_min_inventory_tonnes": {
+      "Z1": 27053.256,
+      "Z2": 26755.968,
+      "Z3": 20691.282,
+      "Z4": 19323.755
+    },
+    "zone_max_inventory_tonnes": {
+      "Z1": 386475.091,
+      "Z2": 445932.797,
+      "Z3": 344854.696,
+      "Z4": 297288.531
+    },
+    "zone_capacity_tonnes": {
+      "Z1": 386475.091,
+      "Z2": 445932.797,
+      "Z3": 344854.696,
+      "Z4": 297288.531
+    },
+    "zone_footprint_capacity_m2": {
+      "Z1": 154590.036,
+      "Z2": 142698.495,
+      "Z3": 130806.954,
+      "Z4": 109996.757
+    },
+    "overflow_penalty_per_tonne": {
+      "Z1": 1.0,
+      "Z2": 1.0,
+      "Z3": 1.0,
+      "Z4": 1.0
+    },
+    "zone_allowed_product": {
+      "Z1::P1": 1,
+      "Z1::P2": 1,
+      "Z1::P3": 0,
+      "Z1::X1": 0,
+      "Z2::P1": 1,
+      "Z2::P2": 1,
+      "Z2::P3": 1,
+      "Z2::X1": 0,
+      "Z3::P1": 0,
+      "Z3::P2": 1,
+      "Z3::P3": 1,
+      "Z3::X1": 0,
+      "Z4::P1": 0,
+      "Z4::P2": 0,
+      "Z4::P3": 0,
+      "Z4::X1": 1
+    },
+    "product_zone_compatible": {
+      "P1::Z1": 1,
+      "P1::Z2": 1,
+      "P1::Z3": 0,
+      "P1::Z4": 0,
+      "P2::Z1": 1,
+      "P2::Z2": 1,
+      "P2::Z3": 1,
+      "P2::Z4": 0,
+      "P3::Z1": 0,
+      "P3::Z2": 1,
+      "P3::Z3": 1,
+      "P3::Z4": 0,
+      "X1::Z1": 0,
+      "X1::Z2": 0,
+      "X1::Z3": 0,
+      "X1::Z4": 1
+    },
+    "product_asset_compatible": {
+      "P1::TU1": 1,
+      "P1::TU2": 1,
+      "P1::ST1": 1,
+      "P1::ST2": 1,
+      "P1::ST3": 0,
+      "P1::RC1": 1,
+      "P1::RC2": 1,
+      "P1::SL1": 1,
+      "P2::TU1": 1,
+      "P2::TU2": 1,
+      "P2::ST1": 1,
+      "P2::ST2": 1,
+      "P2::ST3": 1,
+      "P2::RC1": 1,
+      "P2::RC2": 1,
+      "P2::SL1": 1,
+      "P3::TU1": 1,
+      "P3::TU2": 1,
+      "P3::ST1": 1,
+      "P3::ST2": 1,
+      "P3::ST3": 1,
+      "P3::RC1": 1,
+      "P3::RC2": 1,
+      "P3::SL1": 1,
+      "X1::TU1": 0,
+      "X1::TU2": 1,
+      "X1::ST1": 0,
+      "X1::ST2": 0,
+      "X1::ST3": 1,
+      "X1::RC1": 0,
+      "X1::RC2": 1,
+      "X1::SL1": 1
+    },
+    "product_may_share_zone": {
+      "P1::P1": 1,
+      "P1::P2": 1,
+      "P1::P3": 1,
+      "P1::X1": 0,
+      "P2::P1": 1,
+      "P2::P2": 1,
+      "P2::P3": 1,
+      "P2::X1": 0,
+      "P3::P1": 1,
+      "P3::P2": 1,
+      "P3::P3": 1,
+      "P3::X1": 0,
+      "X1::P1": 0,
+      "X1::P2": 0,
+      "X1::P3": 0,
+      "X1::X1": 1
+    },
+    "special_product_requirements": {
+      "X1": {
+        "product_id": "X1",
+        "tonnes_per_square_metre": 3.2,
+        "minimum_reserved_footprint_m2": 53511.9356512714,
+        "segregation_buffer_m2": 8000.0,
+        "compatible_zones": [
+          "Z4"
+        ],
+        "required_assets": [
+          "TU2",
+          "ST3",
+          "RC2",
+          "SL1"
+        ],
+        "compatible_arcs": [
+          "RAIL_SOURCE__TU2",
+          "TU2__ST3",
+          "ST3__Z4",
+          "Z4__RC2",
+          "RC2__SL1",
+          "SL1__VESSEL_SINK"
+        ],
+        "minimum_campaign_tonnes": 149833.41982355993,
+        "minimum_contiguous_days": 9,
+        "earliest_campaign_start_day": 25,
+        "latest_campaign_start_day": 64,
+        "pre_campaign_buffer_days": 2,
+        "post_campaign_buffer_days": 2,
+        "cleanout_before_days": 1,
+        "cleanout_after_days": 1,
+        "maintenance_incompatible": true,
+        "blending_allowed": false,
+        "minimum_build_tonnes": 99888.94654903995,
+        "build_complete_before_reclaim": true
+      }
+    },
+    "special_product_tonnes_per_square_metre": {
+      "X1": 3.2
+    },
+    "special_product_minimum_reserved_footprint_m2": {
+      "X1": 53511.9356512714
+    },
+    "special_product_segregation_buffer_m2": {
+      "X1": 8000.0
+    },
+    "special_product_required_assets": {
+      "X1": [
+        "TU2",
+        "ST3",
+        "RC2",
+        "SL1"
+      ]
+    },
+    "special_product_compatible_arcs": {
+      "X1": [
+        "RAIL_SOURCE__TU2",
+        "TU2__ST3",
+        "ST3__Z4",
+        "Z4__RC2",
+        "RC2__SL1",
+        "SL1__VESSEL_SINK"
+      ]
+    },
+    "special_product_compatible_zones": {
+      "X1": [
+        "Z4"
+      ]
+    },
+    "special_product_zone_compatible": {
+      "X1::Z1": 0,
+      "X1::Z2": 0,
+      "X1::Z3": 0,
+      "X1::Z4": 1
+    },
+    "initial_inventory_tonnes": {
+      "Z1::P1": 48802.063,
+      "Z1::P2": 38488.337,
+      "Z1::P3": 0.0,
+      "Z1::X1": 0.0,
+      "Z2::P1": 47887.525,
+      "Z2::P2": 42473.879,
+      "Z2::P3": 25047.404,
+      "Z2::X1": 0.0,
+      "Z3::P1": 0.0,
+      "Z3::P2": 38027.837,
+      "Z3::P3": 25101.223,
+      "Z3::X1": 0.0,
+      "Z4::P1": 0.0,
+      "Z4::P2": 0.0,
+      "Z4::P3": 0.0,
+      "Z4::X1": 47736.4
+    },
+    "supply_tonnes": {
+      "P1::0": 42478.168,
+      "P1::1": 40397.947,
+      "P1::2": 41160.054,
+      "P1::3": 41162.987,
+      "P1::4": 41500.877,
+      "P1::5": 40150.423,
+      "P1::6": 38723.306,
+      "P1::7": 39510.987,
+      "P1::8": 43679.178,
+      "P1::9": 42519.124,
+      "P1::10": 39400.242,
+      "P1::11": 40656.37,
+      "P1::12": 38638.018,
+      "P1::13": 39809.064,
+      "P1::14": 39332.827,
+      "P1::15": 41113.939,
+      "P1::16": 42727.454,
+      "P1::17": 41524.611,
+      "P1::18": 37813.668,
+      "P1::19": 38377.537,
+      "P1::20": 39582.308,
+      "P1::21": 40106.883,
+      "P1::22": 41009.176,
+      "P1::23": 42430.916,
+      "P1::24": 39504.207,
+      "P1::25": 37551.966,
+      "P1::26": 35561.481,
+      "P1::27": 39108.844,
+      "P1::28": 40234.131,
+      "P1::29": 40036.735,
+      "P1::30": 40300.428,
+      "P1::31": 39217.737,
+      "P1::32": 39640.393,
+      "P1::33": 41940.585,
+      "P1::34": 41315.099,
+      "P1::35": 41639.24,
+      "P1::36": 39625.18,
+      "P1::37": 40626.727,
+      "P1::38": 43078.072,
+      "P1::39": 38893.299,
+      "P1::40": 40181.205,
+      "P1::41": 38329.089,
+      "P1::42": 41126.127,
+      "P1::43": 39623.851,
+      "P1::44": 43298.385,
+      "P1::45": 39312.484,
+      "P1::46": 40544.043,
+      "P1::47": 37685.543,
+      "P1::48": 39044.228,
+      "P1::49": 39268.656,
+      "P1::50": 39069.447,
+      "P1::51": 40009.822,
+      "P1::52": 38218.214,
+      "P1::53": 39321.004,
+      "P1::54": 35827.386,
+      "P1::55": 38827.108,
+      "P1::56": 41104.172,
+      "P1::57": 43131.136,
+      "P1::58": 41687.277,
+      "P1::59": 38893.97,
+      "P1::60": 40291.803,
+      "P1::61": 40487.322,
+      "P1::62": 40378.07,
+      "P1::63": 41590.724,
+      "P1::64": 42235.295,
+      "P1::65": 43991.647,
+      "P1::66": 40772.565,
+      "P1::67": 41921.827,
+      "P1::68": 39237.177,
+      "P1::69": 39567.704,
+      "P1::70": 41866.159,
+      "P1::71": 42253.989,
+      "P1::72": 40071.807,
+      "P1::73": 39231.663,
+      "P1::74": 38902.505,
+      "P1::75": 37465.403,
+      "P1::76": 40022.681,
+      "P1::77": 39296.298,
+      "P1::78": 40850.285,
+      "P1::79": 40512.805,
+      "P1::80": 40263.537,
+      "P1::81": 38091.131,
+      "P1::82": 38827.379,
+      "P1::83": 40366.29,
+      "P1::84": 38077.733,
+      "P1::85": 40738.507,
+      "P1::86": 40659.346,
+      "P1::87": 39306.948,
+      "P1::88": 39404.109,
+      "P1::89": 38011.565,
+      "P2::0": 33250.077,
+      "P2::1": 32152.473,
+      "P2::2": 33462.086,
+      "P2::3": 30046.452,
+      "P2::4": 30841.43,
+      "P2::5": 29976.356,
+      "P2::6": 31209.571,
+      "P2::7": 32770.723,
+      "P2::8": 33246.341,
+      "P2::9": 33348.987,
+      "P2::10": 30756.874,
+      "P2::11": 30279.361,
+      "P2::12": 29813.878,
+      "P2::13": 31174.975,
+      "P2::14": 30638.423,
+      "P2::15": 32125.922,
+      "P2::16": 33572.808,
+      "P2::17": 31498.679,
+      "P2::18": 30167.204,
+      "P2::19": 29831.914,
+      "P2::20": 30936.525,
+      "P2::21": 33675.59,
+      "P2::22": 33433.243,
+      "P2::23": 31275.826,
+      "P2::24": 31605.784,
+      "P2::25": 30208.929,
+      "P2::26": 30462.221,
+      "P2::27": 33461.859,
+      "P2::28": 33608.266,
+      "P2::29": 33962.31,
+      "P2::30": 32877.324,
+      "P2::31": 30529.125,
+      "P2::32": 31239.835,
+      "P2::33": 30563.855,
+      "P2::34": 30712.862,
+      "P2::35": 32968.943,
+      "P2::36": 33450.459,
+      "P2::37": 34043.723,
+      "P2::38": 32858.372,
+      "P2::39": 32037.303,
+      "P2::40": 30087.566,
+      "P2::41": 30412.24,
+      "P2::42": 32369.707,
+      "P2::43": 33086.869,
+      "P2::44": 32020.81,
+      "P2::45": 32008.178,
+      "P2::46": 31594.612,
+      "P2::47": 29661.407,
+      "P2::48": 30754.245,
+      "P2::49": 31302.271,
+      "P2::50": 31598.391,
+      "P2::51": 32467.61,
+      "P2::52": 29964.375,
+      "P2::53": 29611.724,
+      "P2::54": 29431.396,
+      "P2::55": 30422.501,
+      "P2::56": 29564.452,
+      "P2::57": 31756.928,
+      "P2::58": 31857.608,
+      "P2::59": 31678.776,
+      "P2::60": 32665.901,
+      "P2::61": 30147.934,
+      "P2::62": 33047.74,
+      "P2::63": 33882.298,
+      "P2::64": 35711.387,
+      "P2::65": 33713.117,
+      "P2::66": 32385.064,
+      "P2::67": 31467.767,
+      "P2::68": 32071.612,
+      "P2::69": 31594.345,
+      "P2::70": 33002.223,
+      "P2::71": 34784.974,
+      "P2::72": 34259.772,
+      "P2::73": 33246.565,
+      "P2::74": 30377.796,
+      "P2::75": 28833.449,
+      "P2::76": 31682.557,
+      "P2::77": 30254.026,
+      "P2::78": 31545.561,
+      "P2::79": 29602.035,
+      "P2::80": 31738.131,
+      "P2::81": 30276.541,
+      "P2::82": 30191.959,
+      "P2::83": 31079.558,
+      "P2::84": 31410.181,
+      "P2::85": 31323.729,
+      "P2::86": 32667.707,
+      "P2::87": 32897.289,
+      "P2::88": 31101.943,
+      "P2::89": 30777.787,
+      "P3::0": 21525.723,
+      "P3::1": 22499.776,
+      "P3::2": 22929.28,
+      "P3::3": 20405.17,
+      "P3::4": 22041.308,
+      "P3::5": 19839.397,
+      "P3::6": 21767.926,
+      "P3::7": 22384.53,
+      "P3::8": 22216.367,
+      "P3::9": 23710.483,
+      "P3::10": 21236.349,
+      "P3::11": 21415.677,
+      "P3::12": 20164.6,
+      "P3::13": 21796.389,
+      "P3::14": 21189.369,
+      "P3::15": 21914.273,
+      "P3::16": 21249.613,
+      "P3::17": 22166.198,
+      "P3::18": 19512.219,
+      "P3::19": 20165.213,
+      "P3::20": 20210.258,
+      "P3::21": 21054.942,
+      "P3::22": 22033.238,
+      "P3::23": 21614.285,
+      "P3::24": 21694.074,
+      "P3::25": 21395.988,
+      "P3::26": 20500.562,
+      "P3::27": 20351.48,
+      "P3::28": 20729.33,
+      "P3::29": 22357.445,
+      "P3::30": 20459.153,
+      "P3::31": 21543.786,
+      "P3::32": 21828.543,
+      "P3::33": 21266.299,
+      "P3::34": 20022.173,
+      "P3::35": 22963.062,
+      "P3::36": 22749.13,
+      "P3::37": 22609.05,
+      "P3::38": 22870.836,
+      "P3::39": 20479.117,
+      "P3::40": 19862.157,
+      "P3::41": 21861.476,
+      "P3::42": 21448.758,
+      "P3::43": 21789.468,
+      "P3::44": 22252.364,
+      "P3::45": 20601.349,
+      "P3::46": 20391.188,
+      "P3::47": 20401.587,
+      "P3::48": 22224.806,
+      "P3::49": 20205.566,
+      "P3::50": 20989.601,
+      "P3::51": 22219.857,
+      "P3::52": 20931.519,
+      "P3::53": 19647.967,
+      "P3::54": 20094.752,
+      "P3::55": 19868.221,
+      "P3::56": 20276.231,
+      "P3::57": 23017.156,
+      "P3::58": 22864.268,
+      "P3::59": 20610.868,
+      "P3::60": 20684.973,
+      "P3::61": 20454.253,
+      "P3::62": 22607.324,
+      "P3::63": 22625.943,
+      "P3::64": 22016.165,
+      "P3::65": 22361.197,
+      "P3::66": 22518.263,
+      "P3::67": 21762.368,
+      "P3::68": 19967.388,
+      "P3::69": 20997.058,
+      "P3::70": 20969.683,
+      "P3::71": 22954.352,
+      "P3::72": 21761.263,
+      "P3::73": 20664.76,
+      "P3::74": 19168.071,
+      "P3::75": 20687.954,
+      "P3::76": 19774.314,
+      "P3::77": 21108.852,
+      "P3::78": 21063.657,
+      "P3::79": 21198.116,
+      "P3::80": 19274.223,
+      "P3::81": 19612.571,
+      "P3::82": 20636.888,
+      "P3::83": 20836.265,
+      "P3::84": 20591.539,
+      "P3::85": 20755.005,
+      "P3::86": 22718.474,
+      "P3::87": 20823.305,
+      "P3::88": 20061.808,
+      "P3::89": 21566.423,
+      "X1::0": 13675.48,
+      "X1::1": 12765.36,
+      "X1::2": 13424.007,
+      "X1::3": 12696.183,
+      "X1::4": 12515.77,
+      "X1::5": 11934.837,
+      "X1::6": 12408.071,
+      "X1::7": 13008.133,
+      "X1::8": 14151.012,
+      "X1::9": 14325.475,
+      "X1::10": 13271.46,
+      "X1::11": 12570.276,
+      "X1::12": 11826.918,
+      "X1::13": 12292.973,
+      "X1::14": 12554.189,
+      "X1::15": 12712.998,
+      "X1::16": 12870.492,
+      "X1::17": 12579.626,
+      "X1::18": 12336.181,
+      "X1::19": 12522.816,
+      "X1::20": 12603.699,
+      "X1::21": 12417.427,
+      "X1::22": 13441.009,
+      "X1::23": 13486.734,
+      "X1::24": 12439.333,
+      "X1::25": 12891.514,
+      "X1::26": 11703.46,
+      "X1::27": 12991.201,
+      "X1::28": 12805.936,
+      "X1::29": 13006.016,
+      "X1::30": 12163.178,
+      "X1::31": 12075.474,
+      "X1::32": 12894.333,
+      "X1::33": 12066.029,
+      "X1::34": 12490.621,
+      "X1::35": 13695.827,
+      "X1::36": 12990.989,
+      "X1::37": 13002.303,
+      "X1::38": 12692.229,
+      "X1::39": 12935.869,
+      "X1::40": 12555.745,
+      "X1::41": 13001.311,
+      "X1::42": 12156.328,
+      "X1::43": 12299.376,
+      "X1::44": 13503.128,
+      "X1::45": 12808.949,
+      "X1::46": 13107.537,
+      "X1::47": 11666.399,
+      "X1::48": 12246.293,
+      "X1::49": 12583.048,
+      "X1::50": 13227.575,
+      "X1::51": 12556.526,
+      "X1::52": 12304.78,
+      "X1::53": 12416.311,
+      "X1::54": 11129.078,
+      "X1::55": 11343.74,
+      "X1::56": 12095.919,
+      "X1::57": 12808.913,
+      "X1::58": 13209.069,
+      "X1::59": 12251.903,
+      "X1::60": 12418.702,
+      "X1::61": 12054.063,
+      "X1::62": 12657.123,
+      "X1::63": 12601.392,
+      "X1::64": 13355.823,
+      "X1::65": 13308.19,
+      "X1::66": 12946.786,
+      "X1::67": 12308.108,
+      "X1::68": 12858.905,
+      "X1::69": 13342.097,
+      "X1::70": 12934.824,
+      "X1::71": 14170.895,
+      "X1::72": 13853.831,
+      "X1::73": 12281.727,
+      "X1::74": 11537.352,
+      "X1::75": 12079.112,
+      "X1::76": 12633.313,
+      "X1::77": 12136.938,
+      "X1::78": 13329.252,
+      "X1::79": 12437.115,
+      "X1::80": 12773.124,
+      "X1::81": 11570.563,
+      "X1::82": 12384.29,
+      "X1::83": 12171.231,
+      "X1::84": 12499.432,
+      "X1::85": 13092.62,
+      "X1::86": 13090.546,
+      "X1::87": 12855.888,
+      "X1::88": 12022.138,
+      "X1::89": 12655.094
+    },
+    "demand_tonnes": {
+      "P1::0": 43786.289,
+      "P1::1": 41734.176,
+      "P1::2": 39787.049,
+      "P1::3": 43630.209,
+      "P1::4": 41291.133,
+      "P1::5": 43227.973,
+      "P1::6": 42079.123,
+      "P1::7": 43466.32,
+      "P1::8": 41416.648,
+      "P1::9": 42445.091,
+      "P1::10": 41066.479,
+      "P1::11": 42076.077,
+      "P1::12": 42142.289,
+      "P1::13": 42777.633,
+      "P1::14": 42177.588,
+      "P1::15": 40364.776,
+      "P1::16": 39287.41,
+      "P1::17": 37499.628,
+      "P1::18": 40650.454,
+      "P1::19": 40706.384,
+      "P1::20": 43132.856,
+      "P1::21": 41737.575,
+      "P1::22": 39899.557,
+      "P1::23": 41123.43,
+      "P1::24": 38399.456,
+      "P1::25": 41148.921,
+      "P1::26": 42897.693,
+      "P1::27": 41928.984,
+      "P1::28": 41031.74,
+      "P1::29": 40967.136,
+      "P1::30": 41850.386,
+      "P1::31": 40479.283,
+      "P1::32": 41216.192,
+      "P1::33": 41080.516,
+      "P1::34": 44313.702,
+      "P1::35": 42682.891,
+      "P1::36": 41868.982,
+      "P1::37": 40925.649,
+      "P1::38": 42222.343,
+      "P1::39": 40932.971,
+      "P1::40": 41551.483,
+      "P1::41": 43237.007,
+      "P1::42": 42047.532,
+      "P1::43": 42282.038,
+      "P1::44": 41449.341,
+      "P1::45": 39390.636,
+      "P1::46": 38854.429,
+      "P1::47": 43256.877,
+      "P1::48": 42757.675,
+      "P1::49": 41769.015,
+      "P1::50": 40607.791,
+      "P1::51": 37575.849,
+      "P1::52": 38068.481,
+      "P1::53": 40740.98,
+      "P1::54": 40456.73,
+      "P1::55": 41589.027,
+      "P1::56": 42183.348,
+      "P1::57": 43209.412,
+      "P1::58": 40211.086,
+      "P1::59": 40096.566,
+      "P1::60": 42277.499,
+      "P1::61": 43328.872,
+      "P1::62": 44965.665,
+      "P1::63": 43821.627,
+      "P1::64": 43723.585,
+      "P1::65": 39247.675,
+      "P1::66": 41214.988,
+      "P1::67": 43435.061,
+      "P1::68": 45167.164,
+      "P1::69": 42418.791,
+      "P1::70": 43350.385,
+      "P1::71": 40682.133,
+      "P1::72": 37369.678,
+      "P1::73": 40165.815,
+      "P1::74": 38637.643,
+      "P1::75": 39544.908,
+      "P1::76": 42542.273,
+      "P1::77": 42396.228,
+      "P1::78": 40181.433,
+      "P1::79": 38887.524,
+      "P1::80": 39451.69,
+      "P1::81": 40019.971,
+      "P1::82": 41917.636,
+      "P1::83": 40119.131,
+      "P1::84": 43041.619,
+      "P1::85": 40825.397,
+      "P1::86": 42884.522,
+      "P1::87": 42228.28,
+      "P1::88": 42085.776,
+      "P1::89": 41940.759,
+      "P2::0": 36532.797,
+      "P2::1": 33548.258,
+      "P2::2": 31672.137,
+      "P2::3": 32540.897,
+      "P2::4": 32399.209,
+      "P2::5": 33091.118,
+      "P2::6": 34259.913,
+      "P2::7": 36351.362,
+      "P2::8": 35089.889,
+      "P2::9": 31870.054,
+      "P2::10": 32222.111,
+      "P2::11": 32188.319,
+      "P2::12": 32708.013,
+      "P2::13": 32565.164,
+      "P2::14": 31727.851,
+      "P2::15": 33573.436,
+      "P2::16": 31304.223,
+      "P2::17": 31015.617,
+      "P2::18": 32512.677,
+      "P2::19": 31295.138,
+      "P2::20": 34619.244,
+      "P2::21": 30991.767,
+      "P2::22": 32112.266,
+      "P2::23": 31256.64,
+      "P2::24": 31805.468,
+      "P2::25": 32687.264,
+      "P2::26": 35472.643,
+      "P2::27": 32417.651,
+      "P2::28": 35198.294,
+      "P2::29": 32432.4,
+      "P2::30": 32120.28,
+      "P2::31": 30374.656,
+      "P2::32": 31173.764,
+      "P2::33": 32241.035,
+      "P2::34": 35619.913,
+      "P2::35": 34925.664,
+      "P2::36": 34599.978,
+      "P2::37": 31207.329,
+      "P2::38": 32763.241,
+      "P2::39": 31900.17,
+      "P2::40": 33197.523,
+      "P2::41": 33603.627,
+      "P2::42": 34795.746,
+      "P2::43": 33401.091,
+      "P2::44": 32880.488,
+      "P2::45": 31917.241,
+      "P2::46": 31743.241,
+      "P2::47": 34164.626,
+      "P2::48": 31912.023,
+      "P2::49": 32693.195,
+      "P2::50": 34232.965,
+      "P2::51": 31381.706,
+      "P2::52": 30688.232,
+      "P2::53": 31366.451,
+      "P2::54": 33903.364,
+      "P2::55": 34406.258,
+      "P2::56": 36049.366,
+      "P2::57": 34791.854,
+      "P2::58": 33425.017,
+      "P2::59": 32093.851,
+      "P2::60": 32883.631,
+      "P2::61": 33093.808,
+      "P2::62": 34714.399,
+      "P2::63": 36545.315,
+      "P2::64": 32173.837,
+      "P2::65": 31149.564,
+      "P2::66": 33093.078,
+      "P2::67": 34582.975,
+      "P2::68": 33876.038,
+      "P2::69": 35128.956,
+      "P2::70": 34232.888,
+      "P2::71": 34971.105,
+      "P2::72": 31324.189,
+      "P2::73": 30893.621,
+      "P2::74": 32421.942,
+      "P2::75": 31956.295,
+      "P2::76": 32813.529,
+      "P2::77": 33531.522,
+      "P2::78": 31591.024,
+      "P2::79": 29210.445,
+      "P2::80": 30749.061,
+      "P2::81": 30766.292,
+      "P2::82": 33289.584,
+      "P2::83": 34528.32,
+      "P2::84": 34795.369,
+      "P2::85": 33998.245,
+      "P2::86": 32919.988,
+      "P2::87": 33564.171,
+      "P2::88": 32021.336,
+      "P2::89": 33262.29,
+      "P3::0": 23329.392,
+      "P3::1": 23649.377,
+      "P3::2": 21952.21,
+      "P3::3": 22856.139,
+      "P3::4": 22137.33,
+      "P3::5": 21945.422,
+      "P3::6": 22236.696,
+      "P3::7": 23810.247,
+      "P3::8": 22366.854,
+      "P3::9": 20551.225,
+      "P3::10": 20760.577,
+      "P3::11": 22169.953,
+      "P3::12": 20713.825,
+      "P3::13": 22806.67,
+      "P3::14": 22650.576,
+      "P3::15": 22022.801,
+      "P3::16": 19200.933,
+      "P3::17": 20850.359,
+      "P3::18": 20913.782,
+      "P3::19": 20612.456,
+      "P3::20": 23040.272,
+      "P3::21": 21874.061,
+      "P3::22": 21208.114,
+      "P3::23": 20964.652,
+      "P3::24": 21521.444,
+      "P3::25": 22633.737,
+      "P3::26": 22949.306,
+      "P3::27": 23569.486,
+      "P3::28": 22413.247,
+      "P3::29": 23086.837,
+      "P3::30": 22359.098,
+      "P3::31": 21037.853,
+      "P3::32": 20458.218,
+      "P3::33": 22806.187,
+      "P3::34": 24841.756,
+      "P3::35": 22239.179,
+      "P3::36": 22925.733,
+      "P3::37": 21017.741,
+      "P3::38": 22003.699,
+      "P3::39": 20407.56,
+      "P3::40": 20958.795,
+      "P3::41": 23757.474,
+      "P3::42": 24071.575,
+      "P3::43": 21027.592,
+      "P3::44": 20875.144,
+      "P3::45": 20529.345,
+      "P3::46": 20969.897,
+      "P3::47": 21064.908,
+      "P3::48": 21638.832,
+      "P3::49": 22162.162,
+      "P3::50": 22795.202,
+      "P3::51": 20779.19,
+      "P3::52": 21283.316,
+      "P3::53": 20828.276,
+      "P3::54": 21313.205,
+      "P3::55": 22091.595,
+      "P3::56": 22090.336,
+      "P3::57": 23334.168,
+      "P3::58": 23002.234,
+      "P3::59": 20377.707,
+      "P3::60": 20808.019,
+      "P3::61": 21939.851,
+      "P3::62": 22940.062,
+      "P3::63": 22826.712,
+      "P3::64": 22600.996,
+      "P3::65": 22474.818,
+      "P3::66": 22081.034,
+      "P3::67": 21369.068,
+      "P3::68": 22413.706,
+      "P3::69": 24175.105,
+      "P3::70": 21555.508,
+      "P3::71": 21647.708,
+      "P3::72": 21584.766,
+      "P3::73": 19853.556,
+      "P3::74": 20527.701,
+      "P3::75": 20638.588,
+      "P3::76": 22474.901,
+      "P3::77": 20987.014,
+      "P3::78": 21874.113,
+      "P3::79": 20826.015,
+      "P3::80": 21606.182,
+      "P3::81": 19889.22,
+      "P3::82": 22756.952,
+      "P3::83": 21405.046,
+      "P3::84": 22343.664,
+      "P3::85": 23316.857,
+      "P3::86": 21732.188,
+      "P3::87": 21371.306,
+      "P3::88": 22220.452,
+      "P3::89": 22680.594,
+      "X1::0": 13486.496,
+      "X1::1": 13648.794,
+      "X1::2": 12598.699,
+      "X1::3": 13098.066,
+      "X1::4": 12637.769,
+      "X1::5": 13879.605,
+      "X1::6": 13842.402,
+      "X1::7": 13487.609,
+      "X1::8": 13728.665,
+      "X1::9": 13073.679,
+      "X1::10": 12150.753,
+      "X1::11": 12910.644,
+      "X1::12": 12438.541,
+      "X1::13": 12633.069,
+      "X1::14": 12314.597,
+      "X1::15": 12728.408,
+      "X1::16": 11527.763,
+      "X1::17": 12283.928,
+      "X1::18": 12162.018,
+      "X1::19": 12680.888,
+      "X1::20": 13506.041,
+      "X1::21": 12371.653,
+      "X1::22": 13051.261,
+      "X1::23": 13701.484,
+      "X1::24": 12326.211,
+      "X1::25": 13268.053,
+      "X1::26": 13520.238,
+      "X1::27": 13353.597,
+      "X1::28": 13978.971,
+      "X1::29": 13623.213,
+      "X1::30": 13561.682,
+      "X1::31": 12886.417,
+      "X1::32": 13396.167,
+      "X1::33": 13777.429,
+      "X1::34": 14609.09,
+      "X1::35": 13887.834,
+      "X1::36": 13976.14,
+      "X1::37": 12122.584,
+      "X1::38": 12848.279,
+      "X1::39": 13034.314,
+      "X1::40": 12774.04,
+      "X1::41": 14182.475,
+      "X1::42": 14270.666,
+      "X1::43": 13200.333,
+      "X1::44": 12755.104,
+      "X1::45": 12883.48,
+      "X1::46": 12645.162,
+      "X1::47": 12983.633,
+      "X1::48": 12875.603,
+      "X1::49": 13825.07,
+      "X1::50": 13368.946,
+      "X1::51": 11838.254,
+      "X1::52": 11974.674,
+      "X1::53": 12831.287,
+      "X1::54": 13583.627,
+      "X1::55": 12960.588,
+      "X1::56": 13985.541,
+      "X1::57": 13534.181,
+      "X1::58": 13392.651,
+      "X1::59": 12808.633,
+      "X1::60": 12795.833,
+      "X1::61": 13075.936,
+      "X1::62": 13381.42,
+      "X1::63": 13724.157,
+      "X1::64": 13384.738,
+      "X1::65": 12656.658,
+      "X1::66": 13172.412,
+      "X1::67": 13243.056,
+      "X1::68": 13283.853,
+      "X1::69": 13653.41,
+      "X1::70": 13518.437,
+      "X1::71": 13075.076,
+      "X1::72": 12360.861,
+      "X1::73": 12576.984,
+      "X1::74": 12411.512,
+      "X1::75": 12735.938,
+      "X1::76": 13193.498,
+      "X1::77": 13354.054,
+      "X1::78": 13308.625,
+      "X1::79": 11946.344,
+      "X1::80": 13339.29,
+      "X1::81": 12357.13,
+      "X1::82": 13855.46,
+      "X1::83": 13458.496,
+      "X1::84": 13690.231,
+      "X1::85": 13422.051,
+      "X1::86": 12981.437,
+      "X1::87": 13017.048,
+      "X1::88": 12491.126,
+      "X1::89": 13866.702
+    },
+    "minimum_throughput_rate_tph": {
+      "0": 2466.501,
+      "1": 2507.485,
+      "2": 2514.064,
+      "3": 2474.474,
+      "4": 2492.658,
+      "5": 2431.231,
+      "6": 2450.389,
+      "7": 2411.29,
+      "8": 2414.088,
+      "9": 2430.818,
+      "10": 2446.59,
+      "11": 2487.0,
+      "12": 2471.187,
+      "13": 2459.545,
+      "14": 2426.689,
+      "15": 3116.183,
+      "16": 3098.378,
+      "17": 3110.651,
+      "18": 3180.134,
+      "19": 3201.405,
+      "20": 3211.694,
+      "21": 3201.829,
+      "22": 3144.99,
+      "23": 3118.182,
+      "24": 3101.777,
+      "25": 3071.683,
+      "26": 3117.924,
+      "27": 3129.634,
+      "28": 3146.833,
+      "29": 3180.271,
+      "30": 3183.988,
+      "31": 3152.068,
+      "32": 3152.852,
+      "33": 3098.373,
+      "34": 3096.417,
+      "35": 3917.407,
+      "36": 3952.86,
+      "37": 3938.293,
+      "38": 3954.453,
+      "39": 3969.339,
+      "40": 3943.821,
+      "41": 3913.335,
+      "42": 3854.305,
+      "43": 3879.252,
+      "44": 3863.957,
+      "45": 3875.28,
+      "46": 3905.823,
+      "47": 3957.754,
+      "48": 3963.185,
+      "49": 3924.107,
+      "50": 2894.606,
+      "51": 2882.727,
+      "52": 2907.465,
+      "53": 2902.991,
+      "54": 2951.687,
+      "55": 2950.288,
+      "56": 2959.701,
+      "57": 2927.889,
+      "58": 2898.08,
+      "59": 2906.993,
+      "60": 2837.107,
+      "61": 2870.023,
+      "62": 2869.366,
+      "63": 2901.07,
+      "64": 2946.275,
+      "65": 3676.619,
+      "66": 3695.765,
+      "67": 3641.44,
+      "68": 3668.562,
+      "69": 3615.15,
+      "70": 3645.902,
+      "71": 3639.231,
+      "72": 3666.649,
+      "73": 3653.275,
+      "74": 3702.265,
+      "75": 3686.808,
+      "76": 3653.768,
+      "77": 3621.573,
+      "78": 2741.92,
+      "79": 2717.555,
+      "80": 2774.833,
+      "81": 2806.872,
+      "82": 2800.569,
+      "83": 2811.951,
+      "84": 2807.737,
+      "85": 2828.536,
+      "86": 2810.36,
+      "87": 2793.207,
+      "88": 2759.1,
+      "89": 2809.321
+    },
+    "minimum_throughput_tpd": {
+      "0": 59196.024000000005,
+      "1": 60179.64,
+      "2": 60337.53599999999,
+      "3": 59387.376000000004,
+      "4": 59823.792,
+      "5": 58349.54400000001,
+      "6": 58809.336,
+      "7": 57870.96,
+      "8": 57938.11200000001,
+      "9": 58339.632000000005,
+      "10": 58718.16,
+      "11": 59688.0,
+      "12": 59308.488,
+      "13": 59029.08,
+      "14": 58240.53599999999,
+      "15": 74788.39199999999,
+      "16": 74361.072,
+      "17": 74655.624,
+      "18": 76323.216,
+      "19": 76833.72,
+      "20": 77080.656,
+      "21": 76843.89600000001,
+      "22": 75479.76,
+      "23": 74836.36799999999,
+      "24": 74442.648,
+      "25": 73720.39199999999,
+      "26": 74830.176,
+      "27": 75111.216,
+      "28": 75523.992,
+      "29": 76326.504,
+      "30": 76415.712,
+      "31": 75649.63200000001,
+      "32": 75668.448,
+      "33": 74360.952,
+      "34": 74314.008,
+      "35": 94017.76800000001,
+      "36": 94868.64,
+      "37": 94519.032,
+      "38": 94906.872,
+      "39": 95264.136,
+      "40": 94651.704,
+      "41": 93920.04000000001,
+      "42": 92503.31999999999,
+      "43": 93102.048,
+      "44": 92734.968,
+      "45": 93006.72,
+      "46": 93739.752,
+      "47": 94986.09599999999,
+      "48": 95116.44,
+      "49": 94178.568,
+      "50": 69470.54400000001,
+      "51": 69185.448,
+      "52": 69779.16,
+      "53": 69671.784,
+      "54": 70840.488,
+      "55": 70806.912,
+      "56": 71032.824,
+      "57": 70269.33600000001,
+      "58": 69553.92,
+      "59": 69767.832,
+      "60": 68090.568,
+      "61": 68880.552,
+      "62": 68864.784,
+      "63": 69625.68000000001,
+      "64": 70710.6,
+      "65": 88238.856,
+      "66": 88698.36,
+      "67": 87394.56,
+      "68": 88045.488,
+      "69": 86763.6,
+      "70": 87501.648,
+      "71": 87341.54400000001,
+      "72": 87999.576,
+      "73": 87678.6,
+      "74": 88854.36,
+      "75": 88483.39199999999,
+      "76": 87690.432,
+      "77": 86917.752,
+      "78": 65806.08,
+      "79": 65221.31999999999,
+      "80": 66595.992,
+      "81": 67364.928,
+      "82": 67213.656,
+      "83": 67486.824,
+      "84": 67385.688,
+      "85": 67884.864,
+      "86": 67448.64,
+      "87": 67036.968,
+      "88": 66218.4,
+      "89": 67423.704
+    },
+    "operating_hours_per_day": 24.0,
+    "maintenance_asset": {
+      "M_TU1_01": "TU1",
+      "M_TU2_01": "TU2",
+      "M_ST1_01": "ST1",
+      "M_ST3_01": "ST3",
+      "M_RC1_01": "RC1",
+      "M_RC2_01": "RC2",
+      "M_RC2_02": "RC2",
+      "M_SL1_01": "SL1"
+    },
+    "maintenance_earliest_start": {
+      "M_TU1_01": 13,
+      "M_TU2_01": 14,
+      "M_ST1_01": 20,
+      "M_ST3_01": 59,
+      "M_RC1_01": 26,
+      "M_RC2_01": 32,
+      "M_RC2_02": 61,
+      "M_SL1_01": 40
+    },
+    "maintenance_latest_start": {
+      "M_TU1_01": 36,
+      "M_TU2_01": 33,
+      "M_ST1_01": 35,
+      "M_ST3_01": 68,
+      "M_RC1_01": 37,
+      "M_RC2_01": 51,
+      "M_RC2_02": 67,
+      "M_SL1_01": 52
+    },
+    "maintenance_lifecycle_due": {
+      "M_TU1_01": 49,
+      "M_TU2_01": 47,
+      "M_ST1_01": 47,
+      "M_ST3_01": 76,
+      "M_RC1_01": 51,
+      "M_RC2_01": 69,
+      "M_RC2_02": 75,
+      "M_SL1_01": 64
+    },
+    "maintenance_duration_days": {
+      "M_TU1_01::full_shutdown": 4,
+      "M_TU1_01::partial_30": 6,
+      "M_TU1_01::partial_70": 13,
+      "M_TU2_01::full_shutdown": 4,
+      "M_TU2_01::partial_30": 6,
+      "M_TU2_01::partial_70": 13,
+      "M_ST1_01::full_shutdown": 3,
+      "M_ST1_01::partial_30": 5,
+      "M_ST1_01::partial_70": 10,
+      "M_ST3_01::full_shutdown": 2,
+      "M_ST3_01::partial_30": 3,
+      "M_ST3_01::partial_70": 7,
+      "M_RC1_01::full_shutdown": 4,
+      "M_RC1_01::partial_30": 6,
+      "M_RC1_01::partial_70": 13,
+      "M_RC2_01::full_shutdown": 5,
+      "M_RC2_01::partial_30": 8,
+      "M_RC2_01::partial_70": 16,
+      "M_RC2_02::full_shutdown": 2,
+      "M_RC2_02::partial_30": 3,
+      "M_RC2_02::partial_70": 7,
+      "M_SL1_01::full_shutdown": 3,
+      "M_SL1_01::partial_30": 5,
+      "M_SL1_01::partial_70": 10
+    },
+    "maintenance_capacity_factor": {
+      "M_TU1_01::full_shutdown": 0.0,
+      "M_TU1_01::partial_30": 0.3,
+      "M_TU1_01::partial_70": 0.7,
+      "M_TU2_01::full_shutdown": 0.0,
+      "M_TU2_01::partial_30": 0.3,
+      "M_TU2_01::partial_70": 0.7,
+      "M_ST1_01::full_shutdown": 0.0,
+      "M_ST1_01::partial_30": 0.3,
+      "M_ST1_01::partial_70": 0.7,
+      "M_ST3_01::full_shutdown": 0.0,
+      "M_ST3_01::partial_30": 0.3,
+      "M_ST3_01::partial_70": 0.7,
+      "M_RC1_01::full_shutdown": 0.0,
+      "M_RC1_01::partial_30": 0.3,
+      "M_RC1_01::partial_70": 0.7,
+      "M_RC2_01::full_shutdown": 0.0,
+      "M_RC2_01::partial_30": 0.3,
+      "M_RC2_01::partial_70": 0.7,
+      "M_RC2_02::full_shutdown": 0.0,
+      "M_RC2_02::partial_30": 0.3,
+      "M_RC2_02::partial_70": 0.7,
+      "M_SL1_01::full_shutdown": 0.0,
+      "M_SL1_01::partial_30": 0.3,
+      "M_SL1_01::partial_70": 0.7
+    },
+    "maintenance_available_capacity_fraction": {
+      "M_TU1_01::full_shutdown": 0.0,
+      "M_TU1_01::partial_30": 0.3,
+      "M_TU1_01::partial_70": 0.7,
+      "M_TU2_01::full_shutdown": 0.0,
+      "M_TU2_01::partial_30": 0.3,
+      "M_TU2_01::partial_70": 0.7,
+      "M_ST1_01::full_shutdown": 0.0,
+      "M_ST1_01::partial_30": 0.3,
+      "M_ST1_01::partial_70": 0.7,
+      "M_ST3_01::full_shutdown": 0.0,
+      "M_ST3_01::partial_30": 0.3,
+      "M_ST3_01::partial_70": 0.7,
+      "M_RC1_01::full_shutdown": 0.0,
+      "M_RC1_01::partial_30": 0.3,
+      "M_RC1_01::partial_70": 0.7,
+      "M_RC2_01::full_shutdown": 0.0,
+      "M_RC2_01::partial_30": 0.3,
+      "M_RC2_01::partial_70": 0.7,
+      "M_RC2_02::full_shutdown": 0.0,
+      "M_RC2_02::partial_30": 0.3,
+      "M_RC2_02::partial_70": 0.7,
+      "M_SL1_01::full_shutdown": 0.0,
+      "M_SL1_01::partial_30": 0.3,
+      "M_SL1_01::partial_70": 0.7
+    },
+    "maintenance_capacity_loss_fraction": {
+      "M_TU1_01::full_shutdown": 1.0,
+      "M_TU1_01::partial_30": 0.7,
+      "M_TU1_01::partial_70": 0.30000000000000004,
+      "M_TU2_01::full_shutdown": 1.0,
+      "M_TU2_01::partial_30": 0.7,
+      "M_TU2_01::partial_70": 0.30000000000000004,
+      "M_ST1_01::full_shutdown": 1.0,
+      "M_ST1_01::partial_30": 0.7,
+      "M_ST1_01::partial_70": 0.30000000000000004,
+      "M_ST3_01::full_shutdown": 1.0,
+      "M_ST3_01::partial_30": 0.7,
+      "M_ST3_01::partial_70": 0.30000000000000004,
+      "M_RC1_01::full_shutdown": 1.0,
+      "M_RC1_01::partial_30": 0.7,
+      "M_RC1_01::partial_70": 0.30000000000000004,
+      "M_RC2_01::full_shutdown": 1.0,
+      "M_RC2_01::partial_30": 0.7,
+      "M_RC2_01::partial_70": 0.30000000000000004,
+      "M_RC2_02::full_shutdown": 1.0,
+      "M_RC2_02::partial_30": 0.7,
+      "M_RC2_02::partial_70": 0.30000000000000004,
+      "M_SL1_01::full_shutdown": 1.0,
+      "M_SL1_01::partial_30": 0.7,
+      "M_SL1_01::partial_70": 0.30000000000000004
+    },
+    "maintenance_relative_cost": {
+      "M_TU1_01::full_shutdown": 1.0,
+      "M_TU1_01::partial_30": 1.15,
+      "M_TU1_01::partial_70": 1.35,
+      "M_TU2_01::full_shutdown": 1.0,
+      "M_TU2_01::partial_30": 1.15,
+      "M_TU2_01::partial_70": 1.35,
+      "M_ST1_01::full_shutdown": 1.0,
+      "M_ST1_01::partial_30": 1.15,
+      "M_ST1_01::partial_70": 1.35,
+      "M_ST3_01::full_shutdown": 1.0,
+      "M_ST3_01::partial_30": 1.15,
+      "M_ST3_01::partial_70": 1.35,
+      "M_RC1_01::full_shutdown": 1.0,
+      "M_RC1_01::partial_30": 1.15,
+      "M_RC1_01::partial_70": 1.35,
+      "M_RC2_01::full_shutdown": 1.0,
+      "M_RC2_01::partial_30": 1.15,
+      "M_RC2_01::partial_70": 1.35,
+      "M_RC2_02::full_shutdown": 1.0,
+      "M_RC2_02::partial_30": 1.15,
+      "M_RC2_02::partial_70": 1.35,
+      "M_SL1_01::full_shutdown": 1.0,
+      "M_SL1_01::partial_30": 1.15,
+      "M_SL1_01::partial_70": 1.35
+    },
+    "special_activity_duration_days": {},
+    "special_activity_product": {},
+    "special_activity_scheduled_start": {},
+    "special_activity_required_assets": {},
+    "special_activity_required_zone": {},
+    "special_activity_minimum_tpd": {},
+    "special_activity_minimum_total_tonnes": {},
+    "special_activity_minimum_contiguous_days": {},
+    "special_activity_pre_buffer_days": {},
+    "special_activity_post_buffer_days": {},
+    "special_activity_cleanout_before_days": {},
+    "special_activity_cleanout_after_days": {},
+    "special_activity_minimum_build_tonnes": {},
+    "special_activity_build_complete_before_reclaim": {},
+    "special_activity_capacity_factor": {
+      "TU1::0": 1.0,
+      "TU1::1": 1.0,
+      "TU1::2": 1.0,
+      "TU1::3": 1.0,
+      "TU1::4": 1.0,
+      "TU1::5": 1.0,
+      "TU1::6": 1.0,
+      "TU1::7": 1.0,
+      "TU1::8": 1.0,
+      "TU1::9": 1.0,
+      "TU1::10": 1.0,
+      "TU1::11": 1.0,
+      "TU1::12": 1.0,
+      "TU1::13": 1.0,
+      "TU1::14": 1.0,
+      "TU1::15": 1.0,
+      "TU1::16": 1.0,
+      "TU1::17": 1.0,
+      "TU1::18": 1.0,
+      "TU1::19": 1.0,
+      "TU1::20": 1.0,
+      "TU1::21": 1.0,
+      "TU1::22": 1.0,
+      "TU1::23": 1.0,
+      "TU1::24": 1.0,
+      "TU1::25": 1.0,
+      "TU1::26": 1.0,
+      "TU1::27": 1.0,
+      "TU1::28": 1.0,
+      "TU1::29": 1.0,
+      "TU1::30": 1.0,
+      "TU1::31": 1.0,
+      "TU1::32": 1.0,
+      "TU1::33": 1.0,
+      "TU1::34": 1.0,
+      "TU1::35": 1.0,
+      "TU1::36": 1.0,
+      "TU1::37": 1.0,
+      "TU1::38": 1.0,
+      "TU1::39": 1.0,
+      "TU1::40": 1.0,
+      "TU1::41": 1.0,
+      "TU1::42": 1.0,
+      "TU1::43": 1.0,
+      "TU1::44": 1.0,
+      "TU1::45": 1.0,
+      "TU1::46": 1.0,
+      "TU1::47": 1.0,
+      "TU1::48": 1.0,
+      "TU1::49": 1.0,
+      "TU1::50": 1.0,
+      "TU1::51": 1.0,
+      "TU1::52": 1.0,
+      "TU1::53": 1.0,
+      "TU1::54": 1.0,
+      "TU1::55": 1.0,
+      "TU1::56": 1.0,
+      "TU1::57": 1.0,
+      "TU1::58": 1.0,
+      "TU1::59": 1.0,
+      "TU1::60": 1.0,
+      "TU1::61": 1.0,
+      "TU1::62": 1.0,
+      "TU1::63": 1.0,
+      "TU1::64": 1.0,
+      "TU1::65": 1.0,
+      "TU1::66": 1.0,
+      "TU1::67": 1.0,
+      "TU1::68": 1.0,
+      "TU1::69": 1.0,
+      "TU1::70": 1.0,
+      "TU1::71": 1.0,
+      "TU1::72": 1.0,
+      "TU1::73": 1.0,
+      "TU1::74": 1.0,
+      "TU1::75": 1.0,
+      "TU1::76": 1.0,
+      "TU1::77": 1.0,
+      "TU1::78": 1.0,
+      "TU1::79": 1.0,
+      "TU1::80": 1.0,
+      "TU1::81": 1.0,
+      "TU1::82": 1.0,
+      "TU1::83": 1.0,
+      "TU1::84": 1.0,
+      "TU1::85": 1.0,
+      "TU1::86": 1.0,
+      "TU1::87": 1.0,
+      "TU1::88": 1.0,
+      "TU1::89": 1.0,
+      "TU2::0": 1.0,
+      "TU2::1": 1.0,
+      "TU2::2": 1.0,
+      "TU2::3": 1.0,
+      "TU2::4": 1.0,
+      "TU2::5": 1.0,
+      "TU2::6": 1.0,
+      "TU2::7": 1.0,
+      "TU2::8": 1.0,
+      "TU2::9": 1.0,
+      "TU2::10": 1.0,
+      "TU2::11": 1.0,
+      "TU2::12": 1.0,
+      "TU2::13": 1.0,
+      "TU2::14": 1.0,
+      "TU2::15": 1.0,
+      "TU2::16": 1.0,
+      "TU2::17": 1.0,
+      "TU2::18": 1.0,
+      "TU2::19": 1.0,
+      "TU2::20": 1.0,
+      "TU2::21": 1.0,
+      "TU2::22": 1.0,
+      "TU2::23": 1.0,
+      "TU2::24": 1.0,
+      "TU2::25": 1.0,
+      "TU2::26": 1.0,
+      "TU2::27": 1.0,
+      "TU2::28": 1.0,
+      "TU2::29": 1.0,
+      "TU2::30": 1.0,
+      "TU2::31": 1.0,
+      "TU2::32": 1.0,
+      "TU2::33": 1.0,
+      "TU2::34": 1.0,
+      "TU2::35": 1.0,
+      "TU2::36": 1.0,
+      "TU2::37": 1.0,
+      "TU2::38": 1.0,
+      "TU2::39": 1.0,
+      "TU2::40": 1.0,
+      "TU2::41": 1.0,
+      "TU2::42": 1.0,
+      "TU2::43": 1.0,
+      "TU2::44": 1.0,
+      "TU2::45": 1.0,
+      "TU2::46": 1.0,
+      "TU2::47": 1.0,
+      "TU2::48": 1.0,
+      "TU2::49": 1.0,
+      "TU2::50": 1.0,
+      "TU2::51": 1.0,
+      "TU2::52": 1.0,
+      "TU2::53": 1.0,
+      "TU2::54": 1.0,
+      "TU2::55": 1.0,
+      "TU2::56": 1.0,
+      "TU2::57": 1.0,
+      "TU2::58": 1.0,
+      "TU2::59": 1.0,
+      "TU2::60": 1.0,
+      "TU2::61": 1.0,
+      "TU2::62": 1.0,
+      "TU2::63": 1.0,
+      "TU2::64": 1.0,
+      "TU2::65": 1.0,
+      "TU2::66": 1.0,
+      "TU2::67": 1.0,
+      "TU2::68": 1.0,
+      "TU2::69": 1.0,
+      "TU2::70": 1.0,
+      "TU2::71": 1.0,
+      "TU2::72": 1.0,
+      "TU2::73": 1.0,
+      "TU2::74": 1.0,
+      "TU2::75": 1.0,
+      "TU2::76": 1.0,
+      "TU2::77": 1.0,
+      "TU2::78": 1.0,
+      "TU2::79": 1.0,
+      "TU2::80": 1.0,
+      "TU2::81": 1.0,
+      "TU2::82": 1.0,
+      "TU2::83": 1.0,
+      "TU2::84": 1.0,
+      "TU2::85": 1.0,
+      "TU2::86": 1.0,
+      "TU2::87": 1.0,
+      "TU2::88": 1.0,
+      "TU2::89": 1.0,
+      "ST1::0": 1.0,
+      "ST1::1": 1.0,
+      "ST1::2": 1.0,
+      "ST1::3": 1.0,
+      "ST1::4": 1.0,
+      "ST1::5": 1.0,
+      "ST1::6": 1.0,
+      "ST1::7": 1.0,
+      "ST1::8": 1.0,
+      "ST1::9": 1.0,
+      "ST1::10": 1.0,
+      "ST1::11": 1.0,
+      "ST1::12": 1.0,
+      "ST1::13": 1.0,
+      "ST1::14": 1.0,
+      "ST1::15": 1.0,
+      "ST1::16": 1.0,
+      "ST1::17": 1.0,
+      "ST1::18": 1.0,
+      "ST1::19": 1.0,
+      "ST1::20": 1.0,
+      "ST1::21": 1.0,
+      "ST1::22": 1.0,
+      "ST1::23": 1.0,
+      "ST1::24": 1.0,
+      "ST1::25": 1.0,
+      "ST1::26": 1.0,
+      "ST1::27": 1.0,
+      "ST1::28": 1.0,
+      "ST1::29": 1.0,
+      "ST1::30": 1.0,
+      "ST1::31": 1.0,
+      "ST1::32": 1.0,
+      "ST1::33": 1.0,
+      "ST1::34": 1.0,
+      "ST1::35": 1.0,
+      "ST1::36": 1.0,
+      "ST1::37": 1.0,
+      "ST1::38": 1.0,
+      "ST1::39": 1.0,
+      "ST1::40": 1.0,
+      "ST1::41": 1.0,
+      "ST1::42": 1.0,
+      "ST1::43": 1.0,
+      "ST1::44": 1.0,
+      "ST1::45": 1.0,
+      "ST1::46": 1.0,
+      "ST1::47": 1.0,
+      "ST1::48": 1.0,
+      "ST1::49": 1.0,
+      "ST1::50": 1.0,
+      "ST1::51": 1.0,
+      "ST1::52": 1.0,
+      "ST1::53": 1.0,
+      "ST1::54": 1.0,
+      "ST1::55": 1.0,
+      "ST1::56": 1.0,
+      "ST1::57": 1.0,
+      "ST1::58": 1.0,
+      "ST1::59": 1.0,
+      "ST1::60": 1.0,
+      "ST1::61": 1.0,
+      "ST1::62": 1.0,
+      "ST1::63": 1.0,
+      "ST1::64": 1.0,
+      "ST1::65": 1.0,
+      "ST1::66": 1.0,
+      "ST1::67": 1.0,
+      "ST1::68": 1.0,
+      "ST1::69": 1.0,
+      "ST1::70": 1.0,
+      "ST1::71": 1.0,
+      "ST1::72": 1.0,
+      "ST1::73": 1.0,
+      "ST1::74": 1.0,
+      "ST1::75": 1.0,
+      "ST1::76": 1.0,
+      "ST1::77": 1.0,
+      "ST1::78": 1.0,
+      "ST1::79": 1.0,
+      "ST1::80": 1.0,
+      "ST1::81": 1.0,
+      "ST1::82": 1.0,
+      "ST1::83": 1.0,
+      "ST1::84": 1.0,
+      "ST1::85": 1.0,
+      "ST1::86": 1.0,
+      "ST1::87": 1.0,
+      "ST1::88": 1.0,
+      "ST1::89": 1.0,
+      "ST2::0": 1.0,
+      "ST2::1": 1.0,
+      "ST2::2": 1.0,
+      "ST2::3": 1.0,
+      "ST2::4": 1.0,
+      "ST2::5": 1.0,
+      "ST2::6": 1.0,
+      "ST2::7": 1.0,
+      "ST2::8": 1.0,
+      "ST2::9": 1.0,
+      "ST2::10": 1.0,
+      "ST2::11": 1.0,
+      "ST2::12": 1.0,
+      "ST2::13": 1.0,
+      "ST2::14": 1.0,
+      "ST2::15": 1.0,
+      "ST2::16": 1.0,
+      "ST2::17": 1.0,
+      "ST2::18": 1.0,
+      "ST2::19": 1.0,
+      "ST2::20": 1.0,
+      "ST2::21": 1.0,
+      "ST2::22": 1.0,
+      "ST2::23": 1.0,
+      "ST2::24": 1.0,
+      "ST2::25": 1.0,
+      "ST2::26": 1.0,
+      "ST2::27": 1.0,
+      "ST2::28": 1.0,
+      "ST2::29": 1.0,
+      "ST2::30": 1.0,
+      "ST2::31": 1.0,
+      "ST2::32": 1.0,
+      "ST2::33": 1.0,
+      "ST2::34": 1.0,
+      "ST2::35": 1.0,
+      "ST2::36": 1.0,
+      "ST2::37": 1.0,
+      "ST2::38": 1.0,
+      "ST2::39": 1.0,
+      "ST2::40": 1.0,
+      "ST2::41": 1.0,
+      "ST2::42": 1.0,
+      "ST2::43": 1.0,
+      "ST2::44": 1.0,
+      "ST2::45": 1.0,
+      "ST2::46": 1.0,
+      "ST2::47": 1.0,
+      "ST2::48": 1.0,
+      "ST2::49": 1.0,
+      "ST2::50": 1.0,
+      "ST2::51": 1.0,
+      "ST2::52": 1.0,
+      "ST2::53": 1.0,
+      "ST2::54": 1.0,
+      "ST2::55": 1.0,
+      "ST2::56": 1.0,
+      "ST2::57": 1.0,
+      "ST2::58": 1.0,
+      "ST2::59": 1.0,
+      "ST2::60": 1.0,
+      "ST2::61": 1.0,
+      "ST2::62": 1.0,
+      "ST2::63": 1.0,
+      "ST2::64": 1.0,
+      "ST2::65": 1.0,
+      "ST2::66": 1.0,
+      "ST2::67": 1.0,
+      "ST2::68": 1.0,
+      "ST2::69": 1.0,
+      "ST2::70": 1.0,
+      "ST2::71": 1.0,
+      "ST2::72": 1.0,
+      "ST2::73": 1.0,
+      "ST2::74": 1.0,
+      "ST2::75": 1.0,
+      "ST2::76": 1.0,
+      "ST2::77": 1.0,
+      "ST2::78": 1.0,
+      "ST2::79": 1.0,
+      "ST2::80": 1.0,
+      "ST2::81": 1.0,
+      "ST2::82": 1.0,
+      "ST2::83": 1.0,
+      "ST2::84": 1.0,
+      "ST2::85": 1.0,
+      "ST2::86": 1.0,
+      "ST2::87": 1.0,
+      "ST2::88": 1.0,
+      "ST2::89": 1.0,
+      "ST3::0": 1.0,
+      "ST3::1": 1.0,
+      "ST3::2": 1.0,
+      "ST3::3": 1.0,
+      "ST3::4": 1.0,
+      "ST3::5": 1.0,
+      "ST3::6": 1.0,
+      "ST3::7": 1.0,
+      "ST3::8": 1.0,
+      "ST3::9": 1.0,
+      "ST3::10": 1.0,
+      "ST3::11": 1.0,
+      "ST3::12": 1.0,
+      "ST3::13": 1.0,
+      "ST3::14": 1.0,
+      "ST3::15": 1.0,
+      "ST3::16": 1.0,
+      "ST3::17": 1.0,
+      "ST3::18": 1.0,
+      "ST3::19": 1.0,
+      "ST3::20": 1.0,
+      "ST3::21": 1.0,
+      "ST3::22": 1.0,
+      "ST3::23": 1.0,
+      "ST3::24": 1.0,
+      "ST3::25": 1.0,
+      "ST3::26": 1.0,
+      "ST3::27": 1.0,
+      "ST3::28": 1.0,
+      "ST3::29": 1.0,
+      "ST3::30": 1.0,
+      "ST3::31": 1.0,
+      "ST3::32": 1.0,
+      "ST3::33": 1.0,
+      "ST3::34": 1.0,
+      "ST3::35": 1.0,
+      "ST3::36": 1.0,
+      "ST3::37": 1.0,
+      "ST3::38": 1.0,
+      "ST3::39": 1.0,
+      "ST3::40": 1.0,
+      "ST3::41": 1.0,
+      "ST3::42": 1.0,
+      "ST3::43": 1.0,
+      "ST3::44": 1.0,
+      "ST3::45": 1.0,
+      "ST3::46": 1.0,
+      "ST3::47": 1.0,
+      "ST3::48": 1.0,
+      "ST3::49": 1.0,
+      "ST3::50": 1.0,
+      "ST3::51": 1.0,
+      "ST3::52": 1.0,
+      "ST3::53": 1.0,
+      "ST3::54": 1.0,
+      "ST3::55": 1.0,
+      "ST3::56": 1.0,
+      "ST3::57": 1.0,
+      "ST3::58": 1.0,
+      "ST3::59": 1.0,
+      "ST3::60": 1.0,
+      "ST3::61": 1.0,
+      "ST3::62": 1.0,
+      "ST3::63": 1.0,
+      "ST3::64": 1.0,
+      "ST3::65": 1.0,
+      "ST3::66": 1.0,
+      "ST3::67": 1.0,
+      "ST3::68": 1.0,
+      "ST3::69": 1.0,
+      "ST3::70": 1.0,
+      "ST3::71": 1.0,
+      "ST3::72": 1.0,
+      "ST3::73": 1.0,
+      "ST3::74": 1.0,
+      "ST3::75": 1.0,
+      "ST3::76": 1.0,
+      "ST3::77": 1.0,
+      "ST3::78": 1.0,
+      "ST3::79": 1.0,
+      "ST3::80": 1.0,
+      "ST3::81": 1.0,
+      "ST3::82": 1.0,
+      "ST3::83": 1.0,
+      "ST3::84": 1.0,
+      "ST3::85": 1.0,
+      "ST3::86": 1.0,
+      "ST3::87": 1.0,
+      "ST3::88": 1.0,
+      "ST3::89": 1.0,
+      "RC1::0": 1.0,
+      "RC1::1": 1.0,
+      "RC1::2": 1.0,
+      "RC1::3": 1.0,
+      "RC1::4": 1.0,
+      "RC1::5": 1.0,
+      "RC1::6": 1.0,
+      "RC1::7": 1.0,
+      "RC1::8": 1.0,
+      "RC1::9": 1.0,
+      "RC1::10": 1.0,
+      "RC1::11": 1.0,
+      "RC1::12": 1.0,
+      "RC1::13": 1.0,
+      "RC1::14": 1.0,
+      "RC1::15": 1.0,
+      "RC1::16": 1.0,
+      "RC1::17": 1.0,
+      "RC1::18": 1.0,
+      "RC1::19": 1.0,
+      "RC1::20": 1.0,
+      "RC1::21": 1.0,
+      "RC1::22": 1.0,
+      "RC1::23": 1.0,
+      "RC1::24": 1.0,
+      "RC1::25": 1.0,
+      "RC1::26": 1.0,
+      "RC1::27": 1.0,
+      "RC1::28": 1.0,
+      "RC1::29": 1.0,
+      "RC1::30": 1.0,
+      "RC1::31": 1.0,
+      "RC1::32": 1.0,
+      "RC1::33": 1.0,
+      "RC1::34": 1.0,
+      "RC1::35": 1.0,
+      "RC1::36": 1.0,
+      "RC1::37": 1.0,
+      "RC1::38": 1.0,
+      "RC1::39": 1.0,
+      "RC1::40": 1.0,
+      "RC1::41": 1.0,
+      "RC1::42": 1.0,
+      "RC1::43": 1.0,
+      "RC1::44": 1.0,
+      "RC1::45": 1.0,
+      "RC1::46": 1.0,
+      "RC1::47": 1.0,
+      "RC1::48": 1.0,
+      "RC1::49": 1.0,
+      "RC1::50": 1.0,
+      "RC1::51": 1.0,
+      "RC1::52": 1.0,
+      "RC1::53": 1.0,
+      "RC1::54": 1.0,
+      "RC1::55": 1.0,
+      "RC1::56": 1.0,
+      "RC1::57": 1.0,
+      "RC1::58": 1.0,
+      "RC1::59": 1.0,
+      "RC1::60": 1.0,
+      "RC1::61": 1.0,
+      "RC1::62": 1.0,
+      "RC1::63": 1.0,
+      "RC1::64": 1.0,
+      "RC1::65": 1.0,
+      "RC1::66": 1.0,
+      "RC1::67": 1.0,
+      "RC1::68": 1.0,
+      "RC1::69": 1.0,
+      "RC1::70": 1.0,
+      "RC1::71": 1.0,
+      "RC1::72": 1.0,
+      "RC1::73": 1.0,
+      "RC1::74": 1.0,
+      "RC1::75": 1.0,
+      "RC1::76": 1.0,
+      "RC1::77": 1.0,
+      "RC1::78": 1.0,
+      "RC1::79": 1.0,
+      "RC1::80": 1.0,
+      "RC1::81": 1.0,
+      "RC1::82": 1.0,
+      "RC1::83": 1.0,
+      "RC1::84": 1.0,
+      "RC1::85": 1.0,
+      "RC1::86": 1.0,
+      "RC1::87": 1.0,
+      "RC1::88": 1.0,
+      "RC1::89": 1.0,
+      "RC2::0": 1.0,
+      "RC2::1": 1.0,
+      "RC2::2": 1.0,
+      "RC2::3": 1.0,
+      "RC2::4": 1.0,
+      "RC2::5": 1.0,
+      "RC2::6": 1.0,
+      "RC2::7": 1.0,
+      "RC2::8": 1.0,
+      "RC2::9": 1.0,
+      "RC2::10": 1.0,
+      "RC2::11": 1.0,
+      "RC2::12": 1.0,
+      "RC2::13": 1.0,
+      "RC2::14": 1.0,
+      "RC2::15": 1.0,
+      "RC2::16": 1.0,
+      "RC2::17": 1.0,
+      "RC2::18": 1.0,
+      "RC2::19": 1.0,
+      "RC2::20": 1.0,
+      "RC2::21": 1.0,
+      "RC2::22": 1.0,
+      "RC2::23": 1.0,
+      "RC2::24": 1.0,
+      "RC2::25": 1.0,
+      "RC2::26": 1.0,
+      "RC2::27": 1.0,
+      "RC2::28": 1.0,
+      "RC2::29": 1.0,
+      "RC2::30": 1.0,
+      "RC2::31": 1.0,
+      "RC2::32": 1.0,
+      "RC2::33": 1.0,
+      "RC2::34": 1.0,
+      "RC2::35": 1.0,
+      "RC2::36": 1.0,
+      "RC2::37": 1.0,
+      "RC2::38": 1.0,
+      "RC2::39": 1.0,
+      "RC2::40": 1.0,
+      "RC2::41": 1.0,
+      "RC2::42": 1.0,
+      "RC2::43": 1.0,
+      "RC2::44": 1.0,
+      "RC2::45": 1.0,
+      "RC2::46": 1.0,
+      "RC2::47": 1.0,
+      "RC2::48": 1.0,
+      "RC2::49": 1.0,
+      "RC2::50": 1.0,
+      "RC2::51": 1.0,
+      "RC2::52": 1.0,
+      "RC2::53": 1.0,
+      "RC2::54": 1.0,
+      "RC2::55": 1.0,
+      "RC2::56": 1.0,
+      "RC2::57": 1.0,
+      "RC2::58": 1.0,
+      "RC2::59": 1.0,
+      "RC2::60": 1.0,
+      "RC2::61": 1.0,
+      "RC2::62": 1.0,
+      "RC2::63": 1.0,
+      "RC2::64": 1.0,
+      "RC2::65": 1.0,
+      "RC2::66": 1.0,
+      "RC2::67": 1.0,
+      "RC2::68": 1.0,
+      "RC2::69": 1.0,
+      "RC2::70": 1.0,
+      "RC2::71": 1.0,
+      "RC2::72": 1.0,
+      "RC2::73": 1.0,
+      "RC2::74": 1.0,
+      "RC2::75": 1.0,
+      "RC2::76": 1.0,
+      "RC2::77": 1.0,
+      "RC2::78": 1.0,
+      "RC2::79": 1.0,
+      "RC2::80": 1.0,
+      "RC2::81": 1.0,
+      "RC2::82": 1.0,
+      "RC2::83": 1.0,
+      "RC2::84": 1.0,
+      "RC2::85": 1.0,
+      "RC2::86": 1.0,
+      "RC2::87": 1.0,
+      "RC2::88": 1.0,
+      "RC2::89": 1.0,
+      "SL1::0": 1.0,
+      "SL1::1": 1.0,
+      "SL1::2": 1.0,
+      "SL1::3": 1.0,
+      "SL1::4": 1.0,
+      "SL1::5": 1.0,
+      "SL1::6": 1.0,
+      "SL1::7": 1.0,
+      "SL1::8": 1.0,
+      "SL1::9": 1.0,
+      "SL1::10": 1.0,
+      "SL1::11": 1.0,
+      "SL1::12": 1.0,
+      "SL1::13": 1.0,
+      "SL1::14": 1.0,
+      "SL1::15": 1.0,
+      "SL1::16": 1.0,
+      "SL1::17": 1.0,
+      "SL1::18": 1.0,
+      "SL1::19": 1.0,
+      "SL1::20": 1.0,
+      "SL1::21": 1.0,
+      "SL1::22": 1.0,
+      "SL1::23": 1.0,
+      "SL1::24": 1.0,
+      "SL1::25": 1.0,
+      "SL1::26": 1.0,
+      "SL1::27": 1.0,
+      "SL1::28": 1.0,
+      "SL1::29": 1.0,
+      "SL1::30": 1.0,
+      "SL1::31": 1.0,
+      "SL1::32": 1.0,
+      "SL1::33": 1.0,
+      "SL1::34": 1.0,
+      "SL1::35": 1.0,
+      "SL1::36": 1.0,
+      "SL1::37": 1.0,
+      "SL1::38": 1.0,
+      "SL1::39": 1.0,
+      "SL1::40": 1.0,
+      "SL1::41": 1.0,
+      "SL1::42": 1.0,
+      "SL1::43": 1.0,
+      "SL1::44": 1.0,
+      "SL1::45": 1.0,
+      "SL1::46": 1.0,
+      "SL1::47": 1.0,
+      "SL1::48": 1.0,
+      "SL1::49": 1.0,
+      "SL1::50": 1.0,
+      "SL1::51": 1.0,
+      "SL1::52": 1.0,
+      "SL1::53": 1.0,
+      "SL1::54": 1.0,
+      "SL1::55": 1.0,
+      "SL1::56": 1.0,
+      "SL1::57": 1.0,
+      "SL1::58": 1.0,
+      "SL1::59": 1.0,
+      "SL1::60": 1.0,
+      "SL1::61": 1.0,
+      "SL1::62": 1.0,
+      "SL1::63": 1.0,
+      "SL1::64": 1.0,
+      "SL1::65": 1.0,
+      "SL1::66": 1.0,
+      "SL1::67": 1.0,
+      "SL1::68": 1.0,
+      "SL1::69": 1.0,
+      "SL1::70": 1.0,
+      "SL1::71": 1.0,
+      "SL1::72": 1.0,
+      "SL1::73": 1.0,
+      "SL1::74": 1.0,
+      "SL1::75": 1.0,
+      "SL1::76": 1.0,
+      "SL1::77": 1.0,
+      "SL1::78": 1.0,
+      "SL1::79": 1.0,
+      "SL1::80": 1.0,
+      "SL1::81": 1.0,
+      "SL1::82": 1.0,
+      "SL1::83": 1.0,
+      "SL1::84": 1.0,
+      "SL1::85": 1.0,
+      "SL1::86": 1.0,
+      "SL1::87": 1.0,
+      "SL1::88": 1.0,
+      "SL1::89": 1.0
+    },
+    "maintenance_activity_incompatible": {
+      "TU1::0": 0,
+      "TU1::1": 0,
+      "TU1::2": 0,
+      "TU1::3": 0,
+      "TU1::4": 0,
+      "TU1::5": 0,
+      "TU1::6": 0,
+      "TU1::7": 0,
+      "TU1::8": 0,
+      "TU1::9": 0,
+      "TU1::10": 0,
+      "TU1::11": 0,
+      "TU1::12": 0,
+      "TU1::13": 0,
+      "TU1::14": 0,
+      "TU1::15": 0,
+      "TU1::16": 0,
+      "TU1::17": 0,
+      "TU1::18": 0,
+      "TU1::19": 0,
+      "TU1::20": 0,
+      "TU1::21": 0,
+      "TU1::22": 0,
+      "TU1::23": 0,
+      "TU1::24": 0,
+      "TU1::25": 0,
+      "TU1::26": 0,
+      "TU1::27": 0,
+      "TU1::28": 0,
+      "TU1::29": 0,
+      "TU1::30": 0,
+      "TU1::31": 0,
+      "TU1::32": 0,
+      "TU1::33": 0,
+      "TU1::34": 0,
+      "TU1::35": 0,
+      "TU1::36": 0,
+      "TU1::37": 0,
+      "TU1::38": 0,
+      "TU1::39": 0,
+      "TU1::40": 0,
+      "TU1::41": 0,
+      "TU1::42": 0,
+      "TU1::43": 0,
+      "TU1::44": 0,
+      "TU1::45": 0,
+      "TU1::46": 0,
+      "TU1::47": 0,
+      "TU1::48": 0,
+      "TU1::49": 0,
+      "TU1::50": 0,
+      "TU1::51": 0,
+      "TU1::52": 0,
+      "TU1::53": 0,
+      "TU1::54": 0,
+      "TU1::55": 0,
+      "TU1::56": 0,
+      "TU1::57": 0,
+      "TU1::58": 0,
+      "TU1::59": 0,
+      "TU1::60": 0,
+      "TU1::61": 0,
+      "TU1::62": 0,
+      "TU1::63": 0,
+      "TU1::64": 0,
+      "TU1::65": 0,
+      "TU1::66": 0,
+      "TU1::67": 0,
+      "TU1::68": 0,
+      "TU1::69": 0,
+      "TU1::70": 0,
+      "TU1::71": 0,
+      "TU1::72": 0,
+      "TU1::73": 0,
+      "TU1::74": 0,
+      "TU1::75": 0,
+      "TU1::76": 0,
+      "TU1::77": 0,
+      "TU1::78": 0,
+      "TU1::79": 0,
+      "TU1::80": 0,
+      "TU1::81": 0,
+      "TU1::82": 0,
+      "TU1::83": 0,
+      "TU1::84": 0,
+      "TU1::85": 0,
+      "TU1::86": 0,
+      "TU1::87": 0,
+      "TU1::88": 0,
+      "TU1::89": 0,
+      "TU2::0": 0,
+      "TU2::1": 0,
+      "TU2::2": 0,
+      "TU2::3": 0,
+      "TU2::4": 0,
+      "TU2::5": 0,
+      "TU2::6": 0,
+      "TU2::7": 0,
+      "TU2::8": 0,
+      "TU2::9": 0,
+      "TU2::10": 0,
+      "TU2::11": 0,
+      "TU2::12": 0,
+      "TU2::13": 0,
+      "TU2::14": 0,
+      "TU2::15": 0,
+      "TU2::16": 0,
+      "TU2::17": 0,
+      "TU2::18": 0,
+      "TU2::19": 0,
+      "TU2::20": 0,
+      "TU2::21": 0,
+      "TU2::22": 0,
+      "TU2::23": 0,
+      "TU2::24": 0,
+      "TU2::25": 0,
+      "TU2::26": 0,
+      "TU2::27": 0,
+      "TU2::28": 0,
+      "TU2::29": 0,
+      "TU2::30": 0,
+      "TU2::31": 0,
+      "TU2::32": 0,
+      "TU2::33": 0,
+      "TU2::34": 0,
+      "TU2::35": 0,
+      "TU2::36": 0,
+      "TU2::37": 0,
+      "TU2::38": 0,
+      "TU2::39": 0,
+      "TU2::40": 0,
+      "TU2::41": 0,
+      "TU2::42": 0,
+      "TU2::43": 0,
+      "TU2::44": 0,
+      "TU2::45": 0,
+      "TU2::46": 0,
+      "TU2::47": 0,
+      "TU2::48": 0,
+      "TU2::49": 0,
+      "TU2::50": 0,
+      "TU2::51": 0,
+      "TU2::52": 0,
+      "TU2::53": 0,
+      "TU2::54": 0,
+      "TU2::55": 0,
+      "TU2::56": 0,
+      "TU2::57": 0,
+      "TU2::58": 0,
+      "TU2::59": 0,
+      "TU2::60": 0,
+      "TU2::61": 0,
+      "TU2::62": 0,
+      "TU2::63": 0,
+      "TU2::64": 0,
+      "TU2::65": 0,
+      "TU2::66": 0,
+      "TU2::67": 0,
+      "TU2::68": 0,
+      "TU2::69": 0,
+      "TU2::70": 0,
+      "TU2::71": 0,
+      "TU2::72": 0,
+      "TU2::73": 0,
+      "TU2::74": 0,
+      "TU2::75": 0,
+      "TU2::76": 0,
+      "TU2::77": 0,
+      "TU2::78": 0,
+      "TU2::79": 0,
+      "TU2::80": 0,
+      "TU2::81": 0,
+      "TU2::82": 0,
+      "TU2::83": 0,
+      "TU2::84": 0,
+      "TU2::85": 0,
+      "TU2::86": 0,
+      "TU2::87": 0,
+      "TU2::88": 0,
+      "TU2::89": 0,
+      "ST1::0": 0,
+      "ST1::1": 0,
+      "ST1::2": 0,
+      "ST1::3": 0,
+      "ST1::4": 0,
+      "ST1::5": 0,
+      "ST1::6": 0,
+      "ST1::7": 0,
+      "ST1::8": 0,
+      "ST1::9": 0,
+      "ST1::10": 0,
+      "ST1::11": 0,
+      "ST1::12": 0,
+      "ST1::13": 0,
+      "ST1::14": 0,
+      "ST1::15": 0,
+      "ST1::16": 0,
+      "ST1::17": 0,
+      "ST1::18": 0,
+      "ST1::19": 0,
+      "ST1::20": 0,
+      "ST1::21": 0,
+      "ST1::22": 0,
+      "ST1::23": 0,
+      "ST1::24": 0,
+      "ST1::25": 0,
+      "ST1::26": 0,
+      "ST1::27": 0,
+      "ST1::28": 0,
+      "ST1::29": 0,
+      "ST1::30": 0,
+      "ST1::31": 0,
+      "ST1::32": 0,
+      "ST1::33": 0,
+      "ST1::34": 0,
+      "ST1::35": 0,
+      "ST1::36": 0,
+      "ST1::37": 0,
+      "ST1::38": 0,
+      "ST1::39": 0,
+      "ST1::40": 0,
+      "ST1::41": 0,
+      "ST1::42": 0,
+      "ST1::43": 0,
+      "ST1::44": 0,
+      "ST1::45": 0,
+      "ST1::46": 0,
+      "ST1::47": 0,
+      "ST1::48": 0,
+      "ST1::49": 0,
+      "ST1::50": 0,
+      "ST1::51": 0,
+      "ST1::52": 0,
+      "ST1::53": 0,
+      "ST1::54": 0,
+      "ST1::55": 0,
+      "ST1::56": 0,
+      "ST1::57": 0,
+      "ST1::58": 0,
+      "ST1::59": 0,
+      "ST1::60": 0,
+      "ST1::61": 0,
+      "ST1::62": 0,
+      "ST1::63": 0,
+      "ST1::64": 0,
+      "ST1::65": 0,
+      "ST1::66": 0,
+      "ST1::67": 0,
+      "ST1::68": 0,
+      "ST1::69": 0,
+      "ST1::70": 0,
+      "ST1::71": 0,
+      "ST1::72": 0,
+      "ST1::73": 0,
+      "ST1::74": 0,
+      "ST1::75": 0,
+      "ST1::76": 0,
+      "ST1::77": 0,
+      "ST1::78": 0,
+      "ST1::79": 0,
+      "ST1::80": 0,
+      "ST1::81": 0,
+      "ST1::82": 0,
+      "ST1::83": 0,
+      "ST1::84": 0,
+      "ST1::85": 0,
+      "ST1::86": 0,
+      "ST1::87": 0,
+      "ST1::88": 0,
+      "ST1::89": 0,
+      "ST2::0": 0,
+      "ST2::1": 0,
+      "ST2::2": 0,
+      "ST2::3": 0,
+      "ST2::4": 0,
+      "ST2::5": 0,
+      "ST2::6": 0,
+      "ST2::7": 0,
+      "ST2::8": 0,
+      "ST2::9": 0,
+      "ST2::10": 0,
+      "ST2::11": 0,
+      "ST2::12": 0,
+      "ST2::13": 0,
+      "ST2::14": 0,
+      "ST2::15": 0,
+      "ST2::16": 0,
+      "ST2::17": 0,
+      "ST2::18": 0,
+      "ST2::19": 0,
+      "ST2::20": 0,
+      "ST2::21": 0,
+      "ST2::22": 0,
+      "ST2::23": 0,
+      "ST2::24": 0,
+      "ST2::25": 0,
+      "ST2::26": 0,
+      "ST2::27": 0,
+      "ST2::28": 0,
+      "ST2::29": 0,
+      "ST2::30": 0,
+      "ST2::31": 0,
+      "ST2::32": 0,
+      "ST2::33": 0,
+      "ST2::34": 0,
+      "ST2::35": 0,
+      "ST2::36": 0,
+      "ST2::37": 0,
+      "ST2::38": 0,
+      "ST2::39": 0,
+      "ST2::40": 0,
+      "ST2::41": 0,
+      "ST2::42": 0,
+      "ST2::43": 0,
+      "ST2::44": 0,
+      "ST2::45": 0,
+      "ST2::46": 0,
+      "ST2::47": 0,
+      "ST2::48": 0,
+      "ST2::49": 0,
+      "ST2::50": 0,
+      "ST2::51": 0,
+      "ST2::52": 0,
+      "ST2::53": 0,
+      "ST2::54": 0,
+      "ST2::55": 0,
+      "ST2::56": 0,
+      "ST2::57": 0,
+      "ST2::58": 0,
+      "ST2::59": 0,
+      "ST2::60": 0,
+      "ST2::61": 0,
+      "ST2::62": 0,
+      "ST2::63": 0,
+      "ST2::64": 0,
+      "ST2::65": 0,
+      "ST2::66": 0,
+      "ST2::67": 0,
+      "ST2::68": 0,
+      "ST2::69": 0,
+      "ST2::70": 0,
+      "ST2::71": 0,
+      "ST2::72": 0,
+      "ST2::73": 0,
+      "ST2::74": 0,
+      "ST2::75": 0,
+      "ST2::76": 0,
+      "ST2::77": 0,
+      "ST2::78": 0,
+      "ST2::79": 0,
+      "ST2::80": 0,
+      "ST2::81": 0,
+      "ST2::82": 0,
+      "ST2::83": 0,
+      "ST2::84": 0,
+      "ST2::85": 0,
+      "ST2::86": 0,
+      "ST2::87": 0,
+      "ST2::88": 0,
+      "ST2::89": 0,
+      "ST3::0": 0,
+      "ST3::1": 0,
+      "ST3::2": 0,
+      "ST3::3": 0,
+      "ST3::4": 0,
+      "ST3::5": 0,
+      "ST3::6": 0,
+      "ST3::7": 0,
+      "ST3::8": 0,
+      "ST3::9": 0,
+      "ST3::10": 0,
+      "ST3::11": 0,
+      "ST3::12": 0,
+      "ST3::13": 0,
+      "ST3::14": 0,
+      "ST3::15": 0,
+      "ST3::16": 0,
+      "ST3::17": 0,
+      "ST3::18": 0,
+      "ST3::19": 0,
+      "ST3::20": 0,
+      "ST3::21": 0,
+      "ST3::22": 0,
+      "ST3::23": 0,
+      "ST3::24": 0,
+      "ST3::25": 0,
+      "ST3::26": 0,
+      "ST3::27": 0,
+      "ST3::28": 0,
+      "ST3::29": 0,
+      "ST3::30": 0,
+      "ST3::31": 0,
+      "ST3::32": 0,
+      "ST3::33": 0,
+      "ST3::34": 0,
+      "ST3::35": 0,
+      "ST3::36": 0,
+      "ST3::37": 0,
+      "ST3::38": 0,
+      "ST3::39": 0,
+      "ST3::40": 0,
+      "ST3::41": 0,
+      "ST3::42": 0,
+      "ST3::43": 0,
+      "ST3::44": 0,
+      "ST3::45": 0,
+      "ST3::46": 0,
+      "ST3::47": 0,
+      "ST3::48": 0,
+      "ST3::49": 0,
+      "ST3::50": 0,
+      "ST3::51": 0,
+      "ST3::52": 0,
+      "ST3::53": 0,
+      "ST3::54": 0,
+      "ST3::55": 0,
+      "ST3::56": 0,
+      "ST3::57": 0,
+      "ST3::58": 0,
+      "ST3::59": 0,
+      "ST3::60": 0,
+      "ST3::61": 0,
+      "ST3::62": 0,
+      "ST3::63": 0,
+      "ST3::64": 0,
+      "ST3::65": 0,
+      "ST3::66": 0,
+      "ST3::67": 0,
+      "ST3::68": 0,
+      "ST3::69": 0,
+      "ST3::70": 0,
+      "ST3::71": 0,
+      "ST3::72": 0,
+      "ST3::73": 0,
+      "ST3::74": 0,
+      "ST3::75": 0,
+      "ST3::76": 0,
+      "ST3::77": 0,
+      "ST3::78": 0,
+      "ST3::79": 0,
+      "ST3::80": 0,
+      "ST3::81": 0,
+      "ST3::82": 0,
+      "ST3::83": 0,
+      "ST3::84": 0,
+      "ST3::85": 0,
+      "ST3::86": 0,
+      "ST3::87": 0,
+      "ST3::88": 0,
+      "ST3::89": 0,
+      "RC1::0": 0,
+      "RC1::1": 0,
+      "RC1::2": 0,
+      "RC1::3": 0,
+      "RC1::4": 0,
+      "RC1::5": 0,
+      "RC1::6": 0,
+      "RC1::7": 0,
+      "RC1::8": 0,
+      "RC1::9": 0,
+      "RC1::10": 0,
+      "RC1::11": 0,
+      "RC1::12": 0,
+      "RC1::13": 0,
+      "RC1::14": 0,
+      "RC1::15": 0,
+      "RC1::16": 0,
+      "RC1::17": 0,
+      "RC1::18": 0,
+      "RC1::19": 0,
+      "RC1::20": 0,
+      "RC1::21": 0,
+      "RC1::22": 0,
+      "RC1::23": 0,
+      "RC1::24": 0,
+      "RC1::25": 0,
+      "RC1::26": 0,
+      "RC1::27": 0,
+      "RC1::28": 0,
+      "RC1::29": 0,
+      "RC1::30": 0,
+      "RC1::31": 0,
+      "RC1::32": 0,
+      "RC1::33": 0,
+      "RC1::34": 0,
+      "RC1::35": 0,
+      "RC1::36": 0,
+      "RC1::37": 0,
+      "RC1::38": 0,
+      "RC1::39": 0,
+      "RC1::40": 0,
+      "RC1::41": 0,
+      "RC1::42": 0,
+      "RC1::43": 0,
+      "RC1::44": 0,
+      "RC1::45": 0,
+      "RC1::46": 0,
+      "RC1::47": 0,
+      "RC1::48": 0,
+      "RC1::49": 0,
+      "RC1::50": 0,
+      "RC1::51": 0,
+      "RC1::52": 0,
+      "RC1::53": 0,
+      "RC1::54": 0,
+      "RC1::55": 0,
+      "RC1::56": 0,
+      "RC1::57": 0,
+      "RC1::58": 0,
+      "RC1::59": 0,
+      "RC1::60": 0,
+      "RC1::61": 0,
+      "RC1::62": 0,
+      "RC1::63": 0,
+      "RC1::64": 0,
+      "RC1::65": 0,
+      "RC1::66": 0,
+      "RC1::67": 0,
+      "RC1::68": 0,
+      "RC1::69": 0,
+      "RC1::70": 0,
+      "RC1::71": 0,
+      "RC1::72": 0,
+      "RC1::73": 0,
+      "RC1::74": 0,
+      "RC1::75": 0,
+      "RC1::76": 0,
+      "RC1::77": 0,
+      "RC1::78": 0,
+      "RC1::79": 0,
+      "RC1::80": 0,
+      "RC1::81": 0,
+      "RC1::82": 0,
+      "RC1::83": 0,
+      "RC1::84": 0,
+      "RC1::85": 0,
+      "RC1::86": 0,
+      "RC1::87": 0,
+      "RC1::88": 0,
+      "RC1::89": 0,
+      "RC2::0": 0,
+      "RC2::1": 0,
+      "RC2::2": 0,
+      "RC2::3": 0,
+      "RC2::4": 0,
+      "RC2::5": 0,
+      "RC2::6": 0,
+      "RC2::7": 0,
+      "RC2::8": 0,
+      "RC2::9": 0,
+      "RC2::10": 0,
+      "RC2::11": 0,
+      "RC2::12": 0,
+      "RC2::13": 0,
+      "RC2::14": 0,
+      "RC2::15": 0,
+      "RC2::16": 0,
+      "RC2::17": 0,
+      "RC2::18": 0,
+      "RC2::19": 0,
+      "RC2::20": 0,
+      "RC2::21": 0,
+      "RC2::22": 0,
+      "RC2::23": 0,
+      "RC2::24": 0,
+      "RC2::25": 0,
+      "RC2::26": 0,
+      "RC2::27": 0,
+      "RC2::28": 0,
+      "RC2::29": 0,
+      "RC2::30": 0,
+      "RC2::31": 0,
+      "RC2::32": 0,
+      "RC2::33": 0,
+      "RC2::34": 0,
+      "RC2::35": 0,
+      "RC2::36": 0,
+      "RC2::37": 0,
+      "RC2::38": 0,
+      "RC2::39": 0,
+      "RC2::40": 0,
+      "RC2::41": 0,
+      "RC2::42": 0,
+      "RC2::43": 0,
+      "RC2::44": 0,
+      "RC2::45": 0,
+      "RC2::46": 0,
+      "RC2::47": 0,
+      "RC2::48": 0,
+      "RC2::49": 0,
+      "RC2::50": 0,
+      "RC2::51": 0,
+      "RC2::52": 0,
+      "RC2::53": 0,
+      "RC2::54": 0,
+      "RC2::55": 0,
+      "RC2::56": 0,
+      "RC2::57": 0,
+      "RC2::58": 0,
+      "RC2::59": 0,
+      "RC2::60": 0,
+      "RC2::61": 0,
+      "RC2::62": 0,
+      "RC2::63": 0,
+      "RC2::64": 0,
+      "RC2::65": 0,
+      "RC2::66": 0,
+      "RC2::67": 0,
+      "RC2::68": 0,
+      "RC2::69": 0,
+      "RC2::70": 0,
+      "RC2::71": 0,
+      "RC2::72": 0,
+      "RC2::73": 0,
+      "RC2::74": 0,
+      "RC2::75": 0,
+      "RC2::76": 0,
+      "RC2::77": 0,
+      "RC2::78": 0,
+      "RC2::79": 0,
+      "RC2::80": 0,
+      "RC2::81": 0,
+      "RC2::82": 0,
+      "RC2::83": 0,
+      "RC2::84": 0,
+      "RC2::85": 0,
+      "RC2::86": 0,
+      "RC2::87": 0,
+      "RC2::88": 0,
+      "RC2::89": 0,
+      "SL1::0": 0,
+      "SL1::1": 0,
+      "SL1::2": 0,
+      "SL1::3": 0,
+      "SL1::4": 0,
+      "SL1::5": 0,
+      "SL1::6": 0,
+      "SL1::7": 0,
+      "SL1::8": 0,
+      "SL1::9": 0,
+      "SL1::10": 0,
+      "SL1::11": 0,
+      "SL1::12": 0,
+      "SL1::13": 0,
+      "SL1::14": 0,
+      "SL1::15": 0,
+      "SL1::16": 0,
+      "SL1::17": 0,
+      "SL1::18": 0,
+      "SL1::19": 0,
+      "SL1::20": 0,
+      "SL1::21": 0,
+      "SL1::22": 0,
+      "SL1::23": 0,
+      "SL1::24": 0,
+      "SL1::25": 0,
+      "SL1::26": 0,
+      "SL1::27": 0,
+      "SL1::28": 0,
+      "SL1::29": 0,
+      "SL1::30": 0,
+      "SL1::31": 0,
+      "SL1::32": 0,
+      "SL1::33": 0,
+      "SL1::34": 0,
+      "SL1::35": 0,
+      "SL1::36": 0,
+      "SL1::37": 0,
+      "SL1::38": 0,
+      "SL1::39": 0,
+      "SL1::40": 0,
+      "SL1::41": 0,
+      "SL1::42": 0,
+      "SL1::43": 0,
+      "SL1::44": 0,
+      "SL1::45": 0,
+      "SL1::46": 0,
+      "SL1::47": 0,
+      "SL1::48": 0,
+      "SL1::49": 0,
+      "SL1::50": 0,
+      "SL1::51": 0,
+      "SL1::52": 0,
+      "SL1::53": 0,
+      "SL1::54": 0,
+      "SL1::55": 0,
+      "SL1::56": 0,
+      "SL1::57": 0,
+      "SL1::58": 0,
+      "SL1::59": 0,
+      "SL1::60": 0,
+      "SL1::61": 0,
+      "SL1::62": 0,
+      "SL1::63": 0,
+      "SL1::64": 0,
+      "SL1::65": 0,
+      "SL1::66": 0,
+      "SL1::67": 0,
+      "SL1::68": 0,
+      "SL1::69": 0,
+      "SL1::70": 0,
+      "SL1::71": 0,
+      "SL1::72": 0,
+      "SL1::73": 0,
+      "SL1::74": 0,
+      "SL1::75": 0,
+      "SL1::76": 0,
+      "SL1::77": 0,
+      "SL1::78": 0,
+      "SL1::79": 0,
+      "SL1::80": 0,
+      "SL1::81": 0,
+      "SL1::82": 0,
+      "SL1::83": 0,
+      "SL1::84": 0,
+      "SL1::85": 0,
+      "SL1::86": 0,
+      "SL1::87": 0,
+      "SL1::88": 0,
+      "SL1::89": 0
+    },
+    "committed_outages": [],
+    "priority_activities": [],
+    "priority_minimum_tpd": {},
+    "special_product_minimum_tpd": {},
+    "special_product_campaign_minimum_tonnes": {},
+    "objective_parameters": {
+      "throughput_reward_per_tonne": 1.0,
+      "unmet_demand_penalty_per_tonne": 3.0,
+      "minimum_throughput_shortfall_penalty_per_tonne": 8.0,
+      "unaccepted_supply_penalty_per_tonne": 1.0,
+      "priority_shortfall_penalty_per_tonne": 20.0,
+      "maintenance_mode_cost_weight": 1000.0
+    },
+    "objective_definition": {
+      "sense": "maximize",
+      "primary_term": "sum_d throughput_tonnes[d]",
+      "penalty_term": "sum_p,d overflow_penalty_per_tonne[p] * overflow_tonnes[p,d]",
+      "strict_capacity_variant": "fix overflow_tonnes[p,d] = 0"
+    },
+    "model_notation": {
+      "D": "days",
+      "N": "network nodes",
+      "E": "directed arcs",
+      "A": "capacity-constrained assets",
+      "A_NS": "non-storage processing assets",
+      "P_STOCKYARD": "stockyard nodes (P in the PDF)",
+      "G": "material products (generator extension)",
+      "M_OPERATIONS": "maintenance operations (M in the PDF)",
+      "H": "high-priority activities",
+      "K": "maintenance modes F, P30 and P70"
+    }
+  }
+}

@@ -14,7 +14,7 @@ The generator exports the main inputs required by the mathematical formulation:
 - stockyard nodes `P_STOCKYARD` with tonnage and footprint capacity;
 - product set `G`, including a first-class special product;
 - maintenance operations `M_OPERATIONS`, asset-specific operation sets `M_a`, and feasible start windows `W_m`;
-- special activities `H`, activity start windows `W_h`, durations, fixed capacity profiles `sigma[a,d]`, and maintenance-incompatibility inputs `h[a,d]`;
+- special activities `H`, activity start windows `W_h`, durations, realized capacity profiles `sigma[a,d]`, and maintenance-incompatibility inputs `h[a,d]`;
 - three maintenance modes `K = {F, P30, P70}`;
 - nominal daily asset capacities `C_a` and daily arc capacities `U_i,j`;
 - minimum daily throughput targets;
@@ -49,7 +49,7 @@ X1 product definition
     -> product-specific flow and volume constraints
 ```
 
-A special product is not the same thing as a priority activity. The `Product` and `SpecialProductRequirements` records define X1's physical and operating rules. `PriorityActivity` then represents one protected X1 campaign that consumes those rules: route, zone, footprint, buffers, cleanout, and daily/total tonnes.
+A special product is not the same thing as an operational activity. The `Product` and `SpecialProductRequirements` records define X1's physical and operating rules. `PriorityActivity` records then represent protected operating windows that create the active `sigma[a,d]` and `h[a,d]` inputs used by the current MILP.
 
 ## Synthetic X1 Assumptions
 
@@ -62,11 +62,9 @@ The benchmark X1 requirement record uses:
 - minimum reserved footprint `90,000 m2`;
 - segregation buffer `8,000 m2`;
 - Z4 footprint capacity `185,000 m2`;
-- route through `TU3 -> ST4 -> Z4 -> RC3 -> SL2` in the two-shiploader benchmark;
-- route through `TU3 -> ST4 -> Z4 -> RC3 -> SL1` in the one-shiploader topology;
-- minimum campaign volume `252,000 tonnes`;
-- minimum contiguous campaign length `9 days`;
-- campaign daily minimum `28,000 tonnes/day` in `priority_campaign_conflict`;
+- common deterministic route through `TU2`, `ST3`, `Z4`, `RC2`, and `SL1`;
+- benchmark campaign-volume metadata `252,000 tonnes`;
+- benchmark contiguous-campaign metadata `9 days`;
 - two-day pre- and post-campaign buffers;
 - one-day cleanout before and after the loading campaign;
 - minimum build-before-reclaim inventory `168,000 tonnes`.
@@ -112,18 +110,16 @@ X1 is compatible only with `Z4`. The segregation matrix prevents X1 from sharing
 
 ## Dedicated X1 Route
 
-X1 has a specific compatible path through the existing terminal network. No unrelated second network is created.
-
-Two shiploaders:
+X1 has one deterministic compatible path through the nested core terminal topology. No unrelated second network is created. The same route is used at every F1 scale and by the reference M topology:
 
 ```text
-RAIL_SOURCE -> TU3 -> ST4 -> Z4 -> RC3 -> SL2 -> VESSEL_SINK
+RAIL_SOURCE -> TU2 -> ST3 -> Z4 -> RC2 -> SL1 -> VESSEL_SINK
 ```
 
-One shiploader:
+The required asset tuple is:
 
 ```text
-RAIL_SOURCE -> TU3 -> ST4 -> Z4 -> RC3 -> SL1 -> VESSEL_SINK
+("TU2", "ST3", "RC2", "SL1")
 ```
 
 The exporter includes:
@@ -135,11 +131,11 @@ special_product_required_assets
 special_product_compatible_arcs
 ```
 
-Validation checks that the route is connected, every asset and arc exists, the dedicated zone is on the route, the route reaches a valid shiploader and vessel sink, and one-shiploader scenarios never reference `SL2`.
+Validation checks that the route is connected, every asset and arc exists, the dedicated zone is on the route, the route reaches a valid shiploader and vessel sink, and no generated route refers to nonexistent assets.
 
-## Protected X1 Campaigns
+## Protected Operational Activities
 
-`PriorityActivity` now represents a protected X1 campaign rather than serving as the product definition. Campaign-level exports include:
+`PriorityActivity` records represent protected operating windows rather than serving as the product definition. Activity-level exports include:
 
 ```python
 H
@@ -160,39 +156,35 @@ special_product_minimum_tpd
 special_product_campaign_minimum_tonnes
 ```
 
-The maintenance-incompatibility calendar covers:
+For F4 scenarios, activity windows define either maintenance incompatibility, reduced activity capacity, or both. Other scenarios still contain the X1 product definition and requirements, but they do not add protected activity windows unless required by the scenario family.
 
-```text
-pre-campaign buffer + campaign window + post-campaign buffer
-```
+## Generated Scenarios
 
-Cleanout days are exported through the activity cleanout fields and represented in `sigma[a,d]` as capacity restrictions on the required route assets.
+The current benchmark suite is:
 
-## Generated Occasions
-
-All ten occasions remain available:
-
-| Occasion | Planning condition | Intended model demonstration |
+| Scenario group | Cases | Main data changed |
 |---|---|---|
-| `balanced_control` | Normal profiles and distributed maintenance | Control case with little scheduling value |
-| `peak_export_conflict` | Maintenance during a strong export peak | Improve throughput and demand satisfaction |
-| `overlapping_maintenance` | Downstream jobs start together | Recover minimum-throughput feasibility by staggering |
-| `priority_campaign_conflict` | Maintenance blocks the protected X1 route, buffer, or cleanout interval | Respect special-product route, zone, footprint, and campaign requirements |
-| `yard_overflow_risk` | High starting stock and inbound surge | Reduce overflow and inbound curtailment |
-| `inventory_starvation_risk` | Low starting stock and demand peak | Coordinate upstream work with inventory buffering |
-| `tight_lifecycle_windows` | Narrow, overlapping maintenance windows | Find a valid ordering inside due dates |
-| `partial_shutdown_choice` | Required work during strong demand | Choose among `F`, `P30`, and `P70` |
-| `fixed_schedule_control` | Earliest start equals latest start | Negative control with no timing flexibility |
-| `structurally_infeasible` | Non-movable outages make the hard minimum impossible | Correctly prove infeasibility |
+| `base_control` | 1 | Calibrated common network, inventory, throughput profile, and maintenance windows |
+| `F1_system_scale_*` | L/M/H | Physical asset/network size, maintenance-operation count, and scaled operating quantities |
+| `F2_mode_tradeoff_*` | L/M/H | Maintenance duration ratios for `p_mk` |
+| `F3_yard_flow_*` | L/M/H | Yard capacities, minimum inventory, initial inventory, and `mu_min` |
+| `F4_operational_conflict_*` | L/M/H | Protected activity windows, `sigma[a,d]`, `h[a,d]`, and selected maintenance windows |
+| `structurally_infeasible` | validation | Minimum throughput above physical capacity for infeasibility validation |
 
-`priority_campaign_conflict` is the strongly active X1 case. Ordinary control scenarios still contain the X1 product definition and requirements, but they do not fail merely because X1 exists.
+## Seeded Realization Contract
+
+Scenario families define the treatment; the seed defines the stochastic instance within that treatment. The generator uses independent named streams for common supply, demand, inventory, maintenance-pool, maintenance-window, throughput, and F4 activity-window realization. Common streams do not include the full scenario name, so paired scenarios share the same underlying stochastic data unless that family explicitly owns the parameter.
+
+The following remain structural/configuration data rather than seeded data: product and grade definitions, compatibility rules, nominal asset and arc rates, maintenance capacity factors, and the F1/F2/F3/F4 level tables.
+
+F1 system-scale cases use explicit nested topology profiles: `L = 2 TU / 3 ST / 2 RC / 1 SL`, `M = 3 / 4 / 3 / 2`, and `H = 4 / 5 / 4 / 3`. Their maintenance-operation counts are `8 / 12 / 16`, all with the common `F/P30/P70` mode set. F1 arcs are incremental (`E_L` retained inside `E_M`, and `E_M` retained inside `E_H`) with unchanged capacities and product compatibility. Supply, demand, yard capacities, footprint capacities, initial inventory magnitudes, and minimum throughput scale with effective source-to-sink network capacity from a deterministic max-flow calculation so relative utilisation remains comparable. F2 cases keep the same maintenance tasks and windows and change only mode-duration ratios. F3 cases keep common supply, demand, and maintenance data while changing yard capacities, minimum inventories, initial-inventory targets, and throughput pressure. F4 cases realize protected activity timing and select generated maintenance tasks by route/export properties rather than fixed task IDs.
 
 ## Base, Manual Baseline, Reference Witness, Optimiser Result
 
 These are separate concepts:
 
-1. **Base spread schedule**: deterministic initial schedule created by `_spread_schedule()`.
-2. **Manual baseline**: fixed non-optimised schedule after the occasion overlay.
+1. **Base spread schedule**: deterministic initial schedule created by `build_spread_baseline_schedule()`.
+2. **Manual baseline**: deterministic non-optimised schedule after the scenario-family overlay.
 3. **Reference witness**: hidden construction check showing that the intended mechanism exists.
 4. **Optimiser result**: schedule produced by the MILP or Benders model.
 
@@ -210,7 +202,7 @@ The reference witness is not supplied to the optimiser. `optimizer_objects()` de
 from generate_dissertation_scenarios import GeneratorConfig, build_scenario
 
 scenario = build_scenario(
-    "priority_campaign_conflict",
+    "F4_operational_conflict_M",
     GeneratorConfig(horizon_days=90, seed=42),
 )
 
@@ -236,28 +228,17 @@ It does not solve a full continuous stockpile geometry model, detailed arc-level
 
 ## Generate Data
 
-Default two-shiploader benchmark:
+Default benchmark:
 
 ```bash
 python generate_dissertation_scenarios.py \
   --occasion all \
   --output-dir generated_dissertation_scenarios \
   --horizon-days 90 \
-  --seed 42 \
-  --minimum-throughput-ratio 0.55
+  --seed 42
 ```
 
-One-shiploader topology:
-
-```bash
-python generate_dissertation_scenarios.py \
-  --occasion all \
-  --output-dir generated_pdf_topology \
-  --shiploader-count 1 \
-  --shiploader-rate-tph 9166
-```
-
-The manifest records topology, maintenance modes, seed, horizon, X1 ID, compatible zone, required route assets, footprint assumptions, active protected campaign status, and design-check status.
+The manifest records topology, maintenance modes, seed, randomization version, RNG stream names, horizon, X1 ID, compatible zone, required route assets, footprint assumptions, active protected campaign status, realized maintenance counts, realized initial-inventory ratios, and design-check status.
 
 ## Tests
 
@@ -265,6 +246,6 @@ The manifest records topology, maintenance modes, seed, horizon, X1 ID, compatib
 python -m unittest -v test_generate_dissertation_scenarios.py
 ```
 
-The suite contains **24 tests** covering all ten occasions, deterministic generation, legacy keys, F/P30/P70 mode factors, one- and two-shiploader topologies, first-class X1 identity, requirements, route continuity, segregation, footprint checks, campaign metrics, JSON serialization, controls, and structural infeasibility.
+The suite covers the current scenario set, deterministic generation, seed-to-seed realization differences, paired common streams, F1 system-scale topology/scaling, active model-ready keys, maintenance-mode factors, dynamic network connectivity, X1 identity, route continuity, operational activity exports, JSON serialization, mode/yards-flow/conflict families, and structural infeasibility.
 
 

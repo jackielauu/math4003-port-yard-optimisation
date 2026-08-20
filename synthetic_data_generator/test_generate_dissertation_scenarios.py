@@ -1,9 +1,10 @@
-﻿import importlib.util
+import importlib.util
 import json
+import sys
 import tempfile
 import unittest
-import sys
 from pathlib import Path
+
 
 MODULE_PATH = Path(__file__).with_name("generate_dissertation_scenarios.py")
 spec = importlib.util.spec_from_file_location("scenario_generator", MODULE_PATH)
@@ -17,8 +18,89 @@ class DissertationScenarioGeneratorTests(unittest.TestCase):
     def setUp(self) -> None:
         self.config = scenario_generator.GeneratorConfig(horizon_days=90, seed=42)
 
-    def test_all_occasion_names_build_and_validate(self) -> None:
-        for name in scenario_generator.OCCASION_NAMES:
+    def maintenance_signature(self, scenario, include_modes: bool = False):
+        signature = {}
+        for task in scenario.maintenance_tasks:
+            values = {
+                "asset_id": task.asset_id,
+                "earliest_start_day": task.earliest_start_day,
+                "latest_start_day": task.latest_start_day,
+                "lifecycle_due_day": task.lifecycle_due_day,
+                "full_duration_days": next(
+                    mode.duration_days
+                    for mode in task.modes
+                    if mode.mode_id == scenario_generator.FULL_SHUTDOWN_MODE
+                ),
+                "task_class": task.task_class,
+            }
+            if include_modes:
+                values["modes"] = tuple(
+                    (mode.mode_id, mode.duration_days)
+                    for mode in task.modes
+                )
+            signature[task.task_id] = values
+        return signature
+
+    def stage_counts(self, scenario):
+        return {
+            stage: sum(1 for asset in scenario.assets if asset.stage == stage)
+            for stage in scenario_generator.STAGES
+        }
+
+    def arc_signature(self, scenario):
+        return {
+            arc.arc_id: (arc.capacity_tph, arc.allowed_products)
+            for arc in scenario.arcs
+        }
+
+    def reachable_nodes(self, scenario, start_node: str) -> set[str]:
+        adjacency = {}
+        for arc in scenario.arcs:
+            adjacency.setdefault(arc.from_node, set()).add(arc.to_node)
+        seen = {start_node}
+        stack = [start_node]
+        while stack:
+            node = stack.pop()
+            for successor in adjacency.get(node, set()):
+                if successor not in seen:
+                    seen.add(successor)
+                    stack.append(successor)
+        return seen
+
+    def total_by_day(self, records):
+        totals = {}
+        for record in records:
+            totals[record.day] = totals.get(record.day, 0.0) + record.tonnes
+        return totals
+
+    def average_total(self, records):
+        totals = self.total_by_day(records)
+        return sum(totals.values()) / len(totals)
+
+    def test_suite_names_are_new_four_family_design(self) -> None:
+        self.assertEqual(scenario_generator.BASE_CONTROL_NAME, "base_control")
+        self.assertEqual(len(scenario_generator.EXPERIMENTAL_SCENARIO_NAMES), 12)
+        self.assertEqual(
+            scenario_generator.EXPERIMENTAL_SCENARIO_NAMES,
+            (
+                "F1_system_scale_L",
+                "F1_system_scale_M",
+                "F1_system_scale_H",
+                "F2_mode_tradeoff_L",
+                "F2_mode_tradeoff_M",
+                "F2_mode_tradeoff_H",
+                "F3_yard_flow_L",
+                "F3_yard_flow_M",
+                "F3_yard_flow_H",
+                "F4_operational_conflict_L",
+                "F4_operational_conflict_M",
+                "F4_operational_conflict_H",
+            ),
+        )
+        self.assertIn("structurally_infeasible", scenario_generator.SCENARIO_NAMES)
+
+    def test_all_scenarios_build_validate_and_pass_design_checks(self) -> None:
+        for name in scenario_generator.SCENARIO_NAMES:
             with self.subTest(name=name):
                 scenario = scenario_generator.build_scenario(name, self.config)
                 scenario.validate()
@@ -28,461 +110,673 @@ class DissertationScenarioGeneratorTests(unittest.TestCase):
                     scenario.design_evidence["occasion_checks"]["all_checks_pass"]
                 )
 
-    def test_generator_is_deterministic_for_same_seed(self) -> None:
-        first = scenario_generator.build_scenario("peak_export_conflict", self.config)
-        second = scenario_generator.build_scenario("peak_export_conflict", self.config)
-        self.assertEqual(first.to_json_dict(), second.to_json_dict())
+    def test_base_control_yard_and_inventory_calibration(self) -> None:
+        scenario = scenario_generator.build_scenario("base_control", self.config)
+        zone_by_id = {zone.zone_id: zone for zone in scenario.zones}
+        self.assertEqual(zone_by_id["Z1"].capacity_tonnes, 650_000.0)
+        self.assertEqual(zone_by_id["Z2"].capacity_tonnes, 750_000.0)
+        self.assertEqual(zone_by_id["Z3"].capacity_tonnes, 580_000.0)
+        self.assertEqual(zone_by_id["Z4"].capacity_tonnes, 500_000.0)
 
-    def test_different_seed_changes_generated_profiles(self) -> None:
-        first = scenario_generator.build_scenario(
-            "balanced_control",
-            scenario_generator.GeneratorConfig(seed=1),
+        target_utilisation = scenario_generator.get_zone_initial_inventory_ratios(
+            "base_control"
         )
-        second = scenario_generator.build_scenario(
-            "balanced_control",
-            scenario_generator.GeneratorConfig(seed=2),
-        )
-        self.assertNotEqual(first.inbound_supply, second.inbound_supply)
-        self.assertNotEqual(first.outbound_demand, second.outbound_demand)
-
-    def test_optimizer_objects_have_complete_core_sets(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        data = scenario.optimizer_objects()
-        self.assertEqual(len(data["T"]), 90)
-        self.assertEqual(len(data["P"]), 4)
-        self.assertEqual(len(data["A"]), 12)
-        self.assertEqual(len(data["Z"]), 4)
-        self.assertEqual(len(data["J"]), 12)
-        self.assertIn(("P1", 0), data["supply_tonnes"])
-        self.assertIn(("P1", 0), data["demand_tonnes"])
-        self.assertIn(("Z1", "P1"), data["initial_inventory_tonnes"])
-        # Rate-based model checks
-        self.assertIn("asset_rate_tph", data)
-        self.assertIn("arc_rate_tph", data)
-        self.assertIn("minimum_throughput_rate_tph", data)
-        self.assertIn("operating_hours_per_day", data)
-        self.assertEqual(data["operating_hours_per_day"], 24.0)
-        # Product metadata checks
-        self.assertIn("product_name", data)
-        self.assertIn("product_share_of_volume", data)
-        self.assertEqual(data["SPECIAL_PRODUCTS"], ["X1"])
-        self.assertEqual(data["product_is_special"]["X1"], 1)
-        self.assertEqual(data["product_blending_allowed"]["X1"], 0)
-        # Verify removed fields are absent
-        self.assertNotIn("product_commercial_weight", data)
-        self.assertNotIn("product_priority_eligible", data)
-        # Verify product shares sum to 1.0
-        total_share = sum(data["product_share_of_volume"].values())
-        self.assertAlmostEqual(total_share, 1.0, places=6)
-        # Grade specification checks
-        self.assertIn("product_grade_specs", data)
-        self.assertEqual(len(data["product_grade_specs"]), 4)
-        for product_id in data["P"]:
-            self.assertIn(product_id, data["product_grade_specs"])
-            grade_specs = data["product_grade_specs"][product_id]
-            # Each product should have chemical grade elements
-            self.assertIn("FE", grade_specs)
-            self.assertIn("SIO2", grade_specs)
-            self.assertIn("AL2O3", grade_specs)
-            # Each element should have target, min, max, unit
-            fe_spec = grade_specs["FE"]
-            self.assertIn("target", fe_spec)
-            self.assertIn("min", fe_spec)
-            self.assertIn("max", fe_spec)
-            self.assertIn("unit", fe_spec)
-            # FE target should be in reasonable iron ore range (55-62%)
-            self.assertGreater(fe_spec["target"], 55.0)
-            self.assertLess(fe_spec["target"], 62.0)
-        self.assertNotIn("reference_schedule", data)
-        self.assertNotIn("design_evidence", data)
-
-    def test_special_product_identity_is_first_class(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        special = [product for product in scenario.products if product.is_special]
-        self.assertEqual(len(special), 1)
-        self.assertEqual(special[0].product_id, "X1")
-        self.assertEqual(special[0].name, "Special Product X1")
-        self.assertFalse(special[0].blending_allowed)
-        self.assertTrue(all(not p.is_special for p in scenario.products if p.product_id != "X1"))
-        data = scenario.optimizer_objects()
-        self.assertEqual(data["SPECIAL_PRODUCTS"], ["X1"])
-        self.assertEqual(data["product_is_special"], {"P1": 0, "P2": 0, "P3": 0, "X1": 1})
-
-    def test_special_product_requirements_and_segregation_are_exported(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        requirement = scenario.special_product_requirements[0]
-        data = scenario.optimizer_objects()
-        self.assertEqual(requirement.product_id, "X1")
-        self.assertGreater(requirement.tonnes_per_square_metre, 0)
-        self.assertGreater(requirement.minimum_reserved_footprint_m2, 0)
-        self.assertEqual(requirement.compatible_zones, ("Z4",))
-        self.assertEqual(data["special_product_compatible_zones"]["X1"], ["Z4"])
-        self.assertEqual(data["product_zone_compatible"][("X1", "Z4")], 1)
-        self.assertEqual(data["product_zone_compatible"][("X1", "Z3")], 0)
-        for ordinary in ("P1", "P2", "P3"):
-            self.assertEqual(data["product_may_share_zone"][("X1", ordinary)], 0)
-            self.assertEqual(data["product_may_share_zone"][(ordinary, "X1")], 0)
-        self.assertEqual(data["product_may_share_zone"][("X1", "X1")], 1)
-
-    def test_pdf_maintenance_modes_and_duration_tradeoff(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        expected_factors = {
-            scenario_generator.FULL_SHUTDOWN_MODE: 0.0,
-            scenario_generator.PARTIAL_30_MODE: 0.30,
-            scenario_generator.PARTIAL_70_MODE: 0.70,
-        }
-        for task in scenario.maintenance_tasks:
-            with self.subTest(task=task.task_id):
-                mode_by_id = {mode.mode_id: mode for mode in task.modes}
-                self.assertEqual(set(mode_by_id), set(expected_factors))
-                for mode_id, factor in expected_factors.items():
-                    self.assertAlmostEqual(
-                        mode_by_id[mode_id].capacity_factor_during_work,
-                        factor,
-                    )
-                self.assertLess(
-                    mode_by_id[scenario_generator.FULL_SHUTDOWN_MODE].duration_days,
-                    mode_by_id[scenario_generator.PARTIAL_30_MODE].duration_days,
+        for zone_id, target in target_utilisation.items():
+            total = sum(scenario.initial_inventory[zone_id].values())
+            zone = zone_by_id[zone_id]
+            self.assertGreaterEqual(total, zone.minimum_inventory_tonnes)
+            self.assertLess(total, zone.capacity_tonnes)
+            self.assertLessEqual(
+                abs(total / zone.capacity_tonnes - target),
+                scenario_generator.INITIAL_INVENTORY_FILL_RATIO_JITTER + 1e-6,
+            )
+            self.assertTrue(
+                set(scenario.initial_inventory[zone_id]).issubset(
+                    set(zone.allowed_products)
                 )
-                self.assertLess(
-                    mode_by_id[scenario_generator.PARTIAL_30_MODE].duration_days,
-                    mode_by_id[scenario_generator.PARTIAL_70_MODE].duration_days,
-                )
+            )
+            self.assertGreaterEqual(
+                zone.minimum_inventory_tonnes / zone.capacity_tonnes,
+                0.05,
+            )
+            self.assertLessEqual(
+                zone.minimum_inventory_tonnes / zone.capacity_tonnes,
+                0.08,
+            )
+        self.assertEqual(set(scenario.initial_inventory["Z4"]), {"X1"})
 
-    def test_optimizer_objects_include_current_pdf_notation(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
+    def test_active_model_ready_inputs_are_exported(self) -> None:
+        scenario = scenario_generator.build_scenario("base_control", self.config)
         data = scenario.optimizer_objects()
         for key in (
             "D",
-            "N",
-            "E",
             "A",
-            "A_NS",
-            "P_STOCKYARD",
+            "Z",
             "G",
             "M_OPERATIONS",
             "M_a",
-            "H",
-            "W_m",
-            "W_h",
             "K",
-            "predecessors",
-            "successors",
+            "maintenance_duration_days",
+            "maintenance_available_capacity_fraction",
+            "maintenance_earliest_start",
+            "maintenance_latest_start",
+            "maintenance_activity_incompatible",
+            "special_activity_capacity_factor",
+            "initial_inventory_tonnes",
+            "zone_min_inventory_tonnes",
+            "zone_max_inventory_tonnes",
+            "asset_capacity_tpd",
+            "arc_capacity_tpd",
+            "minimum_throughput_tpd",
+            "product_arc_compatible",
+            "zone_allowed_product",
         ):
             self.assertIn(key, data)
         self.assertEqual(data["K"], list(scenario_generator.MAINTENANCE_MODE_ORDER))
-        self.assertEqual(data["K_symbol"][scenario_generator.PARTIAL_30_MODE], "P30")
-        self.assertIn("asset_capacity_tpd", data)
-        self.assertIn("arc_capacity_tpd", data)
-        self.assertIn("zone_min_inventory_tonnes", data)
-        self.assertIn("zone_max_inventory_tonnes", data)
-        self.assertIn("overflow_penalty_per_tonne", data)
-        self.assertIn("minimum_throughput_tpd", data)
-        self.assertAlmostEqual(
-            data["asset_capacity_tpd"]["RC1"],
-            self.config.reclaimer_rate_tph * self.config.operating_hours_per_day,
-        )
-        mode_key = ("M_RC2", scenario_generator.PARTIAL_30_MODE)
-        self.assertAlmostEqual(
-            data["maintenance_available_capacity_fraction"][mode_key], 0.30
-        )
-        self.assertAlmostEqual(
-            data["maintenance_capacity_loss_fraction"][mode_key], 0.70
-        )
+        self.assertNotIn("reference_schedule", data)
+        self.assertNotIn("design_evidence", data)
 
-    def test_priority_activity_exports_sigma_and_incompatibility_inputs(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "priority_campaign_conflict", self.config
+    def test_base_maintenance_windows_are_spread_and_varied(self) -> None:
+        scenario = scenario_generator.build_scenario("base_control", self.config)
+        starts = [task.earliest_start_day for task in scenario.maintenance_tasks]
+        widths = [
+            task.latest_start_day - task.earliest_start_day + 1
+            for task in scenario.maintenance_tasks
+        ]
+        self.assertGreaterEqual(min(starts), 0)
+        self.assertGreater(max(starts) - min(starts), 45)
+        self.assertLessEqual(min(widths), 10)
+        self.assertGreaterEqual(max(widths), 20)
+        for task in scenario.maintenance_tasks:
+            max_duration = max(mode.duration_days for mode in task.modes)
+            self.assertLessEqual(task.latest_start_day, 90 - max_duration)
+
+    def test_mode_duration_capacity_tradeoff(self) -> None:
+        scenario = scenario_generator.build_scenario("base_control", self.config)
+        task = max(
+            scenario.maintenance_tasks,
+            key=lambda item: next(
+                mode.duration_days
+                for mode in item.modes
+                if mode.mode_id == scenario_generator.FULL_SHUTDOWN_MODE
+            ),
         )
-        data = scenario.optimizer_objects()
-        activity = scenario.priority_activities[0]
-        self.assertEqual(data["H"], [activity.activity_id])
+        mode_by_id = {mode.mode_id: mode for mode in task.modes}
+        full_duration = mode_by_id["full_shutdown"].duration_days
         self.assertEqual(
-            data["special_activity_duration_days"][activity.activity_id],
-            activity.end_day - activity.start_day,
+            mode_by_id["partial_30"].duration_days,
+            max(
+                full_duration + 1,
+                int(full_duration * scenario_generator.BASE_MODE_DURATION_RATIOS["partial_30"] + 0.999999),
+            ),
         )
-        self.assertEqual(
-            data["W_h"][activity.activity_id],
-            [activity.start_day],
+        self.assertGreater(
+            mode_by_id["partial_70"].duration_days,
+            mode_by_id["partial_30"].duration_days,
         )
-        self.assertEqual(data["special_activity_product"][activity.activity_id], "X1")
-        self.assertEqual(data["special_activity_required_zone"][activity.activity_id], "Z4")
-        self.assertEqual(
-            data["special_activity_minimum_total_tonnes"][activity.activity_id],
-            activity.minimum_total_tonnes,
-        )
-        self.assertEqual(
-            data["special_product_campaign_minimum_tonnes"][activity.activity_id],
-            activity.minimum_total_tonnes,
-        )
-        for asset_id in activity.required_assets:
-            for day in range(
-                activity.start_day - activity.pre_campaign_buffer_days,
-                activity.end_day + activity.post_campaign_buffer_days,
-            ):
-                self.assertEqual(
-                    data["maintenance_activity_incompatible"][(asset_id, day)],
-                    1,
-                )
-            for day in range(activity.start_day, activity.end_day):
-                self.assertEqual(
-                    data["maintenance_activity_incompatible"][(asset_id, day)],
-                    1,
-                )
-                self.assertAlmostEqual(
-                    data["special_activity_capacity_factor"][(asset_id, day)],
-                    activity.capacity_factor_during_activity,
-                )
-        for day in range(activity.start_day, activity.end_day):
+        self.assertEqual(mode_by_id["full_shutdown"].capacity_factor_during_work, 0.0)
+        self.assertEqual(mode_by_id["partial_30"].capacity_factor_during_work, 0.30)
+        self.assertEqual(mode_by_id["partial_70"].capacity_factor_during_work, 0.70)
+
+    def test_system_scale_changes_topology_and_operation_count(self) -> None:
+        expected = {
+            "F1_system_scale_L": (
+                {"train_unloader": 2, "stacker": 3, "reclaimer": 2, "shiploader": 1},
+                8,
+                8,
+            ),
+            "F1_system_scale_M": (
+                {"train_unloader": 3, "stacker": 4, "reclaimer": 3, "shiploader": 2},
+                12,
+                12,
+            ),
+            "F1_system_scale_H": (
+                {"train_unloader": 4, "stacker": 5, "reclaimer": 4, "shiploader": 3},
+                16,
+                16,
+            ),
+        }
+        for name, (stage_counts, asset_count, task_count) in expected.items():
+            with self.subTest(name=name):
+                scenario = scenario_generator.build_scenario(name, self.config)
+                data = scenario.optimizer_objects()
+                self.assertEqual(self.stage_counts(scenario), stage_counts)
+                self.assertEqual(len(scenario.assets), asset_count)
+                self.assertEqual(len(scenario.maintenance_tasks), task_count)
+                self.assertEqual(data["K"], list(scenario_generator.MAINTENANCE_MODE_ORDER))
+                self.assertNotIn("partial_50", json.dumps(scenario.to_json_dict()))
+                self.assertEqual(scenario.metadata["scenario_family"], "F1_system_scale")
+
+    def test_f1_network_arcs_are_nested_and_x1_uses_common_core_route(self) -> None:
+        built = {
+            name: scenario_generator.build_scenario(name, self.config)
+            for name in (
+                "F1_system_scale_L",
+                "F1_system_scale_M",
+                "F1_system_scale_H",
+            )
+        }
+        signatures = {
+            name: self.arc_signature(scenario)
+            for name, scenario in built.items()
+        }
+        low_arcs = set(signatures["F1_system_scale_L"])
+        medium_arcs = set(signatures["F1_system_scale_M"])
+        high_arcs = set(signatures["F1_system_scale_H"])
+        self.assertLess(low_arcs, medium_arcs)
+        self.assertLess(medium_arcs, high_arcs)
+        for arc_id in low_arcs:
             self.assertEqual(
-                data["special_product_minimum_tpd"][("X1", day)],
-                activity.minimum_tonnes_per_day,
+                signatures["F1_system_scale_L"][arc_id],
+                signatures["F1_system_scale_M"][arc_id],
+            )
+            self.assertEqual(
+                signatures["F1_system_scale_L"][arc_id],
+                signatures["F1_system_scale_H"][arc_id],
+            )
+        for arc_id in medium_arcs:
+            self.assertEqual(
+                signatures["F1_system_scale_M"][arc_id],
+                signatures["F1_system_scale_H"][arc_id],
             )
 
-    def test_special_product_route_is_connected_for_two_and_one_shiploaders(self) -> None:
-        for config in (
-            self.config,
-            scenario_generator.GeneratorConfig(
-                horizon_days=90,
-                seed=42,
-                shiploader_count=1,
-                shiploader_rate_tph=9166.0,
-            ),
+        expected_assets = ("TU2", "ST3", "RC2", "SL1")
+        expected_arcs = (
+            "RAIL_SOURCE__TU2",
+            "TU2__ST3",
+            "ST3__Z4",
+            "Z4__RC2",
+            "RC2__SL1",
+            "SL1__VESSEL_SINK",
+        )
+        for scenario in built.values():
+            requirement = scenario.special_product_requirements[0]
+            self.assertEqual(requirement.required_assets, expected_assets)
+            self.assertEqual(requirement.compatible_arcs, expected_arcs)
+            self.assertTrue(set(expected_arcs).issubset(self.arc_signature(scenario)))
+
+    def test_f1_effective_network_capacity_increases_by_scale(self) -> None:
+        capacities = {
+            name: scenario_generator.build_scenario(name, self.config).metadata[
+                "effective_network_capacity_tph"
+            ]
+            for name in (
+                "F1_system_scale_L",
+                "F1_system_scale_M",
+                "F1_system_scale_H",
+            )
+        }
+        self.assertLess(
+            capacities["F1_system_scale_L"],
+            capacities["F1_system_scale_M"],
+        )
+        self.assertLess(
+            capacities["F1_system_scale_M"],
+            capacities["F1_system_scale_H"],
+        )
+        self.assertAlmostEqual(capacities["F1_system_scale_L"], 4583.0)
+        self.assertAlmostEqual(capacities["F1_system_scale_M"], 7708.0)
+        self.assertAlmostEqual(capacities["F1_system_scale_H"], 10416.0)
+
+    def test_mode_tradeoff_family_uses_requested_ratios(self) -> None:
+        built = {
+            name: scenario_generator.build_scenario(name, self.config)
+            for name in (
+                "F2_mode_tradeoff_L",
+                "F2_mode_tradeoff_M",
+                "F2_mode_tradeoff_H",
+            )
+        }
+        task_id = built["F2_mode_tradeoff_L"].maintenance_tasks[0].task_id
+        durations = {}
+        for name, scenario in built.items():
+            task = next(task for task in scenario.maintenance_tasks if task.task_id == task_id)
+            durations[name] = {
+                mode.mode_id: mode.duration_days for mode in task.modes
+            }
+        self.assertEqual(
+            {
+                values[scenario_generator.FULL_SHUTDOWN_MODE]
+                for values in durations.values()
+            },
+            {durations["F2_mode_tradeoff_M"][scenario_generator.FULL_SHUTDOWN_MODE]},
+        )
+        self.assertLessEqual(
+            durations["F2_mode_tradeoff_L"][scenario_generator.PARTIAL_30_MODE],
+            durations["F2_mode_tradeoff_M"][scenario_generator.PARTIAL_30_MODE],
+        )
+        self.assertLess(
+            durations["F2_mode_tradeoff_M"][scenario_generator.PARTIAL_30_MODE],
+            durations["F2_mode_tradeoff_H"][scenario_generator.PARTIAL_30_MODE],
+        )
+        self.assertLess(
+            durations["F2_mode_tradeoff_L"][scenario_generator.PARTIAL_70_MODE],
+            durations["F2_mode_tradeoff_M"][scenario_generator.PARTIAL_70_MODE],
+        )
+        self.assertLess(
+            durations["F2_mode_tradeoff_M"][scenario_generator.PARTIAL_70_MODE],
+            durations["F2_mode_tradeoff_H"][scenario_generator.PARTIAL_70_MODE],
+        )
+
+    def test_yard_flow_tightness_changes_initial_inventory_minimums_and_peak(self) -> None:
+        built = {
+            name: scenario_generator.build_scenario(name, self.config)
+            for name in (
+                "F3_yard_flow_L",
+                "F3_yard_flow_M",
+                "F3_yard_flow_H",
+            )
+        }
+        utilisations = {}
+        peaks = {}
+        minimum_inventory_ratios = {}
+        fill_deviations = {}
+        for name, scenario in built.items():
+            total_inventory = sum(
+                sum(by_product.values()) for by_product in scenario.initial_inventory.values()
+            )
+            total_capacity = sum(zone.capacity_tonnes for zone in scenario.zones)
+            utilisations[name] = total_inventory / total_capacity
+            targets = scenario_generator.get_zone_initial_inventory_ratios(name)
+            fill_deviations[name] = {
+                zone.zone_id: (
+                    sum(scenario.initial_inventory[zone.zone_id].values())
+                    / zone.capacity_tonnes
+                    - targets[zone.zone_id]
+                )
+                for zone in scenario.zones
+            }
+            peaks[name] = (
+                max(scenario.minimum_throughput_rate_tph.values())
+                * scenario.operating_hours_per_day
+            )
+            minimum_inventory_ratios[name] = min(
+                zone.minimum_inventory_tonnes / zone.capacity_tonnes
+                for zone in scenario.zones
+            )
+        self.assertGreater(utilisations["F3_yard_flow_L"], utilisations["F3_yard_flow_M"])
+        self.assertGreater(utilisations["F3_yard_flow_M"], utilisations["F3_yard_flow_H"])
+        self.assertLess(peaks["F3_yard_flow_L"], peaks["F3_yard_flow_M"])
+        self.assertLess(peaks["F3_yard_flow_M"], peaks["F3_yard_flow_H"])
+        self.assertLess(
+            minimum_inventory_ratios["F3_yard_flow_L"],
+            minimum_inventory_ratios["F3_yard_flow_H"],
+        )
+        for zone_id in fill_deviations["F3_yard_flow_L"]:
+            self.assertAlmostEqual(
+                fill_deviations["F3_yard_flow_L"][zone_id],
+                fill_deviations["F3_yard_flow_M"][zone_id],
+                places=6,
+            )
+            self.assertAlmostEqual(
+                fill_deviations["F3_yard_flow_M"][zone_id],
+                fill_deviations["F3_yard_flow_H"][zone_id],
+                places=6,
+            )
+
+    def test_operational_conflict_family_exports_h_and_sigma(self) -> None:
+        for name in (
+            "F4_operational_conflict_L",
+            "F4_operational_conflict_M",
+            "F4_operational_conflict_H",
         ):
-            with self.subTest(shiploader_count=config.shiploader_count):
-                scenario = scenario_generator.build_scenario("balanced_control", config)
+            with self.subTest(name=name):
+                scenario = scenario_generator.build_scenario(name, self.config)
                 data = scenario.optimizer_objects()
+                self.assertGreaterEqual(len(data["H"]), 2)
+                route_window = next(
+                    activity
+                    for activity in scenario.priority_activities
+                    if activity.activity_id == "PA_X1_ROUTE_WINDOW"
+                )
+                for asset_id in route_window.required_assets:
+                    for day in range(route_window.start_day, route_window.end_day):
+                        self.assertEqual(
+                            data["maintenance_activity_incompatible"][(asset_id, day)],
+                            1,
+                        )
+                        self.assertLess(
+                            data["special_activity_capacity_factor"][(asset_id, day)],
+                            1.0,
+                        )
+                if name.endswith(("_M", "_H")):
+                    capacity_only = next(
+                        activity
+                        for activity in scenario.priority_activities
+                        if activity.activity_id == "PA_EXPORT_WINDOW_3"
+                    )
+                    for asset_id in capacity_only.required_assets:
+                        for day in range(capacity_only.start_day, capacity_only.end_day):
+                            self.assertEqual(
+                                data["maintenance_activity_incompatible"][(asset_id, day)],
+                                0,
+                            )
+                            self.assertLess(
+                                data["special_activity_capacity_factor"][(asset_id, day)],
+                                1.0,
+                            )
+
+    def test_f4_activity_timing_is_paired_across_levels(self) -> None:
+        built = {
+            name: scenario_generator.build_scenario(name, self.config)
+            for name in (
+                "F4_operational_conflict_L",
+                "F4_operational_conflict_M",
+                "F4_operational_conflict_H",
+            )
+        }
+        timing_by_level = {
+            name: {
+                activity.activity_id: (activity.start_day, activity.end_day)
+                for activity in scenario.priority_activities
+            }
+            for name, scenario in built.items()
+        }
+        for activity_id in ("PA_EXPORT_WINDOW_1", "PA_X1_ROUTE_WINDOW"):
+            self.assertEqual(
+                timing_by_level["F4_operational_conflict_L"][activity_id],
+                timing_by_level["F4_operational_conflict_M"][activity_id],
+            )
+            self.assertEqual(
+                timing_by_level["F4_operational_conflict_M"][activity_id],
+                timing_by_level["F4_operational_conflict_H"][activity_id],
+            )
+        self.assertNotIn(
+            "PA_EXPORT_WINDOW_3",
+            timing_by_level["F4_operational_conflict_L"],
+        )
+        self.assertEqual(
+            timing_by_level["F4_operational_conflict_M"]["PA_EXPORT_WINDOW_3"],
+            timing_by_level["F4_operational_conflict_H"]["PA_EXPORT_WINDOW_3"],
+        )
+
+    def test_generator_is_deterministic_for_same_seed(self) -> None:
+        for seed in (7, 42, 91):
+            config = scenario_generator.GeneratorConfig(seed=seed)
+            first = scenario_generator.build_scenario("F4_operational_conflict_H", config)
+            second = scenario_generator.build_scenario("F4_operational_conflict_H", config)
+            self.assertEqual(first.optimizer_objects(), second.optimizer_objects())
+            self.assertEqual(first.to_json_dict(), second.to_json_dict())
+
+    def test_different_seed_changes_multiple_realized_attributes(self) -> None:
+        first = scenario_generator.build_scenario(
+            "base_control",
+            scenario_generator.GeneratorConfig(seed=42),
+        )
+        second = scenario_generator.build_scenario(
+            "base_control",
+            scenario_generator.GeneratorConfig(seed=43),
+        )
+        self.assertNotEqual(first.inbound_supply, second.inbound_supply)
+        self.assertNotEqual(first.outbound_demand, second.outbound_demand)
+        self.assertNotEqual(first.initial_inventory, second.initial_inventory)
+        first_task_sequence = [task.task_id for task in first.maintenance_tasks]
+        second_task_sequence = [task.task_id for task in second.maintenance_tasks]
+        first_window_signature = {
+            task.task_id: (task.earliest_start_day, task.latest_start_day)
+            for task in first.maintenance_tasks
+        }
+        second_window_signature = {
+            task.task_id: (task.earliest_start_day, task.latest_start_day)
+            for task in second.maintenance_tasks
+        }
+        self.assertNotEqual(first_task_sequence, second_task_sequence)
+        self.assertNotEqual(first_window_signature, second_window_signature)
+
+    def test_common_streams_pair_data_across_families(self) -> None:
+        built = {
+            name: scenario_generator.build_scenario(name, self.config)
+            for name in (
+                "base_control",
+                "F1_system_scale_M",
+                "F2_mode_tradeoff_L",
+                "F2_mode_tradeoff_M",
+                "F2_mode_tradeoff_H",
+                "F3_yard_flow_L",
+                "F3_yard_flow_M",
+                "F3_yard_flow_H",
+                "F4_operational_conflict_M",
+            )
+        }
+        supply = built["base_control"].inbound_supply
+        demand = built["base_control"].outbound_demand
+        for name, scenario in built.items():
+            with self.subTest(name=name, component="supply_demand"):
+                self.assertEqual(scenario.inbound_supply, supply)
+                self.assertEqual(scenario.outbound_demand, demand)
+
+        base_maintenance = self.maintenance_signature(built["base_control"])
+        for name in (
+            "F1_system_scale_M",
+            "F2_mode_tradeoff_L",
+            "F2_mode_tradeoff_M",
+            "F2_mode_tradeoff_H",
+            "F3_yard_flow_L",
+            "F3_yard_flow_M",
+            "F3_yard_flow_H",
+        ):
+            with self.subTest(name=name, component="maintenance"):
+                self.assertEqual(
+                    self.maintenance_signature(built[name]),
+                    base_maintenance,
+                )
+
+        self.assertEqual(
+            built["base_control"].minimum_throughput_rate_tph,
+            built["F2_mode_tradeoff_M"].minimum_throughput_rate_tph,
+        )
+        self.assertNotEqual(
+            built["base_control"].minimum_throughput_rate_tph,
+            built["F3_yard_flow_H"].minimum_throughput_rate_tph,
+        )
+
+    def test_f1_maintenance_pool_is_nested_by_level(self) -> None:
+        low = scenario_generator.build_scenario("F1_system_scale_L", self.config)
+        medium = scenario_generator.build_scenario("F1_system_scale_M", self.config)
+        high = scenario_generator.build_scenario("F1_system_scale_H", self.config)
+        low_signature = self.maintenance_signature(low)
+        medium_signature = self.maintenance_signature(medium)
+        high_signature = self.maintenance_signature(high)
+        self.assertLess(set(low_signature), set(medium_signature))
+        self.assertLess(set(medium_signature), set(high_signature))
+        for task_id, values in low_signature.items():
+            self.assertEqual(medium_signature[task_id], values)
+            self.assertEqual(high_signature[task_id], values)
+        for task_id, values in medium_signature.items():
+            self.assertEqual(high_signature[task_id], values)
+
+    def test_f1_scaled_operating_quantities_preserve_relative_utilisation(self) -> None:
+        for seed in range(1, 21):
+            config = scenario_generator.GeneratorConfig(seed=seed)
+            built = {
+                name: scenario_generator.build_scenario(name, config)
+                for name in (
+                    "F1_system_scale_L",
+                    "F1_system_scale_M",
+                    "F1_system_scale_H",
+                )
+            }
+            normalized_supply_by_name = {}
+            normalized_demand_by_name = {}
+            average_supply_ratio = {}
+            average_demand_ratio = {}
+            yard_utilisation = {}
+            for name, scenario in built.items():
+                effective_daily_capacity = (
+                    scenario.metadata["effective_network_capacity_tph"]
+                    * scenario.operating_hours_per_day
+                )
+                supply_by_day = self.total_by_day(scenario.inbound_supply)
+                demand_by_day = self.total_by_day(scenario.outbound_demand)
+                normalized_supply_by_name[name] = {
+                    day: round(total / effective_daily_capacity, 8)
+                    for day, total in supply_by_day.items()
+                }
+                normalized_demand_by_name[name] = {
+                    day: round(total / effective_daily_capacity, 8)
+                    for day, total in demand_by_day.items()
+                }
+                average_supply_ratio[name] = (
+                    self.average_total(scenario.inbound_supply)
+                    / effective_daily_capacity
+                )
+                average_demand_ratio[name] = (
+                    self.average_total(scenario.outbound_demand)
+                    / effective_daily_capacity
+                )
+                yard_utilisation[name] = (
+                    sum(
+                        sum(by_product.values())
+                        for by_product in scenario.initial_inventory.values()
+                    )
+                    / sum(zone.capacity_tonnes for zone in scenario.zones)
+                )
+
+            for day in normalized_supply_by_name["F1_system_scale_M"]:
+                self.assertAlmostEqual(
+                    normalized_supply_by_name["F1_system_scale_L"][day],
+                    normalized_supply_by_name["F1_system_scale_M"][day],
+                    places=7,
+                )
+                self.assertAlmostEqual(
+                    normalized_supply_by_name["F1_system_scale_M"][day],
+                    normalized_supply_by_name["F1_system_scale_H"][day],
+                    places=7,
+                )
+                self.assertAlmostEqual(
+                    normalized_demand_by_name["F1_system_scale_L"][day],
+                    normalized_demand_by_name["F1_system_scale_M"][day],
+                    places=7,
+                )
+                self.assertAlmostEqual(
+                    normalized_demand_by_name["F1_system_scale_M"][day],
+                    normalized_demand_by_name["F1_system_scale_H"][day],
+                    places=7,
+                )
+            self.assertAlmostEqual(
+                average_supply_ratio["F1_system_scale_L"],
+                average_supply_ratio["F1_system_scale_H"],
+                places=7,
+            )
+            self.assertAlmostEqual(
+                average_demand_ratio["F1_system_scale_L"],
+                average_demand_ratio["F1_system_scale_H"],
+                places=7,
+            )
+            self.assertAlmostEqual(
+                yard_utilisation["F1_system_scale_L"],
+                yard_utilisation["F1_system_scale_H"],
+                places=6,
+            )
+
+    def test_f2_f3_f4_use_reference_m_topology(self) -> None:
+        reference_topology = self.arc_signature(
+            scenario_generator.build_scenario("F1_system_scale_M", self.config)
+        )
+        for name in (
+            "F2_mode_tradeoff_L",
+            "F2_mode_tradeoff_M",
+            "F2_mode_tradeoff_H",
+            "F3_yard_flow_L",
+            "F3_yard_flow_M",
+            "F3_yard_flow_H",
+            "F4_operational_conflict_L",
+            "F4_operational_conflict_M",
+            "F4_operational_conflict_H",
+        ):
+            with self.subTest(name=name):
+                scenario = scenario_generator.build_scenario(name, self.config)
+                self.assertEqual(
+                    self.stage_counts(scenario),
+                    scenario_generator.SYSTEM_SCALE_PROFILES["M"],
+                )
+                self.assertEqual(len(scenario.assets), 12)
+                self.assertEqual(self.arc_signature(scenario), reference_topology)
+
+    def test_dynamic_network_connects_zones_assets_and_x1_routes(self) -> None:
+        for name in (
+            "F1_system_scale_L",
+            "F1_system_scale_M",
+            "F1_system_scale_H",
+            "F2_mode_tradeoff_M",
+            "F3_yard_flow_M",
+            "F4_operational_conflict_M",
+        ):
+            with self.subTest(name=name):
+                scenario = scenario_generator.build_scenario(name, self.config)
+                data = scenario.optimizer_objects()
+                asset_ids = {asset.asset_id for asset in scenario.assets}
+                outgoing = {arc.from_node for arc in scenario.arcs}
+                incoming = {arc.to_node for arc in scenario.arcs}
+                for asset_id in asset_ids:
+                    self.assertIn(asset_id, outgoing | incoming)
+
+                reachable_from_source = self.reachable_nodes(scenario, "RAIL_SOURCE")
+                for asset_id in asset_ids:
+                    self.assertIn(asset_id, reachable_from_source)
+                    self.assertIn(
+                        "VESSEL_SINK",
+                        self.reachable_nodes(scenario, asset_id),
+                    )
+                for zone in scenario.zones:
+                    self.assertIn(zone.zone_id, reachable_from_source)
+                    self.assertIn(
+                        "VESSEL_SINK",
+                        self.reachable_nodes(scenario, zone.zone_id),
+                    )
+
                 route = data["special_product_compatible_arcs"]["X1"]
-                assets = set(data["A"])
-                for asset in data["special_product_required_assets"]["X1"]:
-                    self.assertIn(asset, assets)
-                    self.assertEqual(data["product_asset_compatible"][("X1", asset)], 1)
                 self.assertEqual(data["arc_from"][route[0]], "RAIL_SOURCE")
                 self.assertEqual(data["arc_to"][route[-1]], "VESSEL_SINK")
                 for left, right in zip(route, route[1:]):
                     self.assertEqual(data["arc_to"][left], data["arc_from"][right])
-                self.assertIn("Z4", {data["arc_from"][arc] for arc in route} | {data["arc_to"][arc] for arc in route})
-                self.assertTrue(any(data["arc_to"][arc].startswith("SL") for arc in route))
-                if config.shiploader_count == 1:
-                    self.assertFalse(any("SL2" in item for item in route))
-                    self.assertNotIn("SL2", data["special_product_required_assets"]["X1"])
-
-    def test_single_shiploader_topology_matches_pdf_case_study_option(self) -> None:
-        config = scenario_generator.GeneratorConfig(
-            horizon_days=90,
-            seed=42,
-            shiploader_count=1,
-            shiploader_rate_tph=9166.0,
-        )
-        for name in scenario_generator.OCCASION_NAMES:
-            with self.subTest(name=name):
-                scenario = scenario_generator.build_scenario(name, config)
-                asset_ids = {asset.asset_id for asset in scenario.assets}
-                task_ids = {task.task_id for task in scenario.maintenance_tasks}
-                self.assertIn("SL1", asset_ids)
-                self.assertNotIn("SL2", asset_ids)
-                self.assertIn("M_SL1", task_ids)
-                self.assertNotIn("M_SL2", task_ids)
-                self.assertEqual(len(scenario.assets), 11)
-                self.assertEqual(len(scenario.maintenance_tasks), 11)
+                self.assertEqual(
+                    tuple(data["special_product_required_assets"]["X1"]),
+                    ("TU2", "ST3", "RC2", "SL1"),
+                )
                 self.assertTrue(
-                    scenario.design_evidence["occasion_checks"]["all_checks_pass"]
+                    set(data["special_product_required_assets"]["X1"]).issubset(
+                        asset_ids
+                    )
                 )
-                scenario.validate()
-        campaign = scenario_generator.build_scenario(
-            "priority_campaign_conflict", config
-        )
-        self.assertIn("SL1", campaign.priority_activities[0].required_assets)
-
-    def test_control_case_is_feasible_and_unchanged(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        evidence = scenario.design_evidence
-        self.assertEqual(scenario.manual_baseline, scenario.reference_schedule)
-        self.assertEqual(
-            evidence["manual_baseline_metrics"]["minimum_throughput_violation_days"],
-            0,
-        )
-        self.assertEqual(
-            evidence["manual_baseline_metrics"],
-            evidence["reference_schedule_metrics"],
-        )
-
-    def test_peak_conflict_has_a_better_reference_schedule(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "peak_export_conflict", self.config
-        )
-        baseline = scenario.design_evidence["manual_baseline_metrics"]
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(
-            reference["total_throughput_tonnes"], baseline["total_throughput_tonnes"]
-        )
-        self.assertLess(
-            reference["unmet_demand_tonnes"], baseline["unmet_demand_tonnes"]
-        )
-        self.assertEqual(reference["minimum_throughput_violation_days"], 0)
-        self.assertGreater(reference["objective_proxy"], baseline["objective_proxy"])
-
-    def test_overlapping_and_tight_windows_create_feasibility_value(self) -> None:
-        for name in ("overlapping_maintenance", "tight_lifecycle_windows"):
-            with self.subTest(name=name):
-                scenario = scenario_generator.build_scenario(name, self.config)
-                baseline = scenario.design_evidence["manual_baseline_metrics"]
-                reference = scenario.design_evidence["reference_schedule_metrics"]
-                self.assertGreater(baseline["minimum_throughput_violation_days"], 0)
-                self.assertEqual(reference["minimum_throughput_violation_days"], 0)
-                self.assertGreater(
-                    reference["objective_proxy"], baseline["objective_proxy"]
+                self.assertEqual(
+                    data["special_product_compatible_zones"]["X1"],
+                    ["Z4"],
                 )
 
-    def test_priority_campaign_is_blocked_only_by_baseline(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "priority_campaign_conflict", self.config
-        )
-        baseline = scenario.design_evidence["manual_baseline_metrics"]
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(baseline["priority_shortfall_tonnes"], 0)
-        self.assertGreater(baseline["special_product_shortfall_tonnes"], 0)
-        self.assertGreater(
-            baseline["special_product_campaign_volume_shortfall_tonnes"], 0
-        )
-        self.assertGreater(baseline["total_throughput_tonnes"], 252_000.0)
-        self.assertEqual(reference["priority_shortfall_tonnes"], 0)
-        self.assertEqual(reference["special_product_shortfall_tonnes"], 0)
-        self.assertEqual(
-            reference["special_product_campaign_volume_shortfall_tonnes"], 0
-        )
-        self.assertGreaterEqual(
-            reference["special_product_campaign_volume_tonnes"], 252_000.0
-        )
-        self.assertEqual(reference["special_product_maintenance_conflict_days"], 0)
-        self.assertGreater(reference["objective_proxy"], baseline["objective_proxy"])
-
-    def test_special_product_footprint_is_checked(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "priority_campaign_conflict", self.config
-        )
-        data = scenario.optimizer_objects()
-        self.assertIn("zone_footprint_capacity_m2", data)
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(reference["special_product_maximum_footprint_m2"], 0)
-        self.assertEqual(reference["special_product_footprint_violation_days"], 0)
-
-        oversized = scenario_generator.build_scenario("balanced_control", self.config)
-        oversized.initial_inventory["Z4"]["X1"] = 540_000.0
-        oversized_metrics = scenario_generator.evaluate_schedule(
-            oversized, oversized.manual_baseline
-        )
-        self.assertGreater(
-            oversized_metrics["special_product_footprint_violation_days"], 0
-        )
-        self.assertGreater(oversized_metrics["special_product_footprint_excess_m2"], 0)
-
-    def test_incompatible_special_product_zone_use_fails_validation(self) -> None:
-        scenario = scenario_generator.build_scenario("balanced_control", self.config)
-        scenario.initial_inventory["Z3"]["X1"] = 1_000.0
-        with self.assertRaisesRegex(ValueError, "incompatible with zone Z3"):
-            scenario.validate()
-
-    def test_new_model_ready_keys_and_json_serialization(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "priority_campaign_conflict", self.config
-        )
-        data = scenario.optimizer_objects()
-        for key in (
-            "SPECIAL_PRODUCTS",
-            "product_is_special",
-            "product_blending_allowed",
-            "special_product_requirements",
-            "special_product_tonnes_per_square_metre",
-            "special_product_minimum_reserved_footprint_m2",
-            "special_product_segregation_buffer_m2",
-            "special_product_required_assets",
-            "special_product_compatible_arcs",
-            "special_product_compatible_zones",
-            "zone_footprint_capacity_m2",
-            "product_zone_compatible",
-            "product_asset_compatible",
-            "product_arc_compatible",
-            "product_may_share_zone",
-            "special_activity_product",
-            "special_activity_required_zone",
-            "special_activity_minimum_tpd",
-            "special_activity_minimum_total_tonnes",
-            "special_activity_pre_buffer_days",
-            "special_activity_post_buffer_days",
-            "special_activity_cleanout_before_days",
-            "special_activity_cleanout_after_days",
-            "special_product_minimum_tpd",
-            "special_product_campaign_minimum_tonnes",
-        ):
-            self.assertIn(key, data)
-        self.assertNotIn("reference_schedule", data)
-        self.assertNotIn("design_evidence", data)
+    def test_json_serialization_excludes_reference_when_requested(self) -> None:
+        scenario = scenario_generator.build_scenario("F4_operational_conflict_M", self.config)
         payload = scenario.to_json_dict(include_reference_schedule=False)
         self.assertIn("model_ready_data", payload)
         self.assertNotIn("reference_schedule", payload)
         self.assertNotIn("design_evidence", payload)
         json.dumps(payload)
 
-    def test_storage_pressure_is_created_and_removed(self) -> None:
-        scenario = scenario_generator.build_scenario("yard_overflow_risk", self.config)
-        baseline = scenario.design_evidence["manual_baseline_metrics"]
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(baseline["storage_pressure_days"], 0)
-        self.assertEqual(reference["storage_pressure_days"], 0)
-        self.assertLess(
-            reference["unaccepted_supply_tonnes"], baseline["unaccepted_supply_tonnes"]
-        )
-
-    def test_inventory_starvation_reference_improves_throughput(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "inventory_starvation_risk", self.config
-        )
-        baseline = scenario.design_evidence["manual_baseline_metrics"]
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(
-            reference["total_throughput_tonnes"], baseline["total_throughput_tonnes"]
-        )
-        self.assertGreater(reference["objective_proxy"], baseline["objective_proxy"])
-
-    def test_partial_shutdown_mode_preserves_minimum_throughput(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "partial_shutdown_choice", self.config
-        )
-        baseline = {d.task_id: d for d in scenario.manual_baseline}
-        reference = {d.task_id: d for d in scenario.reference_schedule}
-        self.assertEqual(baseline["M_RC2"].mode_id, "full_shutdown")
+    def test_generation_metadata_records_seeded_realization(self) -> None:
+        scenario = scenario_generator.build_scenario("base_control", self.config)
+        generation = scenario.metadata["generation"]
+        realization = scenario.metadata["realization"]
+        self.assertEqual(generation["master_seed"], self.config.seed)
         self.assertEqual(
-            reference["M_RC2"].mode_id, scenario_generator.PARTIAL_70_MODE
+            generation["randomization_version"],
+            scenario_generator.GENERATOR_RANDOMIZATION_VERSION,
         )
-        baseline_metrics = scenario.design_evidence["manual_baseline_metrics"]
-        reference_metrics = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(baseline_metrics["minimum_throughput_violation_days"], 0)
-        self.assertEqual(reference_metrics["minimum_throughput_violation_days"], 0)
-
-    def test_fixed_schedule_is_a_negative_control(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "fixed_schedule_control", self.config
-        )
-        baseline = {d.task_id: d for d in scenario.manual_baseline}
-        self.assertEqual(scenario.manual_baseline, scenario.reference_schedule)
-        for task in scenario.maintenance_tasks:
-            self.assertEqual(task.earliest_start_day, task.latest_start_day)
-            self.assertEqual(task.earliest_start_day, baseline[task.task_id].start_day)
         self.assertEqual(
-            scenario.design_evidence["manual_baseline_metrics"],
-            scenario.design_evidence["reference_schedule_metrics"],
+            set(generation["rng_stream_names"]),
+            set(scenario_generator.RNG_STREAM_NAMES),
         )
-
-    def test_structural_infeasibility_cannot_be_scheduled_away(self) -> None:
-        scenario = scenario_generator.build_scenario(
-            "structurally_infeasible", self.config
+        self.assertEqual(
+            realization["maintenance_operation_count"],
+            len(scenario.maintenance_tasks),
         )
-        self.assertEqual(scenario.metadata["expected_feasibility"], "infeasible")
-        baseline = scenario.design_evidence["manual_baseline_metrics"]
-        reference = scenario.design_evidence["reference_schedule_metrics"]
-        self.assertGreater(baseline["minimum_throughput_violation_days"], 0)
-        self.assertGreater(reference["minimum_throughput_violation_days"], 0)
+        self.assertEqual(
+            sum(realization["maintenance_by_stage_counts"].values()),
+            len(scenario.maintenance_tasks),
+        )
+        self.assertEqual(
+            set(realization["initial_inventory_fill_ratios"]),
+            {zone.zone_id for zone in scenario.zones},
+        )
 
     def test_generate_suite_writes_manifest_and_all_cases(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -491,17 +785,31 @@ class DissertationScenarioGeneratorTests(unittest.TestCase):
                 self.config,
             )
             self.assertEqual(
-                set(generated), set(scenario_generator.OCCASION_NAMES) | {"manifest"}
+                set(generated), set(scenario_generator.SCENARIO_NAMES) | {"manifest"}
             )
             manifest = json.loads(Path(generated["manifest"]).read_text())
             self.assertEqual(
-                manifest["scenario_count"], len(scenario_generator.OCCASION_NAMES)
+                manifest["scenario_count"], len(scenario_generator.SCENARIO_NAMES)
             )
             self.assertTrue(
                 all(case["all_design_checks_pass"] for case in manifest["cases"])
+            )
+            self.assertEqual(
+                {
+                    case["scenario_name"]
+                    for case in manifest["cases"]
+                    if case["scenario_name"].startswith("F")
+                },
+                set(scenario_generator.EXPERIMENTAL_SCENARIO_NAMES),
+            )
+            self.assertEqual(
+                manifest["randomization_version"],
+                scenario_generator.GENERATOR_RANDOMIZATION_VERSION,
+            )
+            self.assertTrue(
+                all("realization" in case for case in manifest["cases"])
             )
 
 
 if __name__ == "__main__":
     unittest.main()
-

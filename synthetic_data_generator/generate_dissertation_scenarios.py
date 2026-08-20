@@ -1,45 +1,41 @@
 ﻿#!/usr/bin/env python3
-"""Standalone synthetic data generator for the dissertation optimisation model.
+"""Synthetic data generator for the dissertation optimisation scenarios.
 
-The generator creates a complete 90-day integrated maintenance-and-flow planning
-instance from first principles.  It has no dependency on an operational database
-or another software project.
+The file is organised as an experimental specification.  Scenario generation is:
 
-Two layers are deliberately separated:
+    build_scenario(name)
+        -> structural/config parameters
+        -> family treatment tables
+        -> named seeded realization streams
+        -> derived model parameters
+        -> apply_scenario_family()
+        -> validate()
+        -> build design evidence
+        -> optimizer_objects()
+        -> JSON
 
-1. Base system generation
-   Creates products, equipment, network connections, capacities, supply, demand,
-   inventory, maintenance jobs, and planning rules.
-2. Occasion generation
-   Applies a controlled event profile such as a demand peak, overlapping
-   maintenance, a priority campaign, storage pressure, inventory starvation,
-   narrow lifecycle windows, alternative maintenance modes, or structural
-   infeasibility.
+MODEL PARAMETER MAP
 
-Every scenario contains:
+Parameter                         Control source
+-----------------------------------------------------------------------
+Products G                        structural/config controlled
+Assets A, capacities C_a          F1 system-scale controlled
+Network arcs E, capacities U_ij   derived from active topology
+Yard bounds Zmin/Zmax             F1 scaled or F3 family controlled
+Initial inventory z0              F3 target ratios + common seed stream
+Supply and demand                 common seed streams
+Maintenance operation count       F1 family controlled
+Maintenance assets/durations      common maintenance-pool seed stream
+Maintenance windows e_m,l_m       common maintenance-window seed stream
+Maintenance p_mk                  common full duration + family ratios
+Maintenance eta_mk                fixed F/P30/P70 capacity fractions
+Minimum throughput mu_min         F3 peak ratio + common throughput stream
+Activity sigma_ad and h_ad        F4 family tables + F4 seed stream
 
-* ``manual_baseline``: a plausible but non-optimised maintenance plan;
-* ``reference_schedule``: a design witness used to check that an improved plan
-  exists.  It is not an optimiser result and should not be passed to the solver
-  during the experiment;
-* ``design_evidence``: a lightweight deterministic comparison that confirms the
-  intended stress mechanism is present before running the MILP or Benders model.
-
-Example
--------
-Generate all benchmark occasions::
-
-    python generate_dissertation_scenarios.py --occasion all --output-dir generated
-
-Import one scenario directly::
-
-    from generate_dissertation_scenarios import GeneratorConfig, build_scenario
-
-    scenario = build_scenario(
-        "peak_export_conflict",
-        GeneratorConfig(horizon_days=90, seed=42),
-    )
-    model_data = scenario.optimizer_objects()
+Fixed structural/config values include products and grades, product/arc
+and product/zone compatibility rules, nominal asset and arc rates,
+maintenance capacity factors, and the F2/F3/F4 level definitions.  F1
+controls physical system size and maintenance-operation count.
 """
 
 from __future__ import annotations
@@ -49,21 +45,50 @@ import hashlib
 import json
 import math
 import random
+from collections.abc import Mapping as MappingABC
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-OCCASION_NAMES = (
-    "balanced_control",
-    "peak_export_conflict",
-    "overlapping_maintenance",
-    "priority_campaign_conflict",
-    "yard_overflow_risk",
-    "inventory_starvation_risk",
-    "tight_lifecycle_windows",
-    "partial_shutdown_choice",
-    "fixed_schedule_control",
-    "structurally_infeasible",
+
+# ============================================================
+# 1. SCENARIO DEFINITIONS
+# ============================================================
+
+BASE_CONTROL_NAME = "base_control"
+EXPERIMENTAL_SCENARIO_NAMES = (
+    "F1_system_scale_L",
+    "F1_system_scale_M",
+    "F1_system_scale_H",
+    "F2_mode_tradeoff_L",
+    "F2_mode_tradeoff_M",
+    "F2_mode_tradeoff_H",
+    "F3_yard_flow_L",
+    "F3_yard_flow_M",
+    "F3_yard_flow_H",
+    "F4_operational_conflict_L",
+    "F4_operational_conflict_M",
+    "F4_operational_conflict_H",
+)
+VALIDATION_SCENARIO_NAMES = ("structurally_infeasible",)
+SCENARIO_NAMES = (
+    BASE_CONTROL_NAME,
+    *EXPERIMENTAL_SCENARIO_NAMES,
+    *VALIDATION_SCENARIO_NAMES,
+)
+# Backward-compatible name used by the existing notebook.
+OCCASION_NAMES = SCENARIO_NAMES
+
+GENERATOR_RANDOMIZATION_VERSION = "seeded_realization_v1"
+RNG_STREAM_VERSION = "named_streams_v1"
+RNG_STREAM_NAMES = (
+    "common/supply",
+    "common/demand",
+    "common/initial_inventory",
+    "common/maintenance_pool",
+    "common/maintenance_windows",
+    "common/throughput",
+    "F4/activity_windows",
 )
 
 STAGES = ("train_unloader", "stacker", "reclaimer", "shiploader")
@@ -83,10 +108,441 @@ PDF_MODE_SYMBOL = {
     PARTIAL_70_MODE: "P70",
 }
 
+MAINTENANCE_MODE_AVAILABLE_CAPACITY = {
+    FULL_SHUTDOWN_MODE: 0.0,
+    PARTIAL_30_MODE: 0.30,
+    PARTIAL_70_MODE: 0.70,
+}
 
-# ---------------------------------------------------------------------------
-# Public data objects
-# ---------------------------------------------------------------------------
+BASE_MODE_DURATION_RATIOS = {
+    FULL_SHUTDOWN_MODE: 1.00,
+    PARTIAL_30_MODE: 1.50,
+    PARTIAL_70_MODE: 3.05,
+}
+F2_MODE_DURATION_RATIOS = {
+    "L": {
+        FULL_SHUTDOWN_MODE: 1.00,
+        PARTIAL_30_MODE: 1.35,
+        PARTIAL_70_MODE: 2.45,
+    },
+    "M": {
+        FULL_SHUTDOWN_MODE: 1.00,
+        PARTIAL_30_MODE: 1.50,
+        PARTIAL_70_MODE: 3.00,
+    },
+    "H": {
+        FULL_SHUTDOWN_MODE: 1.00,
+        PARTIAL_30_MODE: 1.75,
+        PARTIAL_70_MODE: 3.45,
+    },
+}
+
+SYSTEM_SCALE_PROFILES = {
+    "L": {
+        "train_unloader": 2,
+        "stacker": 3,
+        "reclaimer": 2,
+        "shiploader": 1,
+    },
+    "M": {
+        "train_unloader": 3,
+        "stacker": 4,
+        "reclaimer": 3,
+        "shiploader": 2,
+    },
+    "H": {
+        "train_unloader": 4,
+        "stacker": 5,
+        "reclaimer": 4,
+        "shiploader": 3,
+    },
+}
+
+BASE_ZONE_CAPACITIES_TONNES = {
+    "Z1": 650_000.0,
+    "Z2": 750_000.0,
+    "Z3": 580_000.0,
+    "Z4": 500_000.0,
+}
+BASE_ZONE_MINIMUM_INVENTORY_RATIOS = {
+    "Z1": 0.070,
+    "Z2": 0.060,
+    "Z3": 0.060,
+    "Z4": 0.065,
+}
+BASE_INITIAL_INVENTORY_RATIOS = {
+    "Z1": 0.220,
+    "Z2": 0.250,
+    "Z3": 0.180,
+    "Z4": 0.160,
+}
+ZONE_ALLOWED_PRODUCTS = {
+    "Z1": ("P1", "P2"),
+    "Z2": ("P1", "P2", "P3"),
+    "Z3": ("P2", "P3"),
+    "Z4": ("X1",),
+}
+ZONE_FOOTPRINT_CAPACITY_M2 = {
+    "Z1": 260_000.0,
+    "Z2": 240_000.0,
+    "Z3": 220_000.0,
+    "Z4": 185_000.0,
+}
+ARC_ALLOWED_ALL_PRODUCTS = "__all_products__"
+NETWORK_ARC_LAYERS = {
+    "L": (
+        ("RAIL_SOURCE", "TU1", "train_unloader", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RAIL_SOURCE", "TU2", "train_unloader", ARC_ALLOWED_ALL_PRODUCTS),
+        ("TU1", "ST1", "stacker", ("P1", "P2", "P3")),
+        ("TU2", "ST2", "stacker", ("P1", "P2", "P3")),
+        ("TU1", "ST2", "secondary", ("P1", "P2", "P3")),
+        ("TU2", "ST3", "stacker", ("P2", "P3", "X1")),
+        ("TU1", "ST3", "secondary", ("P2", "P3", "X1")),
+        ("ST1", "Z1", "stacker", ZONE_ALLOWED_PRODUCTS["Z1"]),
+        ("ST1", "Z2", "secondary", ZONE_ALLOWED_PRODUCTS["Z2"]),
+        ("ST2", "Z2", "stacker", ZONE_ALLOWED_PRODUCTS["Z2"]),
+        ("ST2", "Z3", "secondary", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("ST3", "Z3", "stacker", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("ST3", "Z4", "stacker", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("Z1", "RC1", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z1"]),
+        ("Z1", "RC2", "secondary", ZONE_ALLOWED_PRODUCTS["Z1"]),
+        ("Z2", "RC2", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z2"]),
+        ("Z3", "RC2", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("Z4", "RC2", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("RC1", "SL1", "reclaimer", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RC2", "SL1", "reclaimer", ARC_ALLOWED_ALL_PRODUCTS),
+        ("SL1", "VESSEL_SINK", "shiploader", ARC_ALLOWED_ALL_PRODUCTS),
+    ),
+    "M": (
+        ("RAIL_SOURCE", "TU3", "train_unloader", ARC_ALLOWED_ALL_PRODUCTS),
+        ("TU3", "ST4", "stacker", ("P2", "P3", "X1")),
+        ("TU2", "ST4", "secondary", ("P2", "P3", "X1")),
+        ("ST4", "Z3", "secondary", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("ST4", "Z4", "stacker", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("Z2", "RC3", "secondary", ZONE_ALLOWED_PRODUCTS["Z2"]),
+        ("Z3", "RC3", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("Z4", "RC3", "secondary", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("RC2", "SL2", "secondary", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RC3", "SL1", "secondary", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RC3", "SL2", "reclaimer", ARC_ALLOWED_ALL_PRODUCTS),
+        ("SL2", "VESSEL_SINK", "shiploader", ARC_ALLOWED_ALL_PRODUCTS),
+    ),
+    "H": (
+        ("RAIL_SOURCE", "TU4", "train_unloader", ARC_ALLOWED_ALL_PRODUCTS),
+        ("TU4", "ST5", "stacker", ("P2", "P3", "X1")),
+        ("TU3", "ST5", "secondary", ("P2", "P3", "X1")),
+        ("ST5", "Z3", "secondary", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("ST5", "Z4", "stacker", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("Z2", "RC4", "secondary", ZONE_ALLOWED_PRODUCTS["Z2"]),
+        ("Z3", "RC4", "secondary", ZONE_ALLOWED_PRODUCTS["Z3"]),
+        ("Z4", "RC4", "reclaimer", ZONE_ALLOWED_PRODUCTS["Z4"]),
+        ("RC3", "SL3", "secondary", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RC4", "SL2", "secondary", ARC_ALLOWED_ALL_PRODUCTS),
+        ("RC4", "SL3", "reclaimer", ARC_ALLOWED_ALL_PRODUCTS),
+        ("SL3", "VESSEL_SINK", "shiploader", ARC_ALLOWED_ALL_PRODUCTS),
+    ),
+}
+F3_YARD_FLOW_LEVELS = {
+    "L": {
+        "zone_capacities_tonnes": {
+            "Z1": 690_000.0,
+            "Z2": 790_000.0,
+            "Z3": 610_000.0,
+            "Z4": 500_000.0,
+        },
+        "minimum_inventory_ratios": {
+            "Z1": 0.050,
+            "Z2": 0.052,
+            "Z3": 0.050,
+            "Z4": 0.055,
+        },
+        "initial_inventory_ratios": {
+            "Z1": 0.280,
+            "Z2": 0.300,
+            "Z3": 0.260,
+            "Z4": 0.220,
+        },
+        "throughput_peak_ratio": 0.70,
+    },
+    "M": {
+        "zone_capacities_tonnes": BASE_ZONE_CAPACITIES_TONNES,
+        "minimum_inventory_ratios": {
+            "Z1": 0.070,
+            "Z2": 0.070,
+            "Z3": 0.068,
+            "Z4": 0.070,
+        },
+        "initial_inventory_ratios": {
+            "Z1": 0.220,
+            "Z2": 0.245,
+            "Z3": 0.190,
+            "Z4": 0.170,
+        },
+        "throughput_peak_ratio": 0.80,
+    },
+    "H": {
+        "zone_capacities_tonnes": {
+            "Z1": 620_000.0,
+            "Z2": 720_000.0,
+            "Z3": 560_000.0,
+            "Z4": 500_000.0,
+        },
+        "minimum_inventory_ratios": {
+            "Z1": 0.090,
+            "Z2": 0.085,
+            "Z3": 0.092,
+            "Z4": 0.090,
+        },
+        "initial_inventory_ratios": {
+            "Z1": 0.160,
+            "Z2": 0.185,
+            "Z3": 0.145,
+            "Z4": 0.160,
+        },
+        "throughput_peak_ratio": 0.885,
+    },
+}
+
+BASE_THROUGHPUT_PEAK_RATIO = 0.855
+THROUGHPUT_PROFILE_JITTER_FRACTION = 0.006
+THROUGHPUT_SEGMENT_END_DAY_FOR_90_DAY_HORIZON = (15, 35, 50, 65, 78, 90)
+THROUGHPUT_SEGMENT_RATIOS_BY_PEAK_CLASS = {
+    "LOW_PEAK": (0.525, 0.635, "PEAK", 0.595, 0.670, 0.575),
+    "MEDIUM_PEAK": (0.530, 0.670, "PEAK", 0.625, 0.765, 0.600),
+    "HIGH_PEAK": (0.535, 0.685, "PEAK", 0.635, 0.795, 0.610),
+}
+
+INITIAL_INVENTORY_FILL_RATIO_JITTER = 0.012
+INITIAL_INVENTORY_PRODUCT_MIX_JITTER_FRACTION = 0.08
+
+MAINTENANCE_LEVEL_ORDER = {"L": 0, "M": 1, "H": 2}
+MAINTENANCE_WINDOW_EM_JITTER_DAYS = 4
+MAINTENANCE_WINDOW_DUE_BUFFER_RANGE_DAYS = (0, 3)
+MAINTENANCE_WINDOW_SAFETY_DURATION_RATIO = max(
+    max(BASE_MODE_DURATION_RATIOS.values()),
+    max(value for ratios in F2_MODE_DURATION_RATIOS.values() for value in ratios.values()),
+)
+
+# The maintenance template pool preserves the old stage composition and
+# effective counts.  entry_level defines the nested F1 pool:
+# L subset M subset H.  Durations/windows are calibrated around the old
+# calendar placements but realized by the seed.
+MAINTENANCE_TEMPLATE_POOL = (
+    {
+        "template_id": "LOW_TU_EARLY",
+        "entry_level": "L",
+        "stage": "train_unloader",
+        "task_class": "major",
+        "calendar_region": (10, 30),
+        "full_duration_candidates": (4, 5, 6),
+        "window_width_range": (18, 24),
+    },
+    {
+        "template_id": "LOW_TU_MID",
+        "entry_level": "L",
+        "stage": "train_unloader",
+        "task_class": "major",
+        "calendar_region": (14, 36),
+        "full_duration_candidates": (4, 5, 6),
+        "window_width_range": (20, 26),
+    },
+    {
+        "template_id": "LOW_ST_EARLY",
+        "entry_level": "L",
+        "stage": "stacker",
+        "task_class": "modular",
+        "calendar_region": (18, 32),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (12, 17),
+    },
+    {
+        "template_id": "LOW_ST_LATE",
+        "entry_level": "L",
+        "stage": "stacker",
+        "task_class": "modular",
+        "calendar_region": (55, 62),
+        "full_duration_candidates": (2, 3, 4),
+        "window_width_range": (7, 10),
+    },
+    {
+        "template_id": "LOW_RC_EARLY",
+        "entry_level": "L",
+        "stage": "reclaimer",
+        "task_class": "major",
+        "calendar_region": (24, 38),
+        "full_duration_candidates": (4, 5, 6),
+        "window_width_range": (12, 17),
+    },
+    {
+        "template_id": "LOW_RC_MID",
+        "entry_level": "L",
+        "stage": "reclaimer",
+        "task_class": "major",
+        "calendar_region": (35, 55),
+        "full_duration_candidates": (5, 6, 7),
+        "window_width_range": (18, 23),
+    },
+    {
+        "template_id": "LOW_RC_LATE",
+        "entry_level": "L",
+        "stage": "reclaimer",
+        "task_class": "major",
+        "calendar_region": (60, 67),
+        "full_duration_candidates": (2, 3, 4),
+        "window_width_range": (7, 10),
+    },
+    {
+        "template_id": "LOW_SL",
+        "entry_level": "L",
+        "stage": "shiploader",
+        "task_class": "major",
+        "calendar_region": (42, 57),
+        "full_duration_candidates": (3, 4),
+        "window_width_range": (13, 18),
+    },
+    {
+        "template_id": "M_ST_MID",
+        "entry_level": "M",
+        "stage": "stacker",
+        "task_class": "modular",
+        "calendar_region": (30, 42),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (11, 15),
+    },
+    {
+        "template_id": "M_TU_LATE",
+        "entry_level": "M",
+        "stage": "train_unloader",
+        "task_class": "major",
+        "calendar_region": (48, 70),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (19, 24),
+    },
+    {
+        "template_id": "M_ST_X1",
+        "entry_level": "M",
+        "stage": "stacker",
+        "task_class": "modular",
+        "calendar_region": (44, 58),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (12, 17),
+    },
+    {
+        "template_id": "M_SL_SECOND",
+        "entry_level": "M",
+        "stage": "shiploader",
+        "task_class": "major",
+        "calendar_region": (70, 77),
+        "full_duration_candidates": (2, 3),
+        "window_width_range": (7, 10),
+        "min_shiploader_count": 2,
+    },
+    {
+        "template_id": "H_RC_EARLY",
+        "entry_level": "H",
+        "stage": "reclaimer",
+        "task_class": "follow_up",
+        "calendar_region": (8, 24),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (14, 19),
+    },
+    {
+        "template_id": "H_ST_MID",
+        "entry_level": "H",
+        "stage": "stacker",
+        "task_class": "follow_up",
+        "calendar_region": (22, 39),
+        "full_duration_candidates": (2, 3, 4),
+        "window_width_range": (15, 20),
+    },
+    {
+        "template_id": "H_TU_MID",
+        "entry_level": "H",
+        "stage": "train_unloader",
+        "task_class": "follow_up",
+        "calendar_region": (34, 53),
+        "full_duration_candidates": (3, 4, 5),
+        "window_width_range": (17, 22),
+    },
+    {
+        "template_id": "H_SL_LATE",
+        "entry_level": "H",
+        "stage": "shiploader",
+        "task_class": "follow_up",
+        "calendar_region": (54, 77),
+        "full_duration_candidates": (2, 3),
+        "window_width_range": (20, 25),
+    },
+)
+
+F4_LEVEL_SETTINGS = {
+    "L": {
+        "event_1_incompatible": False,
+        "event_2_incompatible": False,
+        "event_2_capacity_factor": 0.90,
+        "event_3_capacity_factor": 0.92,
+        "buffer_days": 0,
+        "include_event_3": False,
+    },
+    "M": {
+        "event_1_incompatible": False,
+        "event_2_incompatible": True,
+        "event_2_capacity_factor": 0.86,
+        "event_3_capacity_factor": 0.88,
+        "buffer_days": 0,
+        "include_event_3": True,
+    },
+    "H": {
+        "event_1_incompatible": False,
+        "event_2_incompatible": True,
+        "event_2_capacity_factor": 0.82,
+        "event_3_capacity_factor": 0.84,
+        "buffer_days": 0,
+        "include_event_3": True,
+    },
+}
+F4_ACTIVITY_WINDOWS = [
+    {
+        "activity_id": "PA_EXPORT_WINDOW_1",
+        "start_day_range": (28, 32),
+        "duration_range": (6, 8),
+        "asset_group": "DOWNSTREAM_EXPORT",
+        "capacity_factor": 0.85,
+        "maintenance_incompatible_from_level": "event_1_incompatible",
+        "buffer_from_level_when_incompatible": True,
+    },
+    {
+        "activity_id": "PA_X1_ROUTE_WINDOW",
+        "start_day_range": (46, 50),
+        "duration_range": (8, 10),
+        "asset_group": "X1_ROUTE",
+        "capacity_factor_from_level": "event_2_capacity_factor",
+        "maintenance_incompatible_from_level": "event_2_incompatible",
+        "buffer_from_level": True,
+    },
+    {
+        "activity_id": "PA_EXPORT_WINDOW_3",
+        "start_day_range": (66, 70),
+        "duration_range": (6, 8),
+        "asset_group": "DOWNSTREAM_EXPORT",
+        "capacity_factor_from_level": "event_3_capacity_factor",
+        "maintenance_incompatible": False,
+        "include_from_level": "include_event_3",
+    },
+]
+F4_MAINTENANCE_PRE_ACTIVITY_RANGE_DAYS = (10, 14)
+F4_MAINTENANCE_POST_ACTIVITY_RANGE_DAYS = (12, 16)
+F4_MAINTENANCE_TARGETS_BY_ACTIVITY = {
+    "PA_EXPORT_WINDOW_1": ("downstream_export", 2),
+    "PA_X1_ROUTE_WINDOW": ("x1_route_upstream", 2),
+    "PA_EXPORT_WINDOW_3": ("downstream_export", 1),
+}
+STRUCTURAL_INFEASIBLE_MIN_THROUGHPUT_RATE_TPH = 12_000.0
+
+
+# ============================================================
+# 2. DATA CLASSES
+# ============================================================
 
 
 @dataclass(frozen=True)
@@ -95,18 +551,11 @@ class GeneratorConfig:
 
     horizon_days: int = 90
     seed: int = 42
-    minimum_throughput_ratio: float = 0.55
     base_supply_tpd: float = 178_000.0
     base_demand_tpd: float = 184_000.0
     noise_fraction: float = 0.035
-    initial_inventory_fill_ratio: float = 0.48
     number_of_products: int = 4
     operating_hours_per_day: float = 24.0  # Hours of operation per day
-    shiploader_count: int = 2
-
-    # The current PDF's initial case-study sentence mentions one shiploader,
-    # while the existing synthetic benchmark uses two. Both topologies are
-    # supported; set shiploader_count=1 to mirror the PDF case study exactly.
 
     # Asset flow rates in tonnes per hour (t/hr)
     train_unloader_rate_tph: float = 2917.0
@@ -117,24 +566,15 @@ class GeneratorConfig:
     # Arc flow rates in tonnes per hour (t/hr) - secondary connections
     arc_secondary_rate_tph: float = 1875.0  # For cross-connections between stages
 
-    # Yard zone capacity in tonnes
-    zone_capacity_tonnes: float = 800_000.0
-
     def validate(self) -> None:
         if self.horizon_days < 60:
-            raise ValueError("horizon_days must be at least 60 for these occasions")
+            raise ValueError("horizon_days must be at least 60 for these scenarios")
         if self.number_of_products != 4:
             raise ValueError("the benchmark currently defines exactly four products")
-        if not 0.0 < self.minimum_throughput_ratio <= 1.0:
-            raise ValueError("minimum_throughput_ratio must be in (0, 1]")
         if not 0.0 <= self.noise_fraction <= 0.25:
             raise ValueError("noise_fraction must be between 0 and 0.25")
-        if not 0.0 < self.initial_inventory_fill_ratio < 1.0:
-            raise ValueError("initial_inventory_fill_ratio must be in (0, 1)")
         if not 0.0 < self.operating_hours_per_day <= 24.0:
             raise ValueError("operating_hours_per_day must be in (0, 24]")
-        if self.shiploader_count not in (1, 2):
-            raise ValueError("shiploader_count must be either 1 or 2")
         if self.train_unloader_rate_tph <= 0:
             raise ValueError("train_unloader_rate_tph must be positive")
         if self.stacker_rate_tph <= 0:
@@ -145,8 +585,6 @@ class GeneratorConfig:
             raise ValueError("shiploader_rate_tph must be positive")
         if self.arc_secondary_rate_tph <= 0:
             raise ValueError("arc_secondary_rate_tph must be positive")
-        if self.zone_capacity_tonnes <= 0:
-            raise ValueError("zone_capacity_tonnes must be positive")
 
 
 @dataclass(frozen=True)
@@ -341,6 +779,10 @@ class DissertationScenario:
     objective_parameters: dict[str, float]
     design_evidence: dict[str, Any] = field(default_factory=dict)
 
+    # ============================================================
+    # 7. VALIDATION
+    # ============================================================
+
     def validate(self) -> None:
         """Raise ``ValueError`` when the generated instance is inconsistent."""
         horizon = len(self.days)
@@ -443,6 +885,7 @@ class DissertationScenario:
 
         task_ids: set[str] = set()
         task_by_id: dict[str, MaintenanceTask] = {}
+        expected_mode_order: tuple[str, ...] | None = None
         for task in self.maintenance_tasks:
             if task.task_id in task_ids:
                 raise ValueError(f"duplicate task ID {task.task_id}")
@@ -452,12 +895,17 @@ class DissertationScenario:
                 raise ValueError(f"task {task.task_id} references unknown asset")
             if not task.modes:
                 raise ValueError(f"task {task.task_id} has no maintenance mode")
-            mode_ids = {m.mode_id for m in task.modes}
-            if len(mode_ids) != len(task.modes):
+            mode_order = tuple(m.mode_id for m in task.modes)
+            mode_ids = set(mode_order)
+            if len(mode_ids) != len(mode_order):
                 raise ValueError(f"task {task.task_id} has duplicate modes")
-            if mode_ids != set(MAINTENANCE_MODE_ORDER):
+            if not mode_ids.issubset(PDF_MODE_SYMBOL):
+                raise ValueError(f"task {task.task_id} has unsupported modes")
+            if expected_mode_order is None:
+                expected_mode_order = mode_order
+            elif mode_order != expected_mode_order:
                 raise ValueError(
-                    f"task {task.task_id} must define F, P30 and P70 modes"
+                    f"task {task.task_id} uses a different mode set/order"
                 )
             max_duration = max(m.duration_days for m in task.modes)
             if not (
@@ -710,15 +1158,33 @@ class DissertationScenario:
             if decision.start_day + mode.duration_days - 1 > task.lifecycle_due_day:
                 raise ValueError(f"lifecycle due day violated in {name}: {decision}")
 
-    def to_json_dict(self, include_reference_schedule: bool = True) -> dict[str, Any]:
+    def to_json_dict(
+    self,
+    include_reference_schedule: bool = False,
+) -> dict[str, Any]:
         """Return a JSON-serialisable representation of the scenario."""
         self.validate()
+
         payload = asdict(self)
         payload["model_ready_data"] = _json_safe(self.optimizer_objects())
+
         if not include_reference_schedule:
+            # Construction/validation schedules must not be supplied to MILP or BD.
+            payload.pop("manual_baseline", None)
             payload.pop("reference_schedule", None)
             payload.pop("design_evidence", None)
+
+            model_ready = payload.get("model_ready_data")
+            if isinstance(model_ready, dict):
+                model_ready.pop("manual_baseline", None)
+                model_ready.pop("reference_schedule", None)
+                model_ready.pop("design_evidence", None)
+
         return payload
+
+    # ============================================================
+    # 6. MODEL EXPORT
+    # ============================================================
 
     def optimizer_objects(self) -> dict[str, Any]:
         """Return model-ready data aligned with the current mathematical PDF.
@@ -739,13 +1205,14 @@ class DissertationScenario:
         tasks = [task.task_id for task in self.maintenance_tasks]
         activities = [activity.activity_id for activity in self.priority_activities]
         nodes = ["RAIL_SOURCE", *assets, *zones, "VESSEL_SINK"]
+        scenario_mode_order = get_scenario_mode_order(self.maintenance_tasks)
         modes = {
             task.task_id: [mode.mode_id for mode in task.modes]
             for task in self.maintenance_tasks
         }
 
-        supply = _records_to_dense(self.inbound_supply, products, self.days)
-        demand = _records_to_dense(self.outbound_demand, products, self.days)
+        supply = build_dense_product_quantity_map(self.inbound_supply, products, self.days)
+        demand = build_dense_product_quantity_map(self.outbound_demand, products, self.days)
         asset_rate = {
             (asset.asset_id, day): asset.nominal_rate_tph
             for asset in self.assets
@@ -783,8 +1250,8 @@ class DissertationScenario:
             for activity in self.priority_activities
             for day in range(activity.start_day, activity.end_day)
         }
-        sigma, incompatible = _special_activity_profiles(self)
-        predecessors, successors = _network_neighbours(self.arcs, nodes)
+        sigma, incompatible = build_operational_activity_profiles(self)
+        predecessors, successors = build_network_adjacency_maps(self.arcs, nodes)
         maintenance_by_asset = {
             asset: [
                 task.task_id
@@ -862,8 +1329,10 @@ class DissertationScenario:
             "H": activities,
             "W_m": feasible_maintenance_starts,
             "W_h": feasible_activity_starts,
-            "K": list(MAINTENANCE_MODE_ORDER),
-            "K_symbol": dict(PDF_MODE_SYMBOL),
+            "K": list(scenario_mode_order),
+            "K_symbol": {
+                mode_id: PDF_MODE_SYMBOL[mode_id] for mode_id in scenario_mode_order
+            },
             "predecessors": predecessors,
             "successors": successors,
             # Legacy aliases retained for existing Gurobi/Pyomo code.
@@ -1053,13 +1522,13 @@ class DissertationScenario:
                 activity.activity_id: activity.minimum_total_tonnes
                 for activity in self.priority_activities
             },
-            "manual_baseline": {
-                decision.task_id: {
-                    "start_day": decision.start_day,
-                    "mode_id": decision.mode_id,
-                }
-                for decision in self.manual_baseline
-            },
+            # "manual_baseline": {
+            #     decision.task_id: {
+            #         "start_day": decision.start_day,
+            #         "mode_id": decision.mode_id,
+            #     }
+            #     for decision in self.manual_baseline
+            # },
             "objective_parameters": dict(self.objective_parameters),
             "objective_definition": {
                 "sense": "maximize",
@@ -1084,26 +1553,33 @@ class DissertationScenario:
         }
 
 
-# ---------------------------------------------------------------------------
-# Base system generation
-# ---------------------------------------------------------------------------
+# ============================================================
+# 3. MAIN SCENARIO BUILDER
+# ============================================================
+
+
+def get_scenario_mode_order(tasks: Sequence[MaintenanceTask]) -> tuple[str, ...]:
+    if not tasks:
+        return MAINTENANCE_MODE_ORDER
+    return tuple(mode.mode_id for mode in tasks[0].modes)
 
 
 def build_scenario(
-    occasion: str,
+    scenario_name: str,
     config: GeneratorConfig | None = None,
 ) -> DissertationScenario:
-    """Build one complete synthetic scenario for a named occasion."""
+    """Build one complete synthetic scenario."""
     config = config or GeneratorConfig()
     config.validate()
-    if occasion not in OCCASION_NAMES:
+    if scenario_name not in SCENARIO_NAMES:
         raise ValueError(
-            f"unknown occasion {occasion!r}; choose one of {', '.join(OCCASION_NAMES)}"
+            f"unknown scenario {scenario_name!r}; choose one of {', '.join(SCENARIO_NAMES)}"
         )
 
-    rng = random.Random(_stable_seed(config.seed, occasion))
-    scenario = _build_base_scenario(config, rng, occasion)
-    scenario = _apply_occasion(scenario, occasion, config, rng)
+    rng_streams = make_rng_streams(config.seed)
+    scenario = build_base_scenario(config, scenario_name, rng_streams)
+    scenario = apply_scenario_family(scenario, scenario_name, config, rng_streams)
+    update_realization_metadata(scenario, config)
     scenario.validate()
 
     baseline_metrics = evaluate_schedule(scenario, scenario.manual_baseline)
@@ -1114,24 +1590,158 @@ def build_scenario(
             "not an optimal solution. Final claims must compare the solver result "
             "against the manual baseline."
         ),
+        "effective_network_capacity_tph": scenario.metadata[
+            "effective_network_capacity_tph"
+        ],
+        "reference_effective_network_capacity_tph": scenario.metadata[
+            "reference_effective_network_capacity_tph"
+        ],
+        "system_scale_factor": scenario.metadata["system_scale_factor"],
         "manual_baseline_metrics": baseline_metrics,
         "reference_schedule_metrics": reference_metrics,
         "reference_minus_baseline": _metric_delta(reference_metrics, baseline_metrics),
-        "occasion_checks": _occasion_checks(
-            occasion, scenario, baseline_metrics, reference_metrics
+        "occasion_checks": validate_scenario_design(
+            scenario_name, scenario, baseline_metrics, reference_metrics
         ),
     }
     return scenario
 
 
-def _build_base_scenario(
-    config: GeneratorConfig,
+def get_scenario_level(scenario_name: str) -> str:
+    return (
+        scenario_name.rsplit("_", 1)[-1]
+        if scenario_name.endswith(("_L", "_M", "_H"))
+        else ""
+    )
+
+
+def get_system_scale_level(scenario_name: str) -> str:
+    return (
+        get_scenario_level(scenario_name)
+        if scenario_name.startswith("F1_system_scale_")
+        else "M"
+    )
+
+
+def get_system_scale_profile(scenario_name: str) -> dict[str, int]:
+    return dict(SYSTEM_SCALE_PROFILES[get_system_scale_level(scenario_name)])
+
+
+def get_maintenance_mode_order_and_duration_ratios(
+    scenario_name: str,
+) -> tuple[tuple[str, ...], dict[str, float]]:
+    if scenario_name.startswith("F2_mode_tradeoff_"):
+        return (
+            MAINTENANCE_MODE_ORDER,
+            F2_MODE_DURATION_RATIOS[get_scenario_level(scenario_name)],
+        )
+    return MAINTENANCE_MODE_ORDER, BASE_MODE_DURATION_RATIOS
+
+
+def get_maintenance_mode_available_capacity_fraction(mode_id: str) -> float:
+    return MAINTENANCE_MODE_AVAILABLE_CAPACITY[mode_id]
+
+
+# ============================================================
+# 4. COMMON BASE DATA
+# ============================================================
+
+
+def get_zone_capacities_tonnes(
+    scenario_name: str,
+    system_scale_factor: float = 1.0,
+) -> dict[str, float]:
+    if scenario_name.startswith("F3_yard_flow_"):
+        return dict(F3_YARD_FLOW_LEVELS[get_scenario_level(scenario_name)]["zone_capacities_tonnes"])
+    capacities = dict(BASE_ZONE_CAPACITIES_TONNES)
+    if scenario_name.startswith("F1_system_scale_"):
+        capacities = {
+            zone_id: round(capacity * system_scale_factor, 3)
+            for zone_id, capacity in capacities.items()
+        }
+    return capacities
+
+
+def get_zone_minimum_inventory_ratios(scenario_name: str) -> dict[str, float]:
+    if scenario_name.startswith("F3_yard_flow_"):
+        return dict(F3_YARD_FLOW_LEVELS[get_scenario_level(scenario_name)]["minimum_inventory_ratios"])
+    return dict(BASE_ZONE_MINIMUM_INVENTORY_RATIOS)
+
+
+def get_zone_initial_inventory_ratios(scenario_name: str) -> dict[str, float]:
+    if scenario_name.startswith("F3_yard_flow_"):
+        return dict(F3_YARD_FLOW_LEVELS[get_scenario_level(scenario_name)]["initial_inventory_ratios"])
+    return dict(BASE_INITIAL_INVENTORY_RATIOS)
+
+
+def build_yard_zones(
+    scenario_name: str,
+    system_scale_factor: float = 1.0,
+) -> list[YardZone]:
+    capacities = get_zone_capacities_tonnes(scenario_name, system_scale_factor)
+    minimum_ratios = get_zone_minimum_inventory_ratios(scenario_name)
+    footprint_scale = system_scale_factor if scenario_name.startswith("F1_system_scale_") else 1.0
+    return [
+        YardZone(
+            zone_id,
+            capacities[zone_id],
+            ZONE_ALLOWED_PRODUCTS[zone_id],
+            round(ZONE_FOOTPRINT_CAPACITY_M2[zone_id] * footprint_scale, 3),
+            round(capacities[zone_id] * minimum_ratios[zone_id], 3),
+        )
+        for zone_id in ("Z1", "Z2", "Z3", "Z4")
+    ]
+
+
+def get_minimum_throughput_peak_ratio(scenario_name: str) -> float:
+    if scenario_name.startswith("F3_yard_flow_"):
+        return float(F3_YARD_FLOW_LEVELS[get_scenario_level(scenario_name)]["throughput_peak_ratio"])
+    return BASE_THROUGHPUT_PEAK_RATIO
+
+
+def build_minimum_throughput_profile(
+    *,
+    days: Sequence[int],
+    nominal_system_rate_tph: float,
+    peak_ratio: float,
     rng: random.Random,
-    occasion: str,
-) -> DissertationScenario:
-    # Define grade specifications for iron ore products
-    # Based on typical iron ore chemical composition ranges
-    normal_1_grades = (  # Synthetic normal product 1 grade envelope
+) -> dict[int, float]:
+    horizon = len(days)
+    boundaries = [
+        max(index + 1, round(horizon * end_day / 90))
+        for index, end_day in enumerate(THROUGHPUT_SEGMENT_END_DAY_FOR_90_DAY_HORIZON[:-1])
+    ]
+    boundaries.append(horizon)
+    if peak_ratio <= 0.72:
+        segment_ratios = THROUGHPUT_SEGMENT_RATIOS_BY_PEAK_CLASS["LOW_PEAK"]
+    elif peak_ratio <= 0.82:
+        segment_ratios = THROUGHPUT_SEGMENT_RATIOS_BY_PEAK_CLASS["MEDIUM_PEAK"]
+    else:
+        segment_ratios = THROUGHPUT_SEGMENT_RATIOS_BY_PEAK_CLASS["HIGH_PEAK"]
+
+    profile: dict[int, float] = {}
+    for day in days:
+        segment = next(index for index, upper in enumerate(boundaries) if day < upper)
+        base_ratio = segment_ratios[segment]
+        segment_ratio = peak_ratio if base_ratio == "PEAK" else float(base_ratio)
+        deterministic_variation = (
+            0.008 * math.sin(2.0 * math.pi * day / 9.0)
+            + 0.004 * math.sin(2.0 * math.pi * day / 17.0 + 0.7)
+        )
+        seeded_variation = rng.uniform(
+            -THROUGHPUT_PROFILE_JITTER_FRACTION,
+            THROUGHPUT_PROFILE_JITTER_FRACTION,
+        )
+        ratio = max(
+            0.0,
+            min(0.95, segment_ratio + deterministic_variation + seeded_variation),
+        )
+        profile[day] = round(nominal_system_rate_tph * ratio, 3)
+    return profile
+
+
+def build_products() -> list[Product]:
+    normal_1_grades = (
         GradeSpec("FE", 57.5, 57.0, 58.0),
         GradeSpec("SIO2", 5.5, 5.0, 6.0),
         GradeSpec("AL2O3", 2.1, 1.8, 2.4),
@@ -1140,7 +1750,7 @@ def _build_base_scenario(
         GradeSpec("AS", 0.005, 0.002, 0.010),
         GradeSpec("LOI", 7.7, 7.2, 8.2),
     )
-    normal_2_grades = (  # Synthetic normal product 2 grade envelope
+    normal_2_grades = (
         GradeSpec("FE", 56.8, 56.3, 57.3),
         GradeSpec("SIO2", 5.9, 5.5, 6.5),
         GradeSpec("AL2O3", 2.7, 2.4, 3.2),
@@ -1149,7 +1759,7 @@ def _build_base_scenario(
         GradeSpec("AS", 0.006, 0.002, 0.012),
         GradeSpec("LOI", 7.4, 7.0, 8.0),
     )
-    normal_3_grades = (  # Synthetic normal product 3 grade envelope
+    normal_3_grades = (
         GradeSpec("FE", 60.3, 59.7, 60.8),
         GradeSpec("SIO2", 4.3, 3.8, 4.8),
         GradeSpec("AL2O3", 2.4, 2.1, 2.7),
@@ -1158,7 +1768,7 @@ def _build_base_scenario(
         GradeSpec("AS", 0.003, 0.002, 0.005),
         GradeSpec("LOI", 5.3, 5.0, 5.7),
     )
-    special_x1_grades = (  # Synthetic special product X1 grade envelope
+    special_x1_grades = (
         GradeSpec("FE", 57.2, 56.8, 57.6),
         GradeSpec("SIO2", 5.7, 5.2, 6.2),
         GradeSpec("AL2O3", 1.8, 1.6, 2.0),
@@ -1167,8 +1777,7 @@ def _build_base_scenario(
         GradeSpec("AS", 0.003, 0.002, 0.005),
         GradeSpec("LOI", 9.6, 9.0, 10.2),
     )
-
-    products = [
+    return [
         Product("P1", "Normal Product 1", 0.38, normal_1_grades),
         Product("P2", "Normal Product 2", 0.30, normal_2_grades),
         Product("P3", "Normal Product 3", 0.20, normal_3_grades),
@@ -1181,83 +1790,175 @@ def _build_base_scenario(
             blending_allowed=False,
         ),
     ]
+
+
+def build_assets(config: GeneratorConfig, scenario_name: str) -> list[Asset]:
+    return build_assets_for_profile(config, get_system_scale_profile(scenario_name))
+
+
+def build_assets_for_profile(
+    config: GeneratorConfig,
+    profile: Mapping[str, int],
+) -> list[Asset]:
+    asset_specs = (
+        ("TU", "train_unloader", config.train_unloader_rate_tph, "Train unloader"),
+        ("ST", "stacker", config.stacker_rate_tph, "Stacker"),
+        ("RC", "reclaimer", config.reclaimer_rate_tph, "Reclaimer"),
+        ("SL", "shiploader", config.shiploader_rate_tph, "Shiploader"),
+    )
+    assets: list[Asset] = []
+    for prefix, stage, rate, label in asset_specs:
+        for index in range(1, profile[stage] + 1):
+            assets.append(
+                Asset(
+                    f"{prefix}{index}",
+                    stage,
+                    rate,
+                    f"{label} {index}",
+                )
+            )
+    return assets
+
+
+def calculate_nominal_stage_rate_for_profile(
+    config: GeneratorConfig,
+    profile: Mapping[str, int],
+) -> dict[str, float]:
+    rate_by_stage = {
+        "train_unloader": config.train_unloader_rate_tph,
+        "stacker": config.stacker_rate_tph,
+        "reclaimer": config.reclaimer_rate_tph,
+        "shiploader": config.shiploader_rate_tph,
+    }
+    return {
+        stage: profile[stage] * rate_by_stage[stage]
+        for stage in STAGES
+    }
+
+
+def calculate_nominal_system_rate_for_profile(
+    config: GeneratorConfig,
+    profile: Mapping[str, int],
+) -> float:
+    return min(calculate_nominal_stage_rate_for_profile(config, profile).values())
+
+
+def get_reference_nominal_system_rate_tph(config: GeneratorConfig) -> float:
+    return calculate_nominal_system_rate_for_profile(
+        config,
+        SYSTEM_SCALE_PROFILES["M"],
+    )
+
+
+def get_reference_effective_network_capacity_tph(
+    config: GeneratorConfig,
+    products: Sequence[str] | None = None,
+) -> float:
+    product_ids = tuple(products) if products is not None else tuple(
+        product.product_id for product in build_products()
+    )
+    assets = build_assets_for_profile(config, SYSTEM_SCALE_PROFILES["M"])
+    arcs = build_network_arcs(product_ids, assets, config)
+    return calculate_effective_network_capacity_tph(assets, arcs)
+
+
+def get_system_scale_factor(
+    config: GeneratorConfig,
+    scenario_name: str,
+    products: Sequence[str] | None = None,
+) -> float:
+    product_ids = tuple(products) if products is not None else tuple(
+        product.product_id for product in build_products()
+    )
+    assets = build_assets(config, scenario_name)
+    arcs = build_network_arcs(product_ids, assets, config)
+    reference_capacity = get_reference_effective_network_capacity_tph(
+        config,
+        product_ids,
+    )
+    return calculate_effective_network_capacity_tph(assets, arcs) / reference_capacity
+
+
+def build_base_scenario(
+    config: GeneratorConfig,
+    scenario_name: str,
+    rng_streams: Mapping[str, random.Random],
+) -> DissertationScenario:
+    products = build_products()
     product_ids = tuple(p.product_id for p in products)
 
-    zones = [
-        YardZone("Z1", config.zone_capacity_tonnes, ("P1", "P2"), 260_000.0),
-        YardZone("Z2", config.zone_capacity_tonnes, ("P1", "P2", "P3"), 240_000.0),
-        YardZone("Z3", config.zone_capacity_tonnes, ("P2", "P3"), 220_000.0),
-        YardZone("Z4", config.zone_capacity_tonnes, ("X1",), 185_000.0),
-    ]
-
-    # Rates in tonnes per hour (t/hr) for continuous flow model
-    tu_rate = config.train_unloader_rate_tph
-    st_rate = config.stacker_rate_tph
-    rc_rate = config.reclaimer_rate_tph
-    sl_rate = config.shiploader_rate_tph
-
-    assets = [
-        Asset("TU1", "train_unloader", tu_rate, "Train unloader 1"),
-        Asset("TU2", "train_unloader", tu_rate, "Train unloader 2"),
-        Asset("TU3", "train_unloader", tu_rate, "Train unloader 3"),
-        Asset("ST1", "stacker", st_rate, "Stacker serving zone 1"),
-        Asset("ST2", "stacker", st_rate, "Stacker serving zone 2"),
-        Asset("ST3", "stacker", st_rate, "Stacker serving zone 3"),
-        Asset("ST4", "stacker", st_rate, "Stacker serving zone 4"),
-        Asset("RC1", "reclaimer", rc_rate, "Reclaimer serving zones 1 and 2"),
-        Asset("RC2", "reclaimer", rc_rate, "Reclaimer serving zones 2 and 3"),
-        Asset("RC3", "reclaimer", rc_rate, "Reclaimer serving zones 3 and 4"),
-    ]
-    assets.extend(
-        Asset(
-            f"SL{index}",
-            "shiploader",
-            sl_rate,
-            f"Shiploader {index}",
-        )
-        for index in range(1, config.shiploader_count + 1)
+    assets = build_assets(config, scenario_name)
+    arcs = build_network_arcs(product_ids, assets, config)
+    effective_network_capacity = calculate_effective_network_capacity_tph(assets, arcs)
+    reference_effective_network_capacity = get_reference_effective_network_capacity_tph(
+        config,
+        product_ids,
     )
+    system_scale_factor = effective_network_capacity / reference_effective_network_capacity
 
-    arcs = _build_network_arcs(product_ids, config)
-    special_requirements = _build_special_product_requirements(config)
+    zones = build_yard_zones(scenario_name, system_scale_factor)
+    special_requirements = build_special_product_requirements(
+    config,
+    assets,
+    system_scale_factor=system_scale_factor,
+    )
     days = list(range(config.horizon_days))
 
-    supply = _generate_daily_profile(
+    supply = build_daily_product_profile(
         days=days,
         products=products,
-        base_total=config.base_supply_tpd,
+        base_total=config.base_supply_tpd * system_scale_factor,
         noise_fraction=config.noise_fraction,
-        rng=rng,
+        rng=rng_streams["common/supply"],
         phase=0.4,
     )
-    demand = _generate_daily_profile(
+    demand = build_daily_product_profile(
         days=days,
         products=products,
-        base_total=config.base_demand_tpd,
+        base_total=config.base_demand_tpd * system_scale_factor,
         noise_fraction=config.noise_fraction,
-        rng=rng,
+        rng=rng_streams["common/demand"],
         phase=2.1,
     )
 
-    initial_inventory = _generate_initial_inventory(
+    initial_inventory = build_initial_inventory(
         zones,
         products,
-        config.initial_inventory_fill_ratio,
+        get_zone_initial_inventory_ratios(scenario_name),
+        rng=rng_streams["common/initial_inventory"],
     )
 
-    tasks = _base_maintenance_tasks(config.horizon_days, config.shiploader_count)
-    spread_schedule = _spread_schedule(tasks)
+    mode_order, mode_ratios = get_maintenance_mode_order_and_duration_ratios(
+        scenario_name
+    )
+    tasks = build_maintenance_tasks(
+        config.horizon_days,
+        scenario_name=scenario_name,
+        mode_order=mode_order,
+        mode_duration_ratios=mode_ratios,
+        assets=assets,
+        pool_rng=rng_streams["common/maintenance_pool"],
+        window_rng=rng_streams["common/maintenance_windows"],
+    )
+    spread_schedule = build_spread_baseline_schedule(tasks)
 
-    nominal_stage_rate = _nominal_stage_rate(assets)
+    nominal_stage_rate = calculate_nominal_stage_rate_tph(assets)
     nominal_system_rate = min(nominal_stage_rate.values())
-    minimum_throughput_rate = {
-        day: round(config.minimum_throughput_ratio * nominal_system_rate, 3)
-        for day in days
-    }
+    throughput_capacity_basis = (
+        effective_network_capacity
+        if scenario_name.startswith("F1_system_scale_")
+        else nominal_system_rate
+    )
+    minimum_throughput_rate = build_minimum_throughput_profile(
+        days=days,
+        nominal_system_rate_tph=throughput_capacity_basis,
+        peak_ratio=get_minimum_throughput_peak_ratio(scenario_name),
+        rng=rng_streams["common/throughput"],
+    )
 
     return DissertationScenario(
         metadata={
-            "scenario_name": occasion,
+            "scenario_name": scenario_name,
             "scenario_family": "synthetic_dissertation_benchmark",
             "horizon_days": config.horizon_days,
             "seed": config.seed,
@@ -1266,13 +1967,23 @@ def _build_base_scenario(
             "data_origin": "generated_from_first_principles",
             "nominal_stage_rate_tph": nominal_stage_rate,
             "nominal_system_rate_tph": nominal_system_rate,
+            "reference_nominal_system_rate_tph": get_reference_nominal_system_rate_tph(config),
+            "effective_network_capacity_tph": effective_network_capacity,
+            "reference_effective_network_capacity_tph": reference_effective_network_capacity,
+            "throughput_capacity_basis_tph": throughput_capacity_basis,
+            "system_scale_factor": system_scale_factor,
+            "system_scale_level": get_system_scale_level(scenario_name),
+            "system_scale_profile": get_system_scale_profile(scenario_name),
             "operating_hours_per_day": config.operating_hours_per_day,
-            "shiploader_count": config.shiploader_count,
+            "shiploader_count": get_system_scale_profile(scenario_name)["shiploader"],
             "mathematical_model_version": "MATH4003 Mathematical Model - current PDF",
             "maintenance_modes": {
-                "F": {"mode_id": FULL_SHUTDOWN_MODE, "available_capacity": 0.0},
-                "P30": {"mode_id": PARTIAL_30_MODE, "available_capacity": 0.30},
-                "P70": {"mode_id": PARTIAL_70_MODE, "available_capacity": 0.70},
+                PDF_MODE_SYMBOL[mode_id]: {
+                    "mode_id": mode_id,
+                    "available_capacity": get_maintenance_mode_available_capacity_fraction(mode_id),
+                    "duration_multiplier": mode_ratios[mode_id],
+                }
+                for mode_id in mode_order
             },
             "objective_formulation": (
                 "maximise cumulative throughput minus penalised stockyard overflow; "
@@ -1309,25 +2020,33 @@ def _build_base_scenario(
     )
 
 
-def _build_network_arcs(
-    products: tuple[str, ...], config: GeneratorConfig
+def build_network_arcs(
+    products: tuple[str, ...],
+    assets: Sequence[Asset],
+    config: GeneratorConfig,
 ) -> list[Arc]:
-    """Build network arcs with rates in tonnes per hour (t/hr)."""
+    """Build nested topology arcs from explicit L, M, and H layers."""
     arcs: list[Arc] = []
-
-    # Get rates from config
-    tu_rate = config.train_unloader_rate_tph
-    st_rate = config.stacker_rate_tph
-    rc_rate = config.reclaimer_rate_tph
-    sl_rate = config.shiploader_rate_tph
-    secondary_rate = config.arc_secondary_rate_tph
+    arc_ids: set[str] = set()
+    active_nodes = {asset.asset_id for asset in assets} | {
+        "RAIL_SOURCE",
+        "VESSEL_SINK",
+        *ZONE_ALLOWED_PRODUCTS.keys(),
+    }
 
     def add(
-        from_node: str, to_node: str, rate_tph: float, allowed: Iterable[str]
+        from_node: str,
+        to_node: str,
+        rate_tph: float,
+        allowed: Iterable[str],
     ) -> None:
+        arc_id = f"{from_node}__{to_node}"
+        if arc_id in arc_ids:
+            return
+        arc_ids.add(arc_id)
         arcs.append(
             Arc(
-                arc_id=f"{from_node}__{to_node}",
+                arc_id=arc_id,
                 from_node=from_node,
                 to_node=to_node,
                 capacity_tph=rate_tph,
@@ -1335,57 +2054,116 @@ def _build_network_arcs(
             )
         )
 
-    # All rates in tonnes per hour (t/hr)
-    for tu in ("TU1", "TU2", "TU3"):
-        add("RAIL_SOURCE", tu, tu_rate, products)
-
-    # Train unloader to stacker arcs (primary and secondary connections)
-    add("TU1", "ST1", st_rate, ("P1", "P2"))
-    add("TU1", "ST2", secondary_rate, ("P1", "P2", "P3"))
-    add("TU2", "ST2", st_rate, ("P1", "P2", "P3"))
-    add("TU2", "ST3", st_rate, ("P2", "P3", "X1"))
-    add("TU3", "ST3", secondary_rate, ("P2", "P3", "X1"))
-    add("TU3", "ST4", st_rate, ("P3", "X1"))
-
-    # Stacker to zone arcs
-    add("ST1", "Z1", st_rate, ("P1", "P2"))
-    add("ST2", "Z2", st_rate, ("P1", "P2", "P3"))
-    add("ST3", "Z3", st_rate, ("P2", "P3", "X1"))
-    add("ST4", "Z4", st_rate, ("P3", "X1"))
-
-    # Zone to reclaimer arcs (primary and secondary connections)
-    add("Z1", "RC1", rc_rate, ("P1", "P2"))
-    add("Z2", "RC1", secondary_rate, ("P1", "P2", "P3"))
-    add("Z2", "RC2", secondary_rate, ("P1", "P2", "P3"))
-    add("Z3", "RC2", rc_rate, ("P2", "P3", "X1"))
-    add("Z3", "RC3", secondary_rate, ("P2", "P3", "X1"))
-    add("Z4", "RC3", rc_rate, ("P3", "X1"))
-
-    # Reclaimer to shiploader arcs. The one-shiploader topology mirrors the
-    # current PDF case study; the two-shiploader topology preserves the earlier
-    # benchmark network.
-    if config.shiploader_count == 1:
-        add("RC1", "SL1", rc_rate, products)
-        add("RC2", "SL1", secondary_rate, products)
-        add("RC3", "SL1", rc_rate, products)
-    else:
-        add("RC1", "SL1", rc_rate, products)
-        add("RC2", "SL1", secondary_rate, products)
-        add("RC2", "SL2", secondary_rate, products)
-        add("RC3", "SL2", rc_rate, products)
-
-    # Shiploader to vessel sink arcs
-    for index in range(1, config.shiploader_count + 1):
-        add(f"SL{index}", "VESSEL_SINK", sl_rate, products)
+    for layer in ("L", "M", "H"):
+        for from_node, to_node, rate_key, allowed_token in NETWORK_ARC_LAYERS[layer]:
+            if from_node not in active_nodes or to_node not in active_nodes:
+                continue
+            add(
+                from_node,
+                to_node,
+                network_arc_rate_tph(rate_key, config),
+                resolve_arc_allowed_products(allowed_token, products),
+            )
     return arcs
 
 
-def _build_special_product_requirements(
+def network_arc_rate_tph(rate_key: str, config: GeneratorConfig) -> float:
+    rates = {
+        "train_unloader": config.train_unloader_rate_tph,
+        "stacker": config.stacker_rate_tph,
+        "reclaimer": config.reclaimer_rate_tph,
+        "shiploader": config.shiploader_rate_tph,
+        "secondary": config.arc_secondary_rate_tph,
+    }
+    return rates[rate_key]
+
+
+def resolve_arc_allowed_products(
+    allowed_token: str | Sequence[str],
+    products: Sequence[str],
+) -> tuple[str, ...]:
+    if allowed_token == ARC_ALLOWED_ALL_PRODUCTS:
+        return tuple(products)
+    allowed = tuple(allowed_token)
+    return tuple(product for product in allowed if product in products)
+
+
+def calculate_effective_network_capacity_tph(
+    assets: Sequence[Asset],
+    arcs: Sequence[Arc],
+) -> float:
+    """Return aggregate RAIL_SOURCE-to-VESSEL_SINK max flow with asset node capacities."""
+    asset_by_id = {asset.asset_id: asset for asset in assets}
+    residual: dict[str, dict[str, float]] = {}
+
+    def add_edge(from_node: str, to_node: str, capacity: float) -> None:
+        residual.setdefault(from_node, {})
+        residual.setdefault(to_node, {})
+        residual[from_node][to_node] = residual[from_node].get(to_node, 0.0) + capacity
+        residual[to_node].setdefault(from_node, 0.0)
+
+    def node_in(node: str) -> str:
+        return f"{node}::in" if node in asset_by_id else node
+
+    def node_out(node: str) -> str:
+        return f"{node}::out" if node in asset_by_id else node
+
+    for asset in assets:
+        add_edge(node_in(asset.asset_id), node_out(asset.asset_id), asset.nominal_rate_tph)
+    for arc in arcs:
+        add_edge(node_out(arc.from_node), node_in(arc.to_node), arc.capacity_tph)
+
+    source = "RAIL_SOURCE"
+    sink = "VESSEL_SINK"
+    max_flow = 0.0
+    while True:
+        parent: dict[str, str | None] = {source: None}
+        queue = [source]
+        for current in queue:
+            for successor, capacity in residual.get(current, {}).items():
+                if successor not in parent and capacity > 1e-9:
+                    parent[successor] = current
+                    if successor == sink:
+                        queue = []
+                        break
+                    queue.append(successor)
+        if sink not in parent:
+            break
+
+        path_capacity = math.inf
+        current = sink
+        while parent[current] is not None:
+            previous = parent[current]
+            path_capacity = min(path_capacity, residual[previous][current])
+            current = previous
+
+        current = sink
+        while parent[current] is not None:
+            previous = parent[current]
+            residual[previous][current] -= path_capacity
+            residual[current][previous] = residual[current].get(previous, 0.0) + path_capacity
+            current = previous
+        max_flow += path_capacity
+
+    return round(max_flow, 6)
+
+
+def build_special_product_requirements(
     config: GeneratorConfig,
+    assets: Sequence[Asset],
+    system_scale_factor: float = 1.0,
 ) -> list[SpecialProductRequirements]:
     """Return deterministic synthetic requirements for benchmark special-product handling."""
-    shiploader = "SL2" if config.shiploader_count == 2 else "SL1"
-    route_nodes = ("RAIL_SOURCE", "TU3", "ST4", "Z4", "RC3", shiploader, "VESSEL_SINK")
+    tu, stacker, reclaimer, shiploader = select_x1_route_assets(assets)
+    route_nodes = (
+        "RAIL_SOURCE",
+        tu,
+        stacker,
+        "Z4",
+        reclaimer,
+        shiploader,
+        "VESSEL_SINK",
+    )
     route_arcs = tuple(
         f"{from_node}__{to_node}"
         for from_node, to_node in zip(route_nodes, route_nodes[1:])
@@ -1393,29 +2171,64 @@ def _build_special_product_requirements(
     return [
         SpecialProductRequirements(
             product_id="X1",
-            tonnes_per_square_metre=3.0,
-            minimum_reserved_footprint_m2=90_000.0,
+            tonnes_per_square_metre=3.2,
+            minimum_reserved_footprint_m2=90_000.0* system_scale_factor,
             segregation_buffer_m2=8_000.0,
             compatible_zones=("Z4",),
-            required_assets=("TU3", "ST4", "RC3", shiploader),
+            required_assets=(tu, stacker, reclaimer, shiploader),
             compatible_arcs=route_arcs,
-            minimum_campaign_tonnes=252_000.0,
+            minimum_campaign_tonnes=252_000.0* system_scale_factor,
             minimum_contiguous_days=9,
-            earliest_campaign_start_day=_day(config.horizon_days, 0.52),
-            latest_campaign_start_day=_day(config.horizon_days, 0.60),
+            earliest_campaign_start_day=25,
+            latest_campaign_start_day=64,
             pre_campaign_buffer_days=2,
             post_campaign_buffer_days=2,
             cleanout_before_days=1,
             cleanout_after_days=1,
             maintenance_incompatible=True,
             blending_allowed=False,
-            minimum_build_tonnes=168_000.0,
+            minimum_build_tonnes=168_000.0 * system_scale_factor,
             build_complete_before_reclaim=True,
         )
     ]
 
 
-def _generate_daily_profile(
+def assets_by_stage(assets: Sequence[Asset]) -> dict[str, list[str]]:
+    return {
+        stage: sorted(
+            [asset.asset_id for asset in assets if asset.stage == stage],
+            key=asset_ordinal,
+        )
+        for stage in STAGES
+    }
+
+
+def asset_ordinal(asset_id: str) -> int:
+    return int("".join(ch for ch in asset_id if ch.isdigit()))
+
+
+def select_x1_route_assets(assets: Sequence[Asset]) -> tuple[str, str, str, str]:
+    by_stage = assets_by_stage(assets)
+    route = ("TU2", "ST3", "RC2", "SL1")
+    if not (
+        route[0] in by_stage["train_unloader"]
+        and route[1] in by_stage["stacker"]
+        and route[2] in by_stage["reclaimer"]
+        and route[3] in by_stage["shiploader"]
+    ):
+        raise ValueError("active topology does not contain the common X1 route assets")
+    return route
+
+
+def downstream_route_assets(
+    requirement: SpecialProductRequirements,
+) -> tuple[str, str]:
+    reclaimer = next(asset_id for asset_id in requirement.required_assets if asset_id.startswith("RC"))
+    shiploader = next(asset_id for asset_id in requirement.required_assets if asset_id.startswith("SL"))
+    return reclaimer, shiploader
+
+
+def build_daily_product_profile(
     *,
     days: Sequence[int],
     products: Sequence[Product],
@@ -1449,83 +2262,319 @@ def _jittered_product_shares(
     return [v / total for v in raw]
 
 
-def _generate_initial_inventory(
+def build_initial_inventory(
     zones: Sequence[YardZone],
     products: Sequence[Product],
-    fill_ratio: float,
+    fill_ratio: float | Mapping[str, float],
+    *,
+    rng: random.Random,
 ) -> dict[str, dict[str, float]]:
     product_share = {p.product_id: p.share_of_volume for p in products}
     inventory: dict[str, dict[str, float]] = {}
     for zone in zones:
         allowed = list(zone.allowed_products)
-        total_weight = sum(product_share[p] for p in allowed)
-        zone_total = zone.capacity_tonnes * fill_ratio
+        zone_fill_ratio = (
+            fill_ratio[zone.zone_id]
+            if isinstance(fill_ratio, MappingABC)
+            else fill_ratio
+        )
+        minimum_ratio = zone.minimum_inventory_tonnes / zone.capacity_tonnes
+        jitter = rng.uniform(
+            -INITIAL_INVENTORY_FILL_RATIO_JITTER,
+            INITIAL_INVENTORY_FILL_RATIO_JITTER,
+        )
+        realized_fill_ratio = min(
+            1.0 - 1e-6,
+            max(minimum_ratio, zone_fill_ratio + jitter),
+        )
+        zone_total = round(zone.capacity_tonnes * realized_fill_ratio, 3)
+        if not zone.minimum_inventory_tonnes <= zone_total < zone.capacity_tonnes:
+            raise ValueError(
+                f"initial inventory target for {zone.zone_id} violates inventory bounds"
+            )
+        raw_weights = {
+            product: max(
+                1e-9,
+                product_share[product]
+                * (
+                    1.0
+                    + rng.uniform(
+                        -INITIAL_INVENTORY_PRODUCT_MIX_JITTER_FRACTION,
+                        INITIAL_INVENTORY_PRODUCT_MIX_JITTER_FRACTION,
+                    )
+                ),
+            )
+            for product in allowed
+        }
+        total_weight = sum(raw_weights.values())
         inventory[zone.zone_id] = {
-            product: round(zone_total * product_share[product] / total_weight, 3)
+            product: round(zone_total * raw_weights[product] / total_weight, 3)
             for product in allowed
         }
     return inventory
 
 
-def _base_maintenance_tasks(
-    horizon: int, shiploader_count: int = 2
+def build_maintenance_tasks(
+    horizon: int,
+    *,
+    scenario_name: str,
+    mode_order: Sequence[str],
+    mode_duration_ratios: Mapping[str, float],
+    assets: Sequence[Asset],
+    pool_rng: random.Random,
+    window_rng: random.Random,
 ) -> list[MaintenanceTask]:
-    def scaled(day: int) -> int:
-        return min(horizon - 1, max(0, round(day * horizon / 90)))
+    candidate_pool = build_maintenance_candidate_pool(
+        horizon=horizon,
+        assets=assets,
+        pool_rng=pool_rng,
+        window_rng=window_rng,
+    )
+    specifications = select_f1_task_subset(candidate_pool, scenario_name)
 
-    specifications = [
-        ("M_TU1", "TU1", 5, 34, 39, 6, "major"),
-        ("M_TU2", "TU2", 18, 54, 60, 7, "major"),
-        ("M_TU3", "TU3", 48, 79, 84, 5, "major"),
-        ("M_ST1", "ST1", 7, 38, 43, 4, "modular"),
-        ("M_ST2", "ST2", 14, 49, 55, 5, "modular"),
-        ("M_ST3", "ST3", 32, 64, 70, 4, "modular"),
-        ("M_ST4", "ST4", 52, 80, 85, 5, "modular"),
-        ("M_RC1", "RC1", 8, 43, 50, 7, "major"),
-        ("M_RC2", "RC2", 23, 59, 66, 6, "major"),
-        ("M_RC3", "RC3", 46, 80, 87, 7, "major"),
-        ("M_SL1", "SL1", 14, 53, 59, 5, "major"),
-    ]
-    if shiploader_count == 2:
-        specifications.append(("M_SL2", "SL2", 43, 80, 86, 5, "major"))
     tasks: list[MaintenanceTask] = []
-    for (
-        task_id,
-        asset_id,
-        earliest,
-        latest,
-        due,
-        duration,
-        task_class,
-    ) in specifications:
-        e = scaled(earliest)
-        standard_duration = max(2, scaled(duration) - scaled(0))
-        partial_30_duration = standard_duration + max(1, standard_duration // 3)
-        partial_70_duration = standard_duration + max(2, standard_duration // 2)
-        latest_scaled = min(scaled(latest), horizon - partial_70_duration)
-        due_scaled = min(scaled(due), horizon - 1)
-        if due_scaled < latest_scaled + standard_duration - 1:
-            due_scaled = min(horizon - 1, latest_scaled + partial_70_duration - 1)
+    for specification in specifications:
+        modes = build_maintenance_modes(
+            specification["full_duration_days"],
+            mode_order=mode_order,
+            duration_ratios=mode_duration_ratios,
+        )
+        max_duration = max(mode.duration_days for mode in modes)
+        if specification["latest_start_day"] + max_duration > horizon:
+            raise ValueError(
+                f"maintenance window for {specification['task_id']} exceeds horizon"
+            )
+        if specification["lifecycle_due_day"] < (
+            specification["latest_start_day"] + max_duration - 1
+        ):
+            raise ValueError(
+                f"maintenance due day for {specification['task_id']} is too early"
+            )
         tasks.append(
             MaintenanceTask(
-                task_id=task_id,
-                asset_id=asset_id,
-                earliest_start_day=e,
-                latest_start_day=latest_scaled,
-                lifecycle_due_day=due_scaled,
-                modes=(
-                    MaintenanceMode(FULL_SHUTDOWN_MODE, standard_duration, 0.0, 1.0),
-                    MaintenanceMode(PARTIAL_30_MODE, partial_30_duration, 0.30, 1.15),
-                    MaintenanceMode(PARTIAL_70_MODE, partial_70_duration, 0.70, 1.35),
-                ),
-                task_class=task_class,
+                task_id=specification["task_id"],
+                asset_id=specification["asset_id"],
+                earliest_start_day=specification["earliest_start_day"],
+                latest_start_day=specification["latest_start_day"],
+                lifecycle_due_day=specification["lifecycle_due_day"],
+                modes=modes,
+                task_class=specification["task_class"],
             )
         )
     return tasks
 
 
-def _spread_schedule(tasks: Sequence[MaintenanceTask]) -> list[MaintenanceDecision]:
-    """Create a reasonable non-overlapping-by-stage starting schedule."""
+def build_maintenance_candidate_pool(
+    *,
+    horizon: int,
+    assets: Sequence[Asset],
+    pool_rng: random.Random,
+    window_rng: random.Random,
+) -> list[dict[str, Any]]:
+    assets_by_stage = {
+        stage: sorted(
+            [asset.asset_id for asset in assets if asset.stage == stage]
+        )
+        for stage in STAGES
+    }
+    stage_use_count = {
+        stage: {asset_id: 0 for asset_id in asset_ids}
+        for stage, asset_ids in assets_by_stage.items()
+    }
+
+    realized: list[dict[str, Any]] = []
+    for template in MAINTENANCE_TEMPLATE_POOL:
+        if len(assets_by_stage["shiploader"]) < template.get("min_shiploader_count", 1):
+            continue
+        stage = template["stage"]
+        eligible_assets = eligible_maintenance_assets_for_template(
+            assets_by_stage[stage],
+            stage,
+            template["entry_level"],
+        )
+        asset_id = choose_balanced_asset(
+            eligible_assets,
+            stage_use_count[stage],
+            pool_rng,
+        )
+        stage_use_count[stage][asset_id] += 1
+        full_duration = generate_maintenance_full_duration(
+            template, horizon, pool_rng
+        )
+        earliest, latest, due = generate_maintenance_window(
+            template=template,
+            horizon=horizon,
+            full_duration=full_duration,
+            rng=window_rng,
+        )
+        realized.append(
+            {
+                "template_id": template["template_id"],
+                "entry_level": template["entry_level"],
+                "asset_id": asset_id,
+                "stage": stage,
+                "earliest_start_day": earliest,
+                "latest_start_day": latest,
+                "lifecycle_due_day": due,
+                "full_duration_days": full_duration,
+                "task_class": template["task_class"],
+            }
+        )
+
+    occurrence_count: dict[str, int] = {}
+    for specification in realized:
+        asset_id = specification["asset_id"]
+        occurrence_count[asset_id] = occurrence_count.get(asset_id, 0) + 1
+        specification["task_id"] = f"M_{asset_id}_{occurrence_count[asset_id]:02d}"
+    return realized
+
+
+def eligible_maintenance_assets_for_template(
+    stage_assets: Sequence[str],
+    stage: str,
+    entry_level: str,
+) -> tuple[str, ...]:
+    profile_count = SYSTEM_SCALE_PROFILES[entry_level][stage]
+    return tuple(stage_assets[: min(profile_count, len(stage_assets))])
+
+
+def choose_balanced_asset(
+    eligible_assets: Sequence[str],
+    use_count: Mapping[str, int],
+    rng: random.Random,
+) -> str:
+    if not eligible_assets:
+        raise ValueError("maintenance template has no eligible asset")
+    minimum_count = min(use_count[asset_id] for asset_id in eligible_assets)
+    candidates = [
+        asset_id
+        for asset_id in eligible_assets
+        if use_count[asset_id] == minimum_count
+    ]
+    return rng.choice(candidates)
+
+
+def generate_maintenance_full_duration(
+    template: Mapping[str, Any],
+    horizon: int,
+    rng: random.Random,
+) -> int:
+    candidates = sorted(
+        {
+            max(2, round(duration * horizon / 90))
+            for duration in template["full_duration_candidates"]
+        }
+    )
+    return rng.choice(candidates)
+
+
+def generate_maintenance_window(
+    *,
+    template: Mapping[str, Any],
+    horizon: int,
+    full_duration: int,
+    rng: random.Random,
+) -> tuple[int, int, int]:
+    nominal_earliest = scale_maintenance_calendar_day(
+        horizon, template["calendar_region"][0]
+    )
+    max_window_duration = max(
+        1,
+        math.ceil(full_duration * MAINTENANCE_WINDOW_SAFETY_DURATION_RATIO),
+    )
+    latest_allowed = horizon - max_window_duration
+    if latest_allowed < 0:
+        raise ValueError("maintenance duration cannot fit in horizon")
+
+    earliest_low = max(0, nominal_earliest - MAINTENANCE_WINDOW_EM_JITTER_DAYS)
+    earliest_high = min(
+        latest_allowed,
+        nominal_earliest + MAINTENANCE_WINDOW_EM_JITTER_DAYS,
+    )
+    if earliest_high < earliest_low:
+        earliest_low = earliest_high = min(max(nominal_earliest, 0), latest_allowed)
+    earliest = rng.randint(earliest_low, earliest_high)
+
+    width_low, width_high = (
+        max(1, round(width * horizon / 90))
+        for width in template["window_width_range"]
+    )
+    window_width = rng.randint(min(width_low, width_high), max(width_low, width_high))
+    latest = min(latest_allowed, max(earliest, earliest + window_width - 1))
+
+    due_min = latest + max_window_duration - 1
+    due_buffer = rng.randint(*MAINTENANCE_WINDOW_DUE_BUFFER_RANGE_DAYS)
+    due = min(horizon - 1, due_min + due_buffer)
+    return earliest, latest, due
+
+
+def scale_maintenance_calendar_day(horizon: int, calibrated_day: int) -> int:
+    return min(horizon - 1, max(0, round(calibrated_day * horizon / 90)))
+
+
+def select_f1_task_subset(
+    candidate_pool: Sequence[dict[str, Any]],
+    scenario_name: str,
+) -> list[dict[str, Any]]:
+    level = (
+        get_scenario_level(scenario_name)
+        if scenario_name.startswith("F1_system_scale_")
+        else "M"
+    )
+    maximum_rank = MAINTENANCE_LEVEL_ORDER[level]
+    return [
+        dict(specification)
+        for specification in candidate_pool
+        if MAINTENANCE_LEVEL_ORDER[specification["entry_level"]] <= maximum_rank
+    ]
+
+
+def expected_maintenance_operation_count(level: str) -> int:
+    maximum_rank = MAINTENANCE_LEVEL_ORDER[level]
+    return sum(
+        1
+        for template in MAINTENANCE_TEMPLATE_POOL
+        if MAINTENANCE_LEVEL_ORDER[template["entry_level"]] <= maximum_rank
+    )
+
+
+def build_maintenance_modes(
+    full_duration: int,
+    *,
+    mode_order: Sequence[str],
+    duration_ratios: Mapping[str, float],
+) -> tuple[MaintenanceMode, ...]:
+    modes: list[MaintenanceMode] = []
+    previous_duration = 0
+    relative_cost = {
+        FULL_SHUTDOWN_MODE: 1.00,
+        PARTIAL_30_MODE: 1.15,
+        PARTIAL_70_MODE: 1.35,
+    }
+    for mode_id in mode_order:
+        ratio = duration_ratios[mode_id]
+        duration = max(1, math.ceil(full_duration * ratio))
+        if modes and duration <= previous_duration:
+            duration = previous_duration + 1
+        modes.append(
+            MaintenanceMode(
+                mode_id,
+                duration,
+                get_maintenance_mode_available_capacity_fraction(mode_id),
+                relative_cost[mode_id],
+            )
+        )
+        previous_duration = duration
+    return tuple(modes)
+
+
+def build_spread_baseline_schedule(
+    tasks: Sequence[MaintenanceTask],
+    priority_activities: Sequence[PriorityActivity] = (),
+    *,
+    avoid_activity_conflicts: bool = False,
+) -> list[MaintenanceDecision]:
+    """Create a deterministic greedy schedule inside generated EM/LM windows."""
     stage_offsets = {
         "TU": 0.10,
         "ST": 0.35,
@@ -1533,503 +2582,463 @@ def _spread_schedule(tasks: Sequence[MaintenanceTask]) -> list[MaintenanceDecisi
         "SL": 0.82,
     }
     schedule: list[MaintenanceDecision] = []
-    for task in tasks:
+    occupied_by_asset: dict[str, set[int]] = {}
+    for task in sorted(
+        tasks,
+        key=lambda item: (
+            item.earliest_start_day,
+            item.latest_start_day,
+            item.asset_id,
+            item.task_id,
+        ),
+    ):
         prefix = task.asset_id[:2]
-        fraction = stage_offsets[prefix]
+        fraction = stage_offsets.get(prefix, 0.50)
         span = task.latest_start_day - task.earliest_start_day
-        start = task.earliest_start_day + round(span * fraction)
+        preferred_start = task.earliest_start_day + round(span * fraction)
+        mode = next(mode for mode in task.modes if mode.mode_id == FULL_SHUTDOWN_MODE)
+        feasible_starts = range(task.earliest_start_day, task.latest_start_day + 1)
+        start = min(
+            feasible_starts,
+            key=lambda candidate: (
+                activity_conflict_days(
+                    task,
+                    candidate,
+                    mode.duration_days,
+                    priority_activities,
+                )
+                if avoid_activity_conflicts
+                else 0,
+                asset_overlap_days(
+                    task.asset_id,
+                    candidate,
+                    mode.duration_days,
+                    occupied_by_asset,
+                ),
+                abs(candidate - preferred_start),
+                candidate,
+            ),
+        )
+        occupied_by_asset.setdefault(task.asset_id, set()).update(
+            range(start, start + mode.duration_days)
+        )
         schedule.append(MaintenanceDecision(task.task_id, start, FULL_SHUTDOWN_MODE))
     return schedule
 
 
-# ---------------------------------------------------------------------------
-# Occasion overlays
-# ---------------------------------------------------------------------------
+def asset_overlap_days(
+    asset_id: str,
+    start_day: int,
+    duration_days: int,
+    occupied_by_asset: Mapping[str, set[int]],
+) -> int:
+    occupied = occupied_by_asset.get(asset_id, set())
+    return sum(1 for day in range(start_day, start_day + duration_days) if day in occupied)
 
 
-def _apply_occasion(
+def activity_conflict_days(
+    task: MaintenanceTask,
+    start_day: int,
+    duration_days: int,
+    priority_activities: Sequence[PriorityActivity],
+) -> int:
+    conflict_days = 0
+    for activity in priority_activities:
+        if not activity.maintenance_incompatible:
+            continue
+        if task.asset_id not in activity.required_assets:
+            continue
+        protected_start = activity.start_day - activity.pre_campaign_buffer_days
+        protected_end = activity.end_day + activity.post_campaign_buffer_days
+        for day in range(start_day, start_day + duration_days):
+            if protected_start <= day < protected_end:
+                conflict_days += 1
+    return conflict_days
+
+
+# ============================================================
+# 5. FAMILY-SPECIFIC DATA
+# ============================================================
+
+
+def apply_scenario_family(
     scenario: DissertationScenario,
-    occasion: str,
+    scenario_name: str,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
     handlers = {
-        "balanced_control": _occasion_balanced_control,
-        "peak_export_conflict": _occasion_peak_export_conflict,
-        "overlapping_maintenance": _occasion_overlapping_maintenance,
-        "priority_campaign_conflict": _occasion_priority_campaign_conflict,
-        "yard_overflow_risk": _occasion_yard_overflow_risk,
-        "inventory_starvation_risk": _occasion_inventory_starvation_risk,
-        "tight_lifecycle_windows": _occasion_tight_lifecycle_windows,
-        "partial_shutdown_choice": _occasion_partial_shutdown_choice,
-        "fixed_schedule_control": _occasion_fixed_schedule_control,
-        "structurally_infeasible": _occasion_structurally_infeasible,
+        BASE_CONTROL_NAME: apply_base_control_metadata,
+        "F1_system_scale_L": apply_system_scale_family,
+        "F1_system_scale_M": apply_system_scale_family,
+        "F1_system_scale_H": apply_system_scale_family,
+        "F2_mode_tradeoff_L": apply_mode_tradeoff_family,
+        "F2_mode_tradeoff_M": apply_mode_tradeoff_family,
+        "F2_mode_tradeoff_H": apply_mode_tradeoff_family,
+        "F3_yard_flow_L": apply_yard_flow_family,
+        "F3_yard_flow_M": apply_yard_flow_family,
+        "F3_yard_flow_H": apply_yard_flow_family,
+        "F4_operational_conflict_L": apply_operational_conflict_family,
+        "F4_operational_conflict_M": apply_operational_conflict_family,
+        "F4_operational_conflict_H": apply_operational_conflict_family,
+        "structurally_infeasible": apply_structural_infeasibility_validation,
     }
-    return handlers[occasion](scenario, config, rng)
+    return handlers[scenario_name](scenario, config, rng_streams)
 
 
-def _occasion_balanced_control(
+def apply_base_control_metadata(
     scenario: DissertationScenario,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
     scenario.metadata.update(
+        scenario_family="base_control",
         occasion_description=(
-            "Normal supply and demand with maintenance already distributed across "
-            "the horizon."
+            "Calibrated normal case with heterogeneous yard capacities, low initial "
+            "inventory, time-varying minimum throughput, and distributed maintenance "
+            "windows."
         ),
         expected_model_value=(
-            "A control case: the optimiser should remain feasible and find only "
-            "small gains over the baseline."
+            "Validate that the common data instance is feasible before testing the "
+            "four experimental scenario families."
         ),
     )
     return scenario
 
 
-def _occasion_peak_export_conflict(
+def apply_system_scale_family(
     scenario: DissertationScenario,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
-    peak_start, peak_end = _period(config.horizon_days, 0.34, 0.50)
-    # Create a genuine low-demand shoulder and a pronounced export peak.
-    # This makes moving maintenance away from the peak economically meaningful
-    # rather than merely spreading the same capacity loss over more days.
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        0,
-        config.horizon_days,
-        factor=0.86,
-    )
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        peak_start,
-        peak_end,
-        factor=1.62,
-    )
-    scenario.inbound_supply = _multiply_records(
-        scenario.inbound_supply,
-        peak_start - 3,
-        peak_end,
-        factor=1.12,
-    )
-
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC1", peak_start + 1)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC2", peak_start + 3)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_SL1", peak_start + 2)
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC1", 10)
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC2", peak_end + 2)
-    # Cross-stage overlap in a low-demand shoulder concentrates the outage
-    # without violating the minimum-throughput threshold.
-    _set_decision(reference, scenario.maintenance_tasks, "M_SL1", 10)
-
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
+    level = get_scenario_level(scenario.metadata["scenario_name"])
+    task_count = len(scenario.maintenance_tasks)
+    mode_count = len(get_scenario_mode_order(scenario.maintenance_tasks))
+    profile = scenario.metadata["system_scale_profile"]
     scenario.metadata.update(
+        scenario_family="F1_system_scale",
+        scenario_level=level,
         occasion_description=(
-            f"Export demand rises by 30% on days {peak_start}-{peak_end - 1}, while "
-            "the manual plan places two reclaimers and one shiploader in maintenance."
+            f"System-scale {level} case with "
+            f"{profile['train_unloader']} train unloaders, "
+            f"{profile['stacker']} stackers, {profile['reclaimer']} reclaimers, "
+            f"{profile['shiploader']} shiploaders, {task_count} maintenance "
+            f"operations, and the common {mode_count}-mode F/P30/P70 set."
         ),
         expected_model_value=(
-            "Move shutdowns away from the export peak to increase loaded tonnes, "
-            "reduce demand shortfall, and protect the minimum daily throughput."
+            "Measure how model size and scheduling complexity change as physical "
+            "network size and maintenance-operation count grow at comparable "
+            "relative utilisation."
         ),
-        stress_period=[peak_start, peak_end],
     )
     return scenario
 
 
-def _occasion_overlapping_maintenance(
+def apply_mode_tradeoff_family(
     scenario: DissertationScenario,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
-    overlap_day = _day(config.horizon_days, 0.40)
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC1", overlap_day)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC2", overlap_day)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_SL1", overlap_day)
-
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC1", overlap_day - 12)
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC2", overlap_day + 1)
-    _set_decision(reference, scenario.maintenance_tasks, "M_SL1", overlap_day + 9)
-
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
+    level = get_scenario_level(scenario.metadata["scenario_name"])
+    first_task = scenario.maintenance_tasks[0]
+    ratios = {
+        mode.mode_id: round(mode.duration_days / first_task.modes[0].duration_days, 3)
+        for mode in first_task.modes
+    }
     scenario.metadata.update(
+        scenario_family="F2_mode_tradeoff",
+        scenario_level=level,
         occasion_description=(
-            "The manual plan starts maintenance on two reclaimers and a shiploader "
-            f"at approximately day {overlap_day}."
+            f"Maintenance-mode trade-off {level} case with fixed topology and "
+            f"duration ratios {ratios}."
         ),
         expected_model_value=(
-            "Stagger the same mandatory maintenance workload so downstream capacity "
-            "does not fall below the minimum operational threshold."
+            "Test whether short severe shutdowns and longer partial-capacity work "
+            "become attractive under different calendar and capacity conditions."
         ),
-        stress_period=[overlap_day, overlap_day + 8],
     )
     return scenario
 
 
-def _occasion_priority_campaign_conflict(
+def apply_yard_flow_family(
     scenario: DissertationScenario,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
-    start, end = _period(config.horizon_days, 0.56, 0.67)
-    requirement = scenario.special_product_requirements[0]
-    campaign_shiploader = "SL2" if config.shiploader_count == 2 else "SL1"
-    campaign_shiploader_task = (
-        "M_SL2" if config.shiploader_count == 2 else "M_SL1"
-    )
-    activity = PriorityActivity(
-        activity_id="PA_X1_SEGREGATED_CAMPAIGN",
-        product_id="X1",
-        start_day=start,
-        end_day=end,
-        minimum_tonnes_per_day=28_000.0,
-        required_assets=requirement.required_assets,
-        hard_requirement=True,
-        earliest_start_day=start,
-        latest_start_day=start,
-        required_zone="Z4",
-        minimum_total_tonnes=requirement.minimum_campaign_tonnes,
-        minimum_contiguous_days=requirement.minimum_contiguous_days,
-        pre_campaign_buffer_days=requirement.pre_campaign_buffer_days,
-        post_campaign_buffer_days=requirement.post_campaign_buffer_days,
-        cleanout_before_days=requirement.cleanout_before_days,
-        cleanout_after_days=requirement.cleanout_after_days,
-        minimum_build_tonnes=requirement.minimum_build_tonnes,
-        build_complete_before_reclaim=requirement.build_complete_before_reclaim,
-        capacity_factor_during_activity=1.0,
-        maintenance_incompatible=requirement.maintenance_incompatible,
-    )
-    scenario.priority_activities = [activity]
-
-    # Give the three campaign-path jobs enough flexibility to be placed before
-    # or after the protected activity. The manual baseline will deliberately
-    # choose starts inside the campaign.
-    replacements: dict[str, MaintenanceTask] = {}
-    for task in scenario.maintenance_tasks:
-        if task.task_id == "M_TU3":
-            replacements[task.task_id] = _retime_task(
-                task, start - 12, end + 12, end + 22
-            )
-        elif task.task_id == "M_ST4":
-            replacements[task.task_id] = _retime_task(
-                task, start - 12, end + 12, end + 20
-            )
-        elif task.task_id == "M_RC3":
-            replacements[task.task_id] = _retime_task(
-                task, start - 12, end + 12, end + 21
-            )
-        elif task.task_id == campaign_shiploader_task:
-            replacements[task.task_id] = _retime_task(
-                task, start - 12, end + 12, end + 20
-            )
-    scenario.maintenance_tasks = [
-        replacements.get(task.task_id, task) for task in scenario.maintenance_tasks
-    ]
-
-    scenario.outbound_demand = _add_product_demand(
-        scenario.outbound_demand,
-        product_id="X1",
-        start=start,
-        end=end,
-        additional_tpd=18_000.0,
-    )
-    scenario.inbound_supply = _multiply_records(
-        scenario.inbound_supply,
-        start - 10,
-        end,
-        factor=1.28,
-        product_id="X1",
-    )
-
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_TU3", start + 1)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_ST4", start)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC3", start + 1)
-    _set_decision(baseline, scenario.maintenance_tasks, campaign_shiploader_task, start + 2)
-    _set_decision(reference, scenario.maintenance_tasks, "M_TU3", end + 8)
-    _set_decision(reference, scenario.maintenance_tasks, "M_ST4", start - 10)
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC3", end + 3)
-    _set_decision(reference, scenario.maintenance_tasks, campaign_shiploader_task, start - 10)
-
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
+    level = get_scenario_level(scenario.metadata["scenario_name"])
+    initial_total = sum(sum(by_product.values()) for by_product in scenario.initial_inventory.values())
+    capacity_total = sum(zone.capacity_tonnes for zone in scenario.zones)
+    min_tpd = min(scenario.minimum_throughput_rate_tph.values()) * config.operating_hours_per_day
+    max_tpd = max(scenario.minimum_throughput_rate_tph.values()) * config.operating_hours_per_day
     scenario.metadata.update(
+        scenario_family="F3_yard_flow",
+        scenario_level=level,
         occasion_description=(
-            f"A protected synthetic X1 campaign runs on days {start}-{end - 1}. "
-            "The manual plan shuts its dedicated route, buffer, or cleanout interval."
+            f"Yard-and-flow tightness {level} case with {initial_total / capacity_total:.1%} "
+            f"initial utilisation and daily minimum throughput between "
+            f"{min_tpd:,.0f} and {max_tpd:,.0f} tonnes."
         ),
         expected_model_value=(
-            "Schedule maintenance around the protected X1 campaign, maintain the "
-            "dedicated Z4 footprint and route, and avoid special-product shortfall."
+            "Show the interaction between heterogeneous yard capacities, non-zero "
+            "minimum inventories, low initial stock, and throughput pressure."
         ),
-        stress_period=[start, end],
     )
     return scenario
 
 
-def _occasion_yard_overflow_risk(
-    scenario: DissertationScenario,
-    config: GeneratorConfig,
+def build_operational_activity_windows(
+    level: str,
+    requirement: SpecialProductRequirements,
     rng: random.Random,
-) -> DissertationScenario:
-    scenario.initial_inventory = _generate_initial_inventory(
-        scenario.zones,
-        scenario.products,
-        fill_ratio=0.885,
-    )
-    start, end = _period(config.horizon_days, 0.24, 0.43)
-    scenario.inbound_supply = _multiply_records(
-        scenario.inbound_supply,
-        start,
-        end,
-        factor=1.38,
-    )
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        start,
-        end,
-        factor=1.18,
-    )
+    horizon: int,
+) -> list[PriorityActivity]:
+    settings = F4_LEVEL_SETTINGS[level]
+    activities: list[PriorityActivity] = []
+    for activity_spec in F4_ACTIVITY_WINDOWS:
+        start_low, start_high = (
+            scale_maintenance_calendar_day(horizon, day)
+            for day in activity_spec["start_day_range"]
+        )
+        duration_low, duration_high = (
+            max(1, round(days * horizon / 90))
+            for days in activity_spec["duration_range"]
+        )
+        start_day = rng.randint(min(start_low, start_high), max(start_low, start_high))
+        duration_days = rng.randint(
+            min(duration_low, duration_high), max(duration_low, duration_high)
+        )
+        start_day = min(start_day, horizon - duration_days)
+        end_day = start_day + duration_days
 
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC1", start + 2)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC2", start + 4)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_SL1", start + 3)
-    if config.shiploader_count == 1:
-        # With a single shiploader, overlapping its outage with RC1 would stop the
-        # entire export path. Place both after the inbound surge instead.
-        _set_decision(reference, scenario.maintenance_tasks, "M_RC1", end)
-        _set_decision(reference, scenario.maintenance_tasks, "M_RC2", end + 4)
-        _set_decision(reference, scenario.maintenance_tasks, "M_SL1", end)
-    else:
-        _set_decision(reference, scenario.maintenance_tasks, "M_RC1", 10)
-        _set_decision(reference, scenario.maintenance_tasks, "M_RC2", end + 4)
-        _set_decision(reference, scenario.maintenance_tasks, "M_SL1", 10)
+        include_key = activity_spec.get("include_from_level")
+        if include_key and not settings[include_key]:
+            continue
 
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
-    scenario.metadata.update(
-        occasion_description=(
-            f"The yard starts at 88.5% full and inbound supply increases by 38% on "
-            f"days {start}-{end - 1}. The manual plan simultaneously reduces "
-            "reclaiming and shiploading capacity."
-        ),
-        expected_model_value=(
-            "Move downstream maintenance away from the supply surge to reduce rail "
-            "curtailment and storage-pressure violations."
-        ),
-        stress_period=[start, end],
-    )
-    return scenario
+        if activity_spec["asset_group"] == "X1_ROUTE":
+            required_assets = requirement.required_assets
+        else:
+            required_assets = downstream_route_assets(requirement)
 
+        if "capacity_factor_from_level" in activity_spec:
+            capacity_factor = settings[activity_spec["capacity_factor_from_level"]]
+        else:
+            capacity_factor = activity_spec["capacity_factor"]
 
-def _occasion_inventory_starvation_risk(
-    scenario: DissertationScenario,
-    config: GeneratorConfig,
-    rng: random.Random,
-) -> DissertationScenario:
-    scenario.initial_inventory = _generate_initial_inventory(
-        scenario.zones,
-        scenario.products,
-        fill_ratio=0.08,
-    )
-    start, end = _period(config.horizon_days, 0.20, 0.40)
-    # Demand is deliberately low outside the peak. This creates useful shoulder
-    # periods in which maintenance can be performed while inventory is rebuilt.
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        0,
-        config.horizon_days,
-        factor=0.82,
-    )
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        start,
-        end,
-        factor=1.65,
-    )
-    scenario.inbound_supply = _multiply_records(
-        scenario.inbound_supply,
-        start - 6,
-        end,
-        factor=0.94,
-    )
+        if "maintenance_incompatible_from_level" in activity_spec:
+            maintenance_incompatible = settings[
+                activity_spec["maintenance_incompatible_from_level"]
+            ]
+        else:
+            maintenance_incompatible = activity_spec["maintenance_incompatible"]
 
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_TU1", start - 4)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_TU2", start - 2)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_ST1", start - 3)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_ST2", start - 1)
+        buffer_days = 0
+        if activity_spec.get("buffer_from_level"):
+            buffer_days = settings["buffer_days"]
+        elif (
+            activity_spec.get("buffer_from_level_when_incompatible")
+            and maintenance_incompatible
+        ):
+            buffer_days = settings["buffer_days"]
 
-    _set_decision(reference, scenario.maintenance_tasks, "M_TU1", 7)
-    _set_decision(reference, scenario.maintenance_tasks, "M_TU2", end)
-    _set_decision(reference, scenario.maintenance_tasks, "M_ST1", 8)
-    _set_decision(reference, scenario.maintenance_tasks, "M_ST2", end)
-
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
-    scenario.metadata.update(
-        occasion_description=(
-            f"The yard starts at only 8% full, demand increases sharply on days {start}-"
-            f"{end - 1}, and the manual plan overlaps upstream unloader and stacker "
-            "maintenance immediately before and during the peak."
-        ),
-        expected_model_value=(
-            "Coordinate upstream maintenance with inventory buffering to prevent "
-            "stock starvation and downstream throughput loss."
-        ),
-        stress_period=[start, end],
-    )
-    return scenario
-
-
-def _occasion_tight_lifecycle_windows(
-    scenario: DissertationScenario,
-    config: GeneratorConfig,
-    rng: random.Random,
-) -> DissertationScenario:
-    center = _day(config.horizon_days, 0.43)
-    replacements: dict[str, MaintenanceTask] = {}
-    for task in scenario.maintenance_tasks:
-        if task.task_id == "M_RC1":
-            replacements[task.task_id] = _retime_task(
-                task, center - 8, center + 2, center + 9
-            )
-        elif task.task_id == "M_RC2":
-            replacements[task.task_id] = _retime_task(
-                task, center - 2, center + 8, center + 15
-            )
-        elif task.task_id == "M_SL1":
-            replacements[task.task_id] = _retime_task(
-                task, center - 4, center + 8, center + 14
-            )
-    scenario.maintenance_tasks = [
-        replacements.get(t.task_id, t) for t in scenario.maintenance_tasks
-    ]
-
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC1", center - 2)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_RC2", center - 2)
-    _set_decision(baseline, scenario.maintenance_tasks, "M_SL1", center - 2)
-
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC1", center - 8)
-    _set_decision(reference, scenario.maintenance_tasks, "M_RC2", center)
-    _set_decision(reference, scenario.maintenance_tasks, "M_SL1", center + 6)
-
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
-    scenario.metadata.update(
-        occasion_description=(
-            "Three downstream jobs have narrow, partially overlapping lifecycle "
-            "windows. A naive common start causes a capacity collapse."
-        ),
-        expected_model_value=(
-            "Find a feasible ordering inside tight windows that a manual earliest-"
-            "start or common-start rule misses."
-        ),
-        stress_period=[center - 8, center + 14],
-    )
-    return scenario
-
-
-def _occasion_partial_shutdown_choice(
-    scenario: DissertationScenario,
-    config: GeneratorConfig,
-    rng: random.Random,
-) -> DissertationScenario:
-    start, end = _period(config.horizon_days, 0.37, 0.53)
-
-    scenario.outbound_demand = _multiply_records(
-        scenario.outbound_demand,
-        start,
-        end,
-        factor=1.18,
-    )
-    baseline = _schedule_map(scenario.manual_baseline)
-    reference = _schedule_map(scenario.reference_schedule)
-    _set_decision(
-        baseline,
-        scenario.maintenance_tasks,
-        "M_RC2",
-        start + 1,
-        mode_id=FULL_SHUTDOWN_MODE,
-    )
-    _set_decision(
-        reference,
-        scenario.maintenance_tasks,
-        "M_RC2",
-        start + 1,
-        mode_id=PARTIAL_70_MODE,
-    )
-    scenario.manual_baseline = list(baseline.values())
-    scenario.reference_schedule = list(reference.values())
-    scenario.metadata.update(
-        occasion_description=(
-            f"A reclaimer maintenance job must occur during sustained strong demand "
-            f"on days {start}-{end - 1}. It can use a short full shutdown, a "
-            "longer 30%-available mode, or the longest 70%-available mode."
-        ),
-        expected_model_value=(
-            "Select the maintenance mode that provides the best trade-off between "
-            "maintenance duration, retained capacity, and throughput."
-        ),
-        stress_period=[start, end],
-    )
-    return scenario
-
-
-def _occasion_fixed_schedule_control(
-    scenario: DissertationScenario,
-    config: GeneratorConfig,
-    rng: random.Random,
-) -> DissertationScenario:
-    decisions = _schedule_map(scenario.manual_baseline)
-    fixed_tasks: list[MaintenanceTask] = []
-    for task in scenario.maintenance_tasks:
-        decision = decisions[task.task_id]
-        mode = next(m for m in task.modes if m.mode_id == decision.mode_id)
-        fixed_tasks.append(
-            replace(
-                task,
-                earliest_start_day=decision.start_day,
-                latest_start_day=decision.start_day,
-                lifecycle_due_day=max(
-                    task.lifecycle_due_day,
-                    decision.start_day + mode.duration_days - 1,
-                ),
+        activities.append(
+            PriorityActivity(
+                activity_id=activity_spec["activity_id"],
+                product_id="X1",
+                start_day=start_day,
+                end_day=end_day,
+                minimum_tonnes_per_day=0.0,
+                required_assets=required_assets,
+                hard_requirement=True,
+                earliest_start_day=start_day,
+                latest_start_day=start_day,
+                required_zone="Z4",
+                minimum_total_tonnes=0.0,
+                minimum_contiguous_days=1,
+                pre_campaign_buffer_days=buffer_days,
+                post_campaign_buffer_days=buffer_days,
+                cleanout_before_days=0,
+                cleanout_after_days=0,
+                capacity_factor_during_activity=capacity_factor,
+                maintenance_incompatible=maintenance_incompatible,
             )
         )
-    scenario.maintenance_tasks = fixed_tasks
-    scenario.reference_schedule = list(scenario.manual_baseline)
+    return activities
+
+
+def apply_operational_conflict_family(
+    scenario: DissertationScenario,
+    config: GeneratorConfig,
+    rng_streams: Mapping[str, random.Random],
+) -> DissertationScenario:
+    level = get_scenario_level(scenario.metadata["scenario_name"])
+    requirement = scenario.special_product_requirements[0]
+    f4_rng = rng_streams["F4/activity_windows"]
+
+    scenario.priority_activities = build_operational_activity_windows(
+        level,
+        requirement,
+        f4_rng,
+        config.horizon_days,
+    )
+
+    scenario.maintenance_tasks = retime_f4_maintenance_tasks(
+        tasks=scenario.maintenance_tasks,
+        activities=scenario.priority_activities,
+        assets=scenario.assets,
+        requirement=requirement,
+        rng=f4_rng,
+        horizon=config.horizon_days,
+    )
+    scenario.manual_baseline = build_spread_baseline_schedule(
+        scenario.maintenance_tasks,
+        scenario.priority_activities,
+        avoid_activity_conflicts=False,
+    )
+    scenario.reference_schedule = build_spread_baseline_schedule(
+        scenario.maintenance_tasks,
+        scenario.priority_activities,
+        avoid_activity_conflicts=True,
+    )
+
     scenario.metadata.update(
+        scenario_family="F4_operational_conflict",
+        scenario_level=level,
         occasion_description=(
-            "Every maintenance start is fixed by setting earliest and latest start "
-            "to the same day."
+            f"Operational-conflict {level} case with {len(scenario.priority_activities)} protected "
+            "activity windows around downstream export and the X1 route."
         ),
         expected_model_value=(
-            "A negative control: the integrated optimiser must not claim scheduling "
-            "benefit when no maintenance flexibility exists."
+            "Use activity capacity reductions and, at the medium and high levels, "
+            "maintenance incompatibility to create calendar regions where maintenance "
+            "timing competes with protected operational work."
         ),
+        stress_periods=[
+            [activity.start_day, activity.end_day]
+            for activity in scenario.priority_activities
+        ],
     )
     return scenario
 
 
-def _occasion_structurally_infeasible(
+def retime_f4_maintenance_tasks(
+    *,
+    tasks: Sequence[MaintenanceTask],
+    activities: Sequence[PriorityActivity],
+    assets: Sequence[Asset],
+    requirement: SpecialProductRequirements,
+    rng: random.Random,
+    horizon: int,
+) -> list[MaintenanceTask]:
+    stage_by_asset = {asset.asset_id: asset.stage for asset in assets}
+    replacements: dict[str, MaintenanceTask] = {}
+    selected_task_ids: set[str] = set()
+    for activity in activities:
+        group, target_count = F4_MAINTENANCE_TARGETS_BY_ACTIVITY.get(
+            activity.activity_id,
+            ("downstream_export", 1),
+        )
+        candidates = f4_candidate_tasks(
+            tasks=tasks,
+            activity=activity,
+            stage_by_asset=stage_by_asset,
+            requirement=requirement,
+            group=group,
+            excluded_task_ids=selected_task_ids,
+        )
+        chosen_tasks = choose_f4_target_tasks(candidates, target_count, rng)
+        for task in chosen_tasks:
+            selected_task_ids.add(task.task_id)
+            replacements[task.task_id] = retime_task_around_activity(
+                task=task,
+                activity=activity,
+                all_activities=activities,
+                rng=rng,
+                horizon=horizon,
+            )
+    return [replacements.get(task.task_id, task) for task in tasks]
+
+
+def f4_candidate_tasks(
+    *,
+    tasks: Sequence[MaintenanceTask],
+    activity: PriorityActivity,
+    stage_by_asset: Mapping[str, str],
+    requirement: SpecialProductRequirements,
+    group: str,
+    excluded_task_ids: set[str],
+) -> list[MaintenanceTask]:
+    unused = [task for task in tasks if task.task_id not in excluded_task_ids]
+    if group == "x1_route_upstream":
+        candidates = [
+            task
+            for task in unused
+            if task.asset_id in requirement.required_assets
+            and stage_by_asset[task.asset_id] in {"train_unloader", "stacker"}
+        ]
+        if candidates:
+            return sorted(candidates, key=lambda task: task.task_id)
+        return sorted(
+            [
+                task
+                for task in unused
+                if task.asset_id in requirement.required_assets
+            ],
+            key=lambda task: task.task_id,
+        )
+
+    direct_activity_assets = [
+        task for task in unused if task.asset_id in activity.required_assets
+    ]
+    if direct_activity_assets:
+        return sorted(direct_activity_assets, key=lambda task: task.task_id)
+    return sorted(
+        [
+            task
+            for task in unused
+            if stage_by_asset[task.asset_id] in {"reclaimer", "shiploader"}
+        ],
+        key=lambda task: task.task_id,
+    )
+
+
+def choose_f4_target_tasks(
+    candidates: Sequence[MaintenanceTask],
+    target_count: int,
+    rng: random.Random,
+) -> list[MaintenanceTask]:
+    if not candidates or target_count <= 0:
+        return []
+    count = min(target_count, len(candidates))
+    return sorted(rng.sample(list(candidates), count), key=lambda task: task.task_id)
+
+
+def retime_task_around_activity(
+    *,
+    task: MaintenanceTask,
+    activity: PriorityActivity,
+    all_activities: Sequence[PriorityActivity],
+    rng: random.Random,
+    horizon: int,
+) -> MaintenanceTask:
+    max_duration = max(mode.duration_days for mode in task.modes)
+    latest_allowed = horizon - max_duration
+    anchor_start = activity.start_day
+    anchor_end = activity.end_day
+    pre_span = rng.randint(*F4_MAINTENANCE_PRE_ACTIVITY_RANGE_DAYS)
+    post_span = rng.randint(*F4_MAINTENANCE_POST_ACTIVITY_RANGE_DAYS)
+    earliest = max(0, min(latest_allowed, anchor_start - pre_span))
+    latest = min(
+        latest_allowed,
+        max(earliest, anchor_end + post_span - max_duration),
+    )
+    due = min(horizon - 1, latest + max_duration - 1)
+    return _retime_task(task, earliest, latest, due)
+
+
+def apply_structural_infeasibility_validation(
     scenario: DissertationScenario,
     config: GeneratorConfig,
-    rng: random.Random,
+    rng_streams: Mapping[str, random.Random],
 ) -> DissertationScenario:
     start, end = _period(config.horizon_days, 0.44, 0.55)
     scenario.committed_outages = [
@@ -2051,15 +3060,16 @@ def _occasion_structurally_infeasible(
         ),
     ]
     for day in range(start, end):
-        scenario.minimum_throughput_rate_tph[day] = 5000.0  # ~120,000 tpd equivalent
+        scenario.minimum_throughput_rate_tph[day] = STRUCTURAL_INFEASIBLE_MIN_THROUGHPUT_RATE_TPH
     scenario.metadata.update(
         occasion_description=(
-            f"Two of three reclaimers have non-movable outages on days {start}-"
-            f"{end - 1}; remaining downstream capacity is below the hard minimum."
+            f"Daily minimum throughput is set above the physical system capacity "
+            f"on days {start}-{end - 1}."
         ),
         expected_model_value=(
             "Correctly prove infeasibility instead of returning an apparently valid "
-            "but physically impossible schedule."
+            "but physically impossible schedule. The infeasibility is created through "
+            "the active minimum-throughput parameter."
         ),
         expected_feasibility="infeasible",
         stress_period=[start, end],
@@ -2067,9 +3077,9 @@ def _occasion_structurally_infeasible(
     return scenario
 
 
-# ---------------------------------------------------------------------------
-# Lightweight design evaluator
-# ---------------------------------------------------------------------------
+# ============================================================
+# 7. VALIDATION AND DESIGN EVIDENCE
+# ============================================================
 
 
 def evaluate_schedule(
@@ -2090,10 +3100,14 @@ def evaluate_schedule(
         req.product_id: req for req in scenario.special_product_requirements
     }
     special_products = set(requirement_by_product)
-    supply = _records_to_dense(scenario.inbound_supply, products, scenario.days)
-    demand = _records_to_dense(scenario.outbound_demand, products, scenario.days)
+    supply = build_dense_product_quantity_map(
+        scenario.inbound_supply, products, scenario.days
+    )
+    demand = build_dense_product_quantity_map(
+        scenario.outbound_demand, products, scenario.days
+    )
     capacity_factor = _effective_capacity_factors(scenario, schedule)
-    _, maintenance_activity_incompatible = _special_activity_profiles(scenario)
+    _, maintenance_activity_incompatible = build_operational_activity_profiles(scenario)
     hours_per_day = scenario.operating_hours_per_day
 
     inventory = {
@@ -2414,7 +3428,7 @@ def evaluate_schedule(
     }
 
 
-def _network_neighbours(
+def build_network_adjacency_maps(
     arcs: Sequence[Arc], nodes: Sequence[str]
 ) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
     """Return predecessor and successor node sets used by flow conservation."""
@@ -2426,10 +3440,10 @@ def _network_neighbours(
     return predecessors, successors
 
 
-def _special_activity_profiles(
+def build_operational_activity_profiles(
     scenario: DissertationScenario,
 ) -> tuple[dict[tuple[str, int], float], dict[tuple[str, int], int]]:
-    """Build sigma[a,d] and h[a,d] from fixed high-priority activities."""
+    """Build sigma[a,d] and h[a,d] from realized high-priority activities."""
     sigma = {
         (asset.asset_id, day): 1.0
         for asset in scenario.assets
@@ -2471,7 +3485,7 @@ def _effective_capacity_factors(
     factors = {
         (asset.asset_id, day): 1.0 for asset in scenario.assets for day in scenario.days
     }
-    sigma, _ = _special_activity_profiles(scenario)
+    sigma, _ = build_operational_activity_profiles(scenario)
     for key, activity_factor in sigma.items():
         factors[key] = min(factors[key], activity_factor)
 
@@ -2490,13 +3504,27 @@ def _effective_capacity_factors(
     return factors
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+# ============================================================
+# SHARED HELPERS
+# ============================================================
 
 
-def _stable_seed(seed: int, occasion: str) -> int:
-    digest = hashlib.sha256(f"{seed}:{occasion}".encode("utf-8")).digest()
+def make_rng_streams(master_seed: int) -> dict[str, random.Random]:
+    return {
+        stream_name: make_rng(master_seed, *stream_name.split("/"))
+        for stream_name in RNG_STREAM_NAMES
+    }
+
+
+def make_rng(master_seed: int, *stream_parts: str) -> random.Random:
+    return random.Random(_stable_seed(master_seed, *stream_parts))
+
+
+def _stable_seed(seed: int, *stream_parts: str) -> int:
+    stream_name = "/".join(stream_parts)
+    digest = hashlib.sha256(
+        f"{GENERATOR_RANDOMIZATION_VERSION}:{seed}:{stream_name}".encode("utf-8")
+    ).digest()
     return int.from_bytes(digest[:8], "big", signed=False)
 
 
@@ -2512,7 +3540,7 @@ def _period(
     return start, end
 
 
-def _nominal_stage_rate(assets: Sequence[Asset]) -> dict[str, float]:
+def calculate_nominal_stage_rate_tph(assets: Sequence[Asset]) -> dict[str, float]:
     """Calculate the total nominal rate (t/hr) per processing stage."""
     return {
         stage: sum(a.nominal_rate_tph for a in assets if a.stage == stage)
@@ -2520,7 +3548,7 @@ def _nominal_stage_rate(assets: Sequence[Asset]) -> dict[str, float]:
     }
 
 
-def _records_to_dense(
+def build_dense_product_quantity_map(
     records: Sequence[DailyProductQuantity],
     products: Sequence[str],
     days: Sequence[int],
@@ -2547,75 +3575,6 @@ def _json_safe(value: Any) -> Any:
     if isinstance(value, list):
         return [_json_safe(item) for item in value]
     return value
-
-
-def _multiply_records(
-    records: Sequence[DailyProductQuantity],
-    start: int,
-    end: int,
-    factor: float,
-    product_id: str | None = None,
-) -> list[DailyProductQuantity]:
-    return [
-        (
-            replace(
-                record,
-                tonnes=round(record.tonnes * factor, 3),
-            )
-            if start <= record.day < end
-            and (product_id is None or record.product_id == product_id)
-            else record
-        )
-        for record in records
-    ]
-
-
-def _add_product_demand(
-    records: Sequence[DailyProductQuantity],
-    *,
-    product_id: str,
-    start: int,
-    end: int,
-    additional_tpd: float,
-) -> list[DailyProductQuantity]:
-    return [
-        (
-            replace(record, tonnes=round(record.tonnes + additional_tpd, 3))
-            if record.product_id == product_id and start <= record.day < end
-            else record
-        )
-        for record in records
-    ]
-
-
-def _schedule_map(
-    schedule: Sequence[MaintenanceDecision],
-) -> dict[str, MaintenanceDecision]:
-    return {decision.task_id: decision for decision in schedule}
-
-
-def _task_by_id(tasks: Sequence[MaintenanceTask], task_id: str) -> MaintenanceTask:
-    try:
-        return next(task for task in tasks if task.task_id == task_id)
-    except StopIteration as exc:
-        raise KeyError(f"unknown maintenance task {task_id}") from exc
-
-
-def _set_decision(
-    schedule: dict[str, MaintenanceDecision],
-    tasks: Sequence[MaintenanceTask],
-    task_id: str,
-    preferred_start: int,
-    mode_id: str = FULL_SHUTDOWN_MODE,
-) -> None:
-    task = _task_by_id(tasks, task_id)
-    mode = next((m for m in task.modes if m.mode_id == mode_id), None)
-    if mode is None:
-        raise ValueError(f"task {task_id} does not support mode {mode_id}")
-    latest_by_due = task.lifecycle_due_day - mode.duration_days + 1
-    latest = min(task.latest_start_day, latest_by_due)
-    start = min(max(preferred_start, task.earliest_start_day), latest)
-    schedule[task_id] = MaintenanceDecision(task_id, start, mode_id)
 
 
 def _retime_task(
@@ -2658,92 +3617,266 @@ def _metric_delta(
     }
 
 
-def _occasion_checks(
-    occasion: str,
+def update_realization_metadata(
+    scenario: DissertationScenario,
+    config: GeneratorConfig,
+) -> None:
+    asset_stage = {asset.asset_id: asset.stage for asset in scenario.assets}
+    maintenance_by_stage = {
+        stage: sum(
+            1
+            for task in scenario.maintenance_tasks
+            if asset_stage[task.asset_id] == stage
+        )
+        for stage in STAGES
+    }
+    initial_inventory_ratios = {
+        zone.zone_id: round(
+            sum(scenario.initial_inventory[zone.zone_id].values())
+            / zone.capacity_tonnes,
+            6,
+        )
+        for zone in scenario.zones
+    }
+    scenario.metadata["generation"] = {
+        "master_seed": config.seed,
+        "randomization_version": GENERATOR_RANDOMIZATION_VERSION,
+        "rng_stream_version": RNG_STREAM_VERSION,
+        "rng_stream_names": list(RNG_STREAM_NAMES),
+        "flow": (
+            "structural/config parameters -> family treatment -> "
+            "seeded realization -> derived parameters -> validation"
+        ),
+    }
+    scenario.metadata["realization"] = {
+        "maintenance_operation_count": len(scenario.maintenance_tasks),
+        "maintenance_by_stage_counts": maintenance_by_stage,
+        "initial_inventory_fill_ratios": initial_inventory_ratios,
+        "maintenance_tasks": {
+            task.task_id: {
+                "asset_id": task.asset_id,
+                "stage": asset_stage[task.asset_id],
+                "full_duration_days": next(
+                    mode.duration_days
+                    for mode in task.modes
+                    if mode.mode_id == FULL_SHUTDOWN_MODE
+                ),
+                "earliest_start_day": task.earliest_start_day,
+                "latest_start_day": task.latest_start_day,
+                "lifecycle_due_day": task.lifecycle_due_day,
+                "task_class": task.task_class,
+            }
+            for task in scenario.maintenance_tasks
+        },
+    }
+
+
+def validate_scenario_design(
+    scenario_name: str,
     scenario: DissertationScenario,
     baseline: Mapping[str, float | int],
     reference: Mapping[str, float | int],
 ) -> dict[str, Any]:
-    checks: dict[str, bool] = {}
-    if occasion == "balanced_control":
+    product_ids = {product.product_id for product in scenario.products}
+    zone_by_id = {zone.zone_id: zone for zone in scenario.zones}
+    asset_ids = {asset.asset_id for asset in scenario.assets}
+    arc_ids = {arc.arc_id for arc in scenario.arcs}
+    task_ids = [task.task_id for task in scenario.maintenance_tasks]
+    x1_requirement = next(
+        req for req in scenario.special_product_requirements if req.product_id == "X1"
+    )
+    serialized_model_data = json.dumps(_json_safe(scenario.optimizer_objects()))
+    checks: dict[str, bool] = {
+        "initial_inventory_respects_zone_bounds": all(
+            zone.minimum_inventory_tonnes
+            <= sum(scenario.initial_inventory[zone.zone_id].values())
+            < zone.capacity_tonnes
+            for zone in scenario.zones
+        ),
+        "initial_inventory_uses_known_products": all(
+            set(by_product).issubset(product_ids)
+            for by_product in scenario.initial_inventory.values()
+        ),
+        "initial_inventory_respects_product_zone_compatibility": all(
+            set(by_product).issubset(set(zone_by_id[zone_id].allowed_products))
+            for zone_id, by_product in scenario.initial_inventory.items()
+        ),
+        "maintenance_assets_exist": all(
+            task.asset_id in asset_ids for task in scenario.maintenance_tasks
+        ),
+        "maintenance_task_ids_are_unique": len(task_ids) == len(set(task_ids)),
+        "maintenance_windows_valid_for_longest_mode": all(
+            0
+            <= task.earliest_start_day
+            <= task.latest_start_day
+            <= len(scenario.days) - max(mode.duration_days for mode in task.modes)
+            and task.lifecycle_due_day
+            >= task.latest_start_day + max(mode.duration_days for mode in task.modes) - 1
+            for task in scenario.maintenance_tasks
+        ),
+        "no_inactive_asset_references": all(
+            asset_id in asset_ids
+            for task in scenario.maintenance_tasks
+            for asset_id in (task.asset_id,)
+        )
+        and all(
+            asset_id in asset_ids
+            for activity in scenario.priority_activities
+            for asset_id in activity.required_assets
+        ),
+        "generation_metadata_present": (
+            scenario.metadata.get("generation", {}).get("master_seed")
+            == scenario.metadata.get("seed")
+            and "realization" in scenario.metadata
+        ),
+        "minimum_throughput_profile_varies": (
+            max(scenario.minimum_throughput_rate_tph.values())
+            > 1.2 * min(scenario.minimum_throughput_rate_tph.values())
+        ),
+        "mode_duration_increases_with_available_capacity": all(
+            all(
+                left.duration_days < right.duration_days
+                for left, right in zip(task.modes, task.modes[1:])
+            )
+            for task in scenario.maintenance_tasks
+        ),
+        "three_active_maintenance_modes": (
+            get_scenario_mode_order(scenario.maintenance_tasks)
+            == MAINTENANCE_MODE_ORDER
+        ),
+        "no_p50_in_active_model_data": "partial_50" not in serialized_model_data,
+        "effective_network_capacity_matches_topology": math.isclose(
+            scenario.metadata["effective_network_capacity_tph"],
+            calculate_effective_network_capacity_tph(scenario.assets, scenario.arcs),
+            rel_tol=0.0,
+            abs_tol=1e-6,
+        ),
+        "common_x1_route_assets": (
+            x1_requirement.required_assets == ("TU2", "ST3", "RC2", "SL1")
+        ),
+        "common_x1_route_arcs_exist": set(x1_requirement.compatible_arcs).issubset(
+            arc_ids
+        ),
+    }
+    if scenario_name == BASE_CONTROL_NAME:
         checks["baseline_and_reference_are_identical"] = (
             scenario.manual_baseline == scenario.reference_schedule
         )
-    elif occasion == "peak_export_conflict":
-        checks["reference_has_more_throughput"] = (
-            reference["total_throughput_tonnes"] > baseline["total_throughput_tonnes"]
+    elif scenario_name.startswith("F1_system_scale"):
+        level = get_scenario_level(scenario_name)
+        task_count = len(scenario.maintenance_tasks)
+        mode_count = len(get_scenario_mode_order(scenario.maintenance_tasks))
+        profile = SYSTEM_SCALE_PROFILES[level]
+        stage_counts = {
+            stage: sum(1 for asset in scenario.assets if asset.stage == stage)
+            for stage in STAGES
+        }
+        expected_count = expected_maintenance_operation_count(level)
+        checks["task_count_matches_scale_level"] = task_count == expected_count
+        checks["asset_count_matches_scale_level"] = stage_counts == profile
+        checks["mode_count_matches_scale_level"] = mode_count == 3
+    elif scenario_name.startswith("F2_mode_tradeoff"):
+        mode_order = get_scenario_mode_order(scenario.maintenance_tasks)
+        checks["three_tradeoff_modes_present"] = mode_order == MAINTENANCE_MODE_ORDER
+        checks["uses_reference_m_topology"] = (
+            scenario.metadata.get("system_scale_profile") == SYSTEM_SCALE_PROFILES["M"]
         )
-        checks["reference_has_less_unmet_demand"] = (
-            reference["unmet_demand_tonnes"] < baseline["unmet_demand_tonnes"]
+    elif scenario_name.startswith("F3_yard_flow"):
+        min_inventory_ratios = [
+            zone.minimum_inventory_tonnes / zone.capacity_tonnes
+            for zone in scenario.zones
+        ]
+        checks["nonzero_minimum_inventory"] = min(min_inventory_ratios) >= 0.05
+        checks["uses_reference_m_topology"] = (
+            scenario.metadata.get("system_scale_profile") == SYSTEM_SCALE_PROFILES["M"]
         )
-    elif occasion in {"overlapping_maintenance", "tight_lifecycle_windows"}:
-        checks["reference_has_fewer_minimum_violations"] = (
-            reference["minimum_throughput_violation_days"]
-            < baseline["minimum_throughput_violation_days"]
+    elif scenario_name.startswith("F4_operational_conflict"):
+        total_incompatible_days = sum(
+            build_operational_activity_profiles(scenario)[1].values()
         )
-    elif occasion == "priority_campaign_conflict":
-        checks["reference_reduces_priority_shortfall"] = (
-            reference["priority_shortfall_tonnes"]
-            < baseline["priority_shortfall_tonnes"]
+        reduced_capacity_days = sum(
+            1
+            for value in build_operational_activity_profiles(scenario)[0].values()
+            if value < 1.0
         )
-        checks["baseline_has_special_product_shortfall"] = (
-            baseline["special_product_shortfall_tonnes"] > 0
-            or baseline["special_product_campaign_volume_shortfall_tonnes"] > 0
+
+        checks["multiple_activity_windows"] = (
+            len(scenario.priority_activities) >= 2
         )
-        checks["reference_has_no_special_product_shortfall"] = (
-            reference["special_product_shortfall_tonnes"] == 0
-            and reference["special_product_campaign_volume_shortfall_tonnes"] == 0
+
+        checks["uses_reference_m_topology"] = (
+            scenario.metadata.get("system_scale_profile")
+            == SYSTEM_SCALE_PROFILES["M"]
         )
-        checks["reference_has_no_footprint_violation"] = (
-            reference["special_product_footprint_violation_days"] == 0
+
+        expected_activity_count = (
+            2 if get_scenario_level(scenario_name) == "L" else 3
         )
-        checks["reference_has_no_maintenance_conflict"] = (
-            reference["special_product_maintenance_conflict_days"] == 0
+
+        checks["activity_count_matches_level"] = (
+            len(scenario.priority_activities) == expected_activity_count
         )
-    elif occasion == "yard_overflow_risk":
-        checks["reference_reduces_unaccepted_supply"] = (
-            reference["unaccepted_supply_tonnes"] < baseline["unaccepted_supply_tonnes"]
+
+        level = get_scenario_level(scenario_name)
+
+        checks["has_capacity_reduction"] = (
+            reduced_capacity_days > 0
         )
-    elif occasion == "inventory_starvation_risk":
-        checks["reference_has_more_throughput"] = (
-            reference["total_throughput_tonnes"] > baseline["total_throughput_tonnes"]
-        )
-    elif occasion == "partial_shutdown_choice":
-        checks["reference_has_more_throughput"] = (
-            reference["total_throughput_tonnes"] > baseline["total_throughput_tonnes"]
-        )
-        checks["reference_has_fewer_minimum_violations"] = (
-            reference["minimum_throughput_violation_days"]
-            < baseline["minimum_throughput_violation_days"]
-        )
-    elif occasion == "fixed_schedule_control":
-        checks["baseline_and_reference_are_identical"] = (
-            scenario.manual_baseline == scenario.reference_schedule
-        )
-        checks["metrics_are_identical"] = baseline == reference
-    elif occasion == "structurally_infeasible":
+
+        if level == "L":
+            checks["no_hard_maintenance_incompatibility_at_L"] = (
+                total_incompatible_days == 0
+            )
+
+            checks["retimed_tasks_touch_activity_windows"] = any(
+                task.asset_id in activity.required_assets
+                and task.earliest_start_day < activity.end_day
+                and task.latest_start_day >= activity.start_day
+                for task in scenario.maintenance_tasks
+                for activity in scenario.priority_activities
+            )
+
+        else:
+            checks["has_hard_maintenance_incompatibility"] = (
+                total_incompatible_days > 0
+            )
+
+            checks[
+                "retimed_tasks_touch_incompatible_activity_assets"
+            ] = any(
+                task.asset_id in activity.required_assets
+                and task.earliest_start_day < activity.end_day
+                and task.latest_start_day >= activity.start_day
+                for task in scenario.maintenance_tasks
+                for activity in scenario.priority_activities
+                if activity.maintenance_incompatible
+            )
+
+    elif scenario_name == "structurally_infeasible":
         checks["baseline_has_minimum_violation"] = (
             baseline["minimum_throughput_violation_days"] > 0
         )
+
         checks["reference_has_minimum_violation"] = (
             reference["minimum_throughput_violation_days"] > 0
         )
+
     return {
         "checks": checks,
         "all_checks_pass": all(checks.values()) if checks else True,
     }
 
 
-# ---------------------------------------------------------------------------
-# Persistence and CLI
-# ---------------------------------------------------------------------------
+# ============================================================
+# 8. OUTPUT / CLI
+# ============================================================
 
 
 def write_scenario(
     scenario: DissertationScenario,
     output_path: str | Path,
     *,
-    include_reference_schedule: bool = True,
+    include_reference_schedule: bool = False,
 ) -> Path:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -2757,6 +3890,7 @@ def write_scenario(
         )
         + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     return path
 
@@ -2764,7 +3898,7 @@ def write_scenario(
 def generate_suite(
     output_dir: str | Path,
     config: GeneratorConfig | None = None,
-    occasions: Sequence[str] = OCCASION_NAMES,
+    scenario_names: Sequence[str] = SCENARIO_NAMES,
 ) -> dict[str, Path]:
     config = config or GeneratorConfig()
     output = Path(output_dir)
@@ -2772,21 +3906,53 @@ def generate_suite(
 
     generated: dict[str, Path] = {}
     manifest_cases: list[dict[str, Any]] = []
-    for occasion in occasions:
-        scenario = build_scenario(occasion, config)
+    for scenario_name in scenario_names:
+        scenario = build_scenario(scenario_name, config)
+        scenario_modes = get_scenario_mode_order(scenario.maintenance_tasks)
         special_products = [product.product_id for product in scenario.products if product.is_special]
         special_requirement = next(
             req for req in scenario.special_product_requirements if req.product_id == "X1"
         )
-        path = write_scenario(scenario, output / f"{occasion}.json")
-        generated[occasion] = path
+        path = write_scenario(
+            scenario,
+            output / f"{scenario_name}.json",
+            include_reference_schedule=False,
+        )
+        generated[scenario_name] = path
         manifest_cases.append(
             {
-                "scenario_name": occasion,
+                "scenario_name": scenario_name,
                 "file": path.name,
                 "description": scenario.metadata["occasion_description"],
                 "expected_model_value": scenario.metadata["expected_model_value"],
                 "expected_feasibility": scenario.metadata["expected_feasibility"],
+                "asset_count": len(scenario.assets),
+                "system_scale_level": scenario.metadata["system_scale_level"],
+                "system_scale_profile": scenario.metadata["system_scale_profile"],
+                "system_scale_factor": scenario.metadata["system_scale_factor"],
+                "effective_network_capacity_tph": scenario.metadata[
+                    "effective_network_capacity_tph"
+                ],
+                "reference_effective_network_capacity_tph": scenario.metadata[
+                    "reference_effective_network_capacity_tph"
+                ],
+                "throughput_capacity_basis_tph": scenario.metadata[
+                    "throughput_capacity_basis_tph"
+                ],
+                "maintenance_operation_count": len(scenario.maintenance_tasks),
+                "maintenance_modes": list(scenario_modes),
+                "generation": scenario.metadata["generation"],
+                "realization": {
+                    "maintenance_operation_count": scenario.metadata["realization"][
+                        "maintenance_operation_count"
+                    ],
+                    "maintenance_by_stage_counts": scenario.metadata["realization"][
+                        "maintenance_by_stage_counts"
+                    ],
+                    "initial_inventory_fill_ratios": scenario.metadata[
+                        "realization"
+                    ]["initial_inventory_fill_ratios"],
+                },
                 "special_product_ids": special_products,
                 "special_product_id": "X1",
                 "special_product_compatible_zone": special_requirement.compatible_zones[0],
@@ -2811,8 +3977,13 @@ def generate_suite(
         "mathematical_model_version": "MATH4003 current PDF",
         "horizon_days": config.horizon_days,
         "seed": config.seed,
-        "shiploader_count": config.shiploader_count,
-        "maintenance_modes": list(MAINTENANCE_MODE_ORDER),
+        "randomization_version": GENERATOR_RANDOMIZATION_VERSION,
+        "rng_stream_version": RNG_STREAM_VERSION,
+        "rng_stream_names": list(RNG_STREAM_NAMES),
+        "system_scale_profiles": SYSTEM_SCALE_PROFILES,
+        "reference_system_scale_level": "M",
+        "default_maintenance_modes": list(MAINTENANCE_MODE_ORDER),
+        "supported_maintenance_modes": list(MAINTENANCE_MODE_ORDER),
         "special_product_ids": ["X1"],
         "special_product_id": "X1",
         "special_product_synthetic_assumptions": {
@@ -2830,6 +4001,7 @@ def generate_suite(
     manifest_path.write_text(
         json.dumps(manifest, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     generated["manifest"] = manifest_path
     return generated
@@ -2842,8 +4014,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--occasion",
         default="all",
-        choices=("all", *OCCASION_NAMES),
-        help="Named occasion to generate, or all benchmark occasions.",
+        choices=("all", *SCENARIO_NAMES),
+        help="Named scenario to generate, or all benchmark scenarios.",
     )
     parser.add_argument(
         "--output-dir",
@@ -2853,21 +4025,6 @@ def _parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--horizon-days", type=int, default=90)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--minimum-throughput-ratio",
-        type=float,
-        default=0.55,
-    )
-    parser.add_argument(
-        "--shiploader-count",
-        type=int,
-        choices=(1, 2),
-        default=2,
-        help=(
-            "Use one shiploader to mirror the current PDF case study, or two "
-            "to preserve the original benchmark topology."
-        ),
-    )
     parser.add_argument(
         "--shiploader-rate-tph",
         type=float,
@@ -2882,12 +4039,10 @@ def main() -> int:
     config = GeneratorConfig(
         horizon_days=args.horizon_days,
         seed=args.seed,
-        minimum_throughput_ratio=args.minimum_throughput_ratio,
-        shiploader_count=args.shiploader_count,
         shiploader_rate_tph=args.shiploader_rate_tph,
     )
-    occasions = OCCASION_NAMES if args.occasion == "all" else (args.occasion,)
-    generated = generate_suite(args.output_dir, config, occasions)
+    scenario_names = SCENARIO_NAMES if args.occasion == "all" else (args.occasion,)
+    generated = generate_suite(args.output_dir, config, scenario_names)
     for name, path in generated.items():
         print(f"{name}: {path}")
     return 0
