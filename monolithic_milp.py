@@ -1,113 +1,25 @@
-"""
-Superseded by multicommodity_milp.py -- kept for reference only.
+"""Single-commodity monolithic MILP for the frozen canonical schema.
 
-Monolithic MILP for MATH4003 Chapter 3
-Integrated Mid-Term Port Yard Planning in Iron Ore Supply Chains
-
-Implements the compact formulation from MATH4003_Mathematical_Model_21467181.docx
-(Sections 2.1-2.5) exactly: sets, parameters, decision variables, objective, and
-all ten constraints. This is the monolithic MILP that Section 3 of that document
-names as the first implementation step, ahead of Benders decomposition.
-
-SCOPE NOTE: Chapter 3's formulation is single-commodity (aggregate tonnes flow
-f_{i,j,d}), while generate_dissertation_scenarios.py exports multi-product data
-(P1, P2, P3, X1). This script aggregates across products so the model matches
-Chapter 3 exactly. Extending to a multi-commodity flow (f_{i,j,g,d}) is the
-natural next step once this base model is validated -- that's also where the
-X1 special-product research question plugs in.
-
-MODELLING DECISIONS NOT FULLY SPECIFIED IN THE SOURCE DOCUMENT (flagged for
-supervisor confirmation, not silently assumed):
-  1. mu_d (throughput) has no defining equation in Chapter 3, only mu_d >= mu_min.
-     Defined here as total flow into the network's sink node(s) (nodes with no
-     successors -- VESSEL_SINK in the generator's topology).
-  2. Constraint (3)'s source-document image writes the x-summation window using
-     a single p_m (not mode-indexed), while constraint (2) uses mode-dependent
-     p_{m,k}. This implementation uses p_{m,k} throughout for consistency with
-     (2). Worth a quick confirmation with Hoa/Ponpot that this is intended.
-
-KEY NAMING NOTE: Chapter 3 uses P for the stockyard node set. In the current
-generate_dissertation_scenarios.py export, model_ready_data['P'] is actually the
-*product* set (P1, P2, P3, X1) -- a legacy key repurposed for the multi-product
-extension. The stockyard set matching Chapter 3's P is model_ready_data['Z']
-(equivalently 'P_STOCKYARD'). This script uses 'Z' throughout and calls it P_
-in variable names to match the paper's notation without colliding with Python.
+The scenario JSON is loaded through model_data_loader.py. The loader validates
+that G has exactly one commodity, then this model uses aggregate flow and
+stockyard inventory variables: x, delta, f, z, o, and mu.
 """
 
-import json
 import sys
 
 import gurobipy as gp
 from gurobipy import GRB
 
+from model_data_loader import load_canonical_scenario
+
 
 def load_scenario(path):
-    """Load one generate_dissertation_scenarios.py JSON output and translate
-    its model_ready_data into Chapter 3's notation, aggregating per-product
-    quantities to a single commodity where the generator exports them by
-    product."""
-    with open(path) as f:
-        raw = json.load(f)
-    m = raw["model_ready_data"]
-
-    D = m["D"]
-    N = m["N"]
-    A = m["A"]
-    A_NS = m["A_NS"]
-    P_ = m["Z"]  # stockyard set -- see KEY NAMING NOTE above
-    M = m["M_OPERATIONS"]
-    M_a = m["M_a"]
-    K = m["K"]  # ['full_shutdown', 'partial_30', 'partial_70'] == {F, P30, P70}
-
-    arc_ids = list(m["arc_from"].keys())
-    E = [(m["arc_from"][a], m["arc_to"][a]) for a in arc_ids]
-    U = {(m["arc_from"][a], m["arc_to"][a]): m["arc_capacity_tpd"][a] for a in arc_ids}
-
-    predecessors = m["predecessors"]
-    successors = m["successors"]
-
-    C = m["asset_capacity_tpd"]
-
-    p, eta = {}, {}
-    for key, val in m["maintenance_duration_days"].items():
-        mm, kk = key.split("::")
-        p[(mm, kk)] = val
-    for key, val in m["maintenance_available_capacity_fraction"].items():
-        mm, kk = key.split("::")
-        eta[(mm, kk)] = val
-
-    e_m = m["maintenance_earliest_start"]
-    l_m = m["maintenance_latest_start"]
-
-    sigma, h = {}, {}
-    for key, val in m["special_activity_capacity_factor"].items():
-        a, d = key.split("::")
-        sigma[(a, int(d))] = val
-    for key, val in m["maintenance_activity_incompatible"].items():
-        a, d = key.split("::")
-        h[(a, int(d))] = val
-
-    Z_min = m["zone_min_inventory_tonnes"]
-    Z_max = m["zone_max_inventory_tonnes"]
-    alpha = m["overflow_penalty_per_tonne"]
-
-    # z_p^0: generator tracks initial inventory per (zone, product) in the
-    # multi-commodity scenario export, or pre-aggregated per zone in the
-    # single-commodity export ("Z1" vs "Z1::P1") -- split(...)[0] handles both.
-    z0 = {zp: 0.0 for zp in P_}
-    for key, val in m["initial_inventory_tonnes"].items():
-        zz = key.split("::")[0]
-        if zz in z0:
-            z0[zz] += val
-
-    mu_min = {int(d): v for d, v in m["minimum_throughput_tpd"].items()}
-
-    return dict(
-        D=D, N=N, A=A, A_NS=A_NS, P_=P_, M=M, M_a=M_a, K=K,
-        E=E, U=U, predecessors=predecessors, successors=successors,
-        C=C, p=p, eta=eta, e_m=e_m, l_m=l_m, sigma=sigma, h=h,
-        Z_min=Z_min, Z_max=Z_max, alpha=alpha, z0=z0, mu_min=mu_min,
-    )
+    data = load_canonical_scenario(path, require_single_commodity=True)
+    g0 = data["G"][0]
+    data["g0"] = g0
+    data["z0"] = {zone: data["z0_pg"][(zone, g0)] for zone in data["P_"]}
+    data["is_multicommodity"] = False
+    return data
 
 
 def build_model(data, strict_capacity=False):
@@ -128,8 +40,8 @@ def build_model(data, strict_capacity=False):
     model = gp.Model("math4003_monolithic_milp")
 
     # --- Decision variables (Section 2.3) ---
-    x = model.addVars(((mm, k, d) for mm in M for k in K for d in D),
-                       vtype=GRB.BINARY, name="x")
+    valid_starts = [(mm, k, d) for mm in M for k in K for d in D if e_m[mm] <= d <= l_m[mm]]
+    x = model.addVars(valid_starts, vtype=GRB.BINARY, name="x")
     delta = model.addVars(M, D, lb=0.0, ub=1.0, name="delta")
     f = model.addVars(E, D, lb=0.0, name="f")
     z = model.addVars(P_, D, lb=0.0, name="z")

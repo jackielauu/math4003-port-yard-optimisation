@@ -206,6 +206,9 @@ tempCodeRunnerFile.py
 # Ruff stuff:
 .ruff_cache/
 
+# Local scenario-run outputs
+results/
+
 # PyPI configuration file
 .pypirc
 

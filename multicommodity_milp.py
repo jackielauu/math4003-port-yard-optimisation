@@ -1,120 +1,23 @@
-"""
-Monolithic MILP for MATH4003 Chapter 3 -- multi-commodity extension
-Integrated Mid-Term Port Yard Planning in Iron Ore Supply Chains
+"""Multi-commodity monolithic MILP for the frozen canonical schema.
 
-Extends monolithic_milp.py to a multi-commodity flow
-
-WHAT CHANGED FROM THE SINGLE-COMMODITY VERSION:
-  - Flow, and everything downstream of flow, now carries a product index g
-    drawn from G = {P1, P2, P3, X1}: f_{i,j,d} -> f_{i,j,g,d}.
-  - Constraints that are genuinely about material movement now hold per
-    product: flow conservation (4), stockyard inventory balance (5),
-    throughput definition (9).
-  - Constraints that represent SHARED PHYSICAL CAPACITY stay aggregated
-    across products, since an asset/arc/zone's capacity is a property of
-    the infrastructure, not of any one commodity: stockyard capacity (6),
-    asset capacity (7), arc capacity (8). Overflow o_{p,d} likewise stays
-    per-zone rather than per-(zone,product) for the same reason.
-  - Maintenance-side constraints (1), (2), (3) are unchanged -- maintenance
-    decisions aren't product-specific.
-  - Product-routing restrictions (e.g. X1 only through TU3-ST4-Z4-RC3-SL2,
-    only permitted in zone Z4) are enforced by fixing the upper bound of
-    f[i,j,g,d] and z[p,g,d] to 0 wherever the generator's compatibility
-    data says (arc, g) or (zone, g) isn't allowed, rather than adding new
-    constraints -- this keeps the constraint count matching Chapter 3.
-
-NOT YET IN SCOPE: per-product demand satisfaction, X1's protected-campaign
-footprint/buffer/cleanout rules. The generator already exports the data
-for these (demand_tonnes, special_activity_* fields) if/when Chapter 4/5
-extends the formulation to cover them.
+This is the same physical model as monolithic_milp.py, with commodity index g
+only on material flow and stockyard inventory variables. Maintenance variables,
+overflow, total throughput, and physical capacities remain shared.
 """
 
-import json
 import sys
 
 import gurobipy as gp
 from gurobipy import GRB
 
+from model_data_loader import load_canonical_scenario
+
 
 def load_scenario(path):
-    with open(path) as f:
-        raw = json.load(f)
-    m = raw["model_ready_data"]
-
-    D = m["D"]
-    N = m["N"]
-    A = m["A"]
-    A_NS = m["A_NS"]
-    P_ = m["Z"]              # stockyard set (Chapter 3's P) -- see naming note in monolithic_milp.py
-    G = m["G"]                # product set: P1, P2, P3, X1
-    M = m["M_OPERATIONS"]
-    M_a = m["M_a"]
-    K = m["K"]
-
-    arc_ids = list(m["arc_from"].keys())
-    E = [(m["arc_from"][a], m["arc_to"][a]) for a in arc_ids]
-    arc_id_of = {(m["arc_from"][a], m["arc_to"][a]): a for a in arc_ids}
-    U = {(m["arc_from"][a], m["arc_to"][a]): m["arc_capacity_tpd"][a] for a in arc_ids}
-
-    predecessors = m["predecessors"]
-    successors = m["successors"]
-    C = m["asset_capacity_tpd"]
-
-    p, eta = {}, {}
-    for key, val in m["maintenance_duration_days"].items():
-        mm, kk = key.split("::")
-        p[(mm, kk)] = val
-    for key, val in m["maintenance_available_capacity_fraction"].items():
-        mm, kk = key.split("::")
-        eta[(mm, kk)] = val
-
-    e_m = m["maintenance_earliest_start"]
-    l_m = m["maintenance_latest_start"]
-
-    sigma, h = {}, {}
-    for key, val in m["special_activity_capacity_factor"].items():
-        a, d = key.split("::")
-        sigma[(a, int(d))] = val
-    for key, val in m["maintenance_activity_incompatible"].items():
-        a, d = key.split("::")
-        h[(a, int(d))] = val
-
-    Z_min = m["zone_min_inventory_tonnes"]
-    Z_max = m["zone_max_inventory_tonnes"]
-    alpha = m["overflow_penalty_per_tonne"]
-    mu_min = {int(d): v for d, v in m["minimum_throughput_tpd"].items()}
-
-    # z0[p, g]: initial inventory per zone per product -- the generator
-    # already tracks this granularly, so no aggregation needed here.
-    z0 = {}
-    for key, val in m["initial_inventory_tonnes"].items():
-        zz, gg = key.split("::")
-        z0[(zz, gg)] = val
-
-    # Product-compatibility lookups, used to fix incompatible (arc,g) and
-    # (zone,g) variables to 0 rather than adding new constraints.
-    product_arc_compatible = m["product_arc_compatible"]      # "g::arc_id" -> 1/0
-    zone_allowed_product = m["zone_allowed_product"]           # "zone::g"   -> 1/0
-
-    def arc_ok(i, j, g):
-        arc_id = arc_id_of.get((i, j))
-        if arc_id is None:
-            return False
-        if not product_arc_compatible.get(f"{g}::{arc_id}", 0):
-            return False
-        if i in P_ and not zone_allowed_product.get(f"{i}::{g}", 0):
-            return False
-        if j in P_ and not zone_allowed_product.get(f"{j}::{g}", 0):
-            return False
-        return True
-
-    return dict(
-        D=D, N=N, A=A, A_NS=A_NS, P_=P_, G=G, M=M, M_a=M_a, K=K,
-        E=E, U=U, predecessors=predecessors, successors=successors,
-        C=C, p=p, eta=eta, e_m=e_m, l_m=l_m, sigma=sigma, h=h,
-        Z_min=Z_min, Z_max=Z_max, alpha=alpha, z0=z0, mu_min=mu_min,
-        arc_ok=arc_ok, zone_allowed_product=zone_allowed_product,
-    )
+    data = load_canonical_scenario(path)
+    data["z0"] = data["z0_pg"]
+    data["is_multicommodity"] = True
+    return data
 
 
 def build_model(data, strict_capacity=False):
@@ -127,33 +30,16 @@ def build_model(data, strict_capacity=False):
     sigma, h = data["sigma"], data["h"]
     Z_min, Z_max, alpha, z0 = data["Z_min"], data["Z_max"], data["alpha"], data["z0"]
     mu_min = data["mu_min"]
-    arc_ok = data["arc_ok"]
-    zone_allowed_product = data["zone_allowed_product"]
 
     model = gp.Model("math4003_multicommodity_milp")
 
     # --- Decision variables ---
-    x = model.addVars(((mm, k, d) for mm in M for k in K for d in D),
-                       vtype=GRB.BINARY, name="x")
+    valid_starts = [(mm, k, d) for mm in M for k in K for d in D if e_m[mm] <= d <= l_m[mm]]
+    x = model.addVars(valid_starts, vtype=GRB.BINARY, name="x")
     delta = model.addVars(M, D, lb=0.0, ub=1.0, name="delta")
 
-    # f[i,j,g,d]: only create/allow flow where the product is actually
-    # permitted on that arc -- everything else is fixed to 0 rather than
-    # left to the solver to discover.
     f = model.addVars(E, G, D, lb=0.0, name="f")
-    for (i, j) in E:
-        for g in G:
-            if not arc_ok(i, j, g):
-                for d in D:
-                    f[i, j, g, d].ub = 0.0
-
     z = model.addVars(P_, G, D, lb=0.0, name="z")
-    for pz in P_:
-        for g in G:
-            if not zone_allowed_product.get(f"{pz}::{g}", 0):
-                for d in D:
-                    z[pz, g, d].ub = 0.0
-
     o = model.addVars(P_, D, lb=0.0, name="o")   # aggregate overflow, per zone
     mu = model.addVars(D, lb=0.0, name="mu")     # aggregate throughput, per day
 
