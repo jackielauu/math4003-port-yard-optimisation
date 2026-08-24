@@ -91,11 +91,12 @@ def load_scenario(path):
     Z_max = m["zone_max_inventory_tonnes"]
     alpha = m["overflow_penalty_per_tonne"]
 
-    # z_p^0: generator tracks initial inventory per (zone, product); aggregate
-    # across products since Chapter 3 is single-commodity.
+    # z_p^0: generator tracks initial inventory per (zone, product) in the
+    # multi-commodity scenario export, or pre-aggregated per zone in the
+    # single-commodity export ("Z1" vs "Z1::P1") -- split(...)[0] handles both.
     z0 = {zp: 0.0 for zp in P_}
     for key, val in m["initial_inventory_tonnes"].items():
-        zz, _prod = key.split("::")
+        zz = key.split("::")[0]
         if zz in z0:
             z0[zz] += val
 
