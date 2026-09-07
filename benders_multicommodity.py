@@ -21,36 +21,23 @@ import gurobipy as gp
 from gurobipy import GRB
 
 from benders_monolithic import build_master, make_cut, make_feasibility_cut
-from multicommodity_milp import load_scenario
+from multicommodity_milp import load_scenario, apply_routing_bounds
 
 __all__ = ["load_scenario", "build_master", "build_subproblem", "make_cut", "make_feasibility_cut", "solve_benders"]
 
 
 def build_subproblem(data, delta_value):
-    D, N, A, A_NS, P_, G = data["D"], data["N"], data["A"], data["A_NS"], data["P_"], data["G"]
+    D, N, A, A_NS, P_, G = data["D"], data["N"], data["A"], data["A_NS"], data["P_"], data["PRODUCTS"]
     E, U = data["E"], data["U"]
     predecessors, successors = data["predecessors"], data["successors"]
     C, sigma, M_a = data["C"], data["sigma"], data["M_a"]
     Z_min, Z_max, alpha, z0 = data["Z_min"], data["Z_max"], data["alpha"], data["z0"]
     mu_min = data["mu_min"]
-    arc_ok = data["arc_ok"]
-    zone_allowed_product = data["zone_allowed_product"]
-
     model = gp.Model("benders_subproblem_multicommodity")
 
     f = model.addVars(E, G, D, lb=0.0, name="f")
-    for (i, j) in E:
-        for g in G:
-            if not arc_ok(i, j, g):
-                for d in D:
-                    f[i, j, g, d].ub = 0.0
-
     z = model.addVars(P_, G, D, lb=0.0, name="z")
-    for pz in P_:
-        for g in G:
-            if not zone_allowed_product.get(f"{pz}::{g}", 0):
-                for d in D:
-                    z[pz, g, d].ub = 0.0
+    apply_routing_bounds(data, f, z)
 
     o = model.addVars(P_, D, lb=0.0, name="o")
     mu = model.addVars(D, lb=0.0, name="mu")

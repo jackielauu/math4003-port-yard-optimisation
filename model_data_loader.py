@@ -1,4 +1,9 @@
-"""Canonical JSON loader for the frozen port-yard MILP schema."""
+"""Canonical port-yard schema with mandatory product routing.
+
+G contains general commodities; SPECIAL_PRODUCTS is disjoint. Both are indexed
+by the complete routing matrices and initial inventory. PRODUCTS is their union
+in the loaded solver data.
+"""
 
 from __future__ import annotations
 
@@ -15,6 +20,10 @@ CANONICAL_MODEL_READY_KEYS = (
     "A_NS",
     "P",
     "G",
+    "SPECIAL_PRODUCTS",
+    "product_arc_compatible",
+    "zone_allowed_product",
+    "product_zone_compatible",
     "M",
     "M_a",
     "K",
@@ -45,15 +54,11 @@ LEGACY_OPTIMISATION_FIELDS = {
     "supply_tonnes",
     "demand_tonnes",
     "maintenance_relative_cost",
-    "SPECIAL_PRODUCTS",
     "product_is_special",
     "product_grade_specs",
     "product_blending_allowed",
     "product_volume_share",
-    "product_arc_compatible",
     "arc_allowed_product",
-    "zone_allowed_product",
-    "product_zone_compatible",
     "product_asset_compatible",
     "product_may_share_zone",
     "special_product_required_assets",
@@ -108,7 +113,26 @@ def load_canonical_scenario(
     z0_pg = _parse_pair_float_mapping(model_ready_data["initial_inventory_tonnes"], float)
     mu_min = {int(day): float(value) for day, value in model_ready_data["minimum_throughput_tpd"].items()}
 
+    products = G + list(model_ready_data["SPECIAL_PRODUCTS"])
+    product_arc = _parse_pair_float_mapping(model_ready_data["product_arc_compatible"], int)
+    zone_product = _parse_pair_float_mapping(model_ready_data["zone_allowed_product"], int)
+    arc_id_of = dict(zip(E, arc_ids))
+
+    def arc_ok(i, j, product):
+        arc_id = arc_id_of.get((i, j))
+        if arc_id is None:
+            return False
+        return bool(product_arc[(product, arc_id)] and
+                    (i not in P or zone_product[(i, product)]) and
+                    (j not in P or zone_product[(j, product)]))
+
     return {
+        "PRODUCTS": products,
+        "SPECIAL_PRODUCTS": list(model_ready_data["SPECIAL_PRODUCTS"]),
+        "product_arc_compatible": product_arc,
+        "product_zone_compatible": _parse_pair_float_mapping(model_ready_data["product_zone_compatible"], int),
+        "zone_allowed_product": {f"{zone}::{product}": value for (zone, product), value in zone_product.items()},
+        "arc_ok": arc_ok,
         "raw": raw,
         "model_ready_data": model_ready_data,
         "D": D,
@@ -172,8 +196,14 @@ def validate_canonical_model_ready_data(
 
     if not G:
         raise ValueError("G must be non-empty")
-    if require_single_commodity and len(G) != 1:
-        raise ValueError(f"single-commodity MILP requires exactly one commodity, received {len(G)}")
+    special = list(data["SPECIAL_PRODUCTS"])
+    if len(set(special)) != len(special) or set(special) & G:
+        raise ValueError("SPECIAL_PRODUCTS must be unique and disjoint from G")
+    if len(G) != len(data["G"]):
+        raise ValueError("G must contain unique products")
+    products = G | set(special)
+    if require_single_commodity and len(products) != 1:
+        raise ValueError(f"single-commodity MILP requires exactly one commodity, received {len(products)}")
     if not A.issubset(N) or not A_NS.issubset(A) or not P.issubset(N):
         raise ValueError("A, A_NS, and P must reference valid nodes")
     if A & P:
@@ -187,6 +217,28 @@ def validate_canonical_model_ready_data(
     for arc_id in arc_ids:
         if data["arc_from"][arc_id] not in N or data["arc_to"][arc_id] not in N:
             raise ValueError(f"arc {arc_id} references an unknown node")
+
+    endpoints = [(data["arc_from"][arc], data["arc_to"][arc]) for arc in data["E"]]
+    if len(set(endpoints)) != len(data["E"]):
+        raise ValueError("E must have unique arcs and endpoint pairs")
+    matrices = {}
+    for name, required in (
+        ("product_arc_compatible", {(g, arc) for g in products for arc in arc_ids}),
+        ("zone_allowed_product", {(zone, g) for zone in P for g in products}),
+        ("product_zone_compatible", {(g, zone) for g in products for zone in P}),
+    ):
+        matrix = _parse_pair_float_mapping(data[name], lambda value: value)
+        if set(matrix) != required or len(matrix) != len(data[name]):
+            raise ValueError(f"{name} must contain every required pair and no others")
+        if any(value not in (0, 1) for value in matrix.values()):
+            raise ValueError(f"{name} must contain binary values")
+        matrices[name] = matrix
+    zone_product = matrices["zone_allowed_product"]
+    if any(value != matrices["product_zone_compatible"][(g, zone)]
+           for (zone, g), value in zone_product.items()):
+        raise ValueError("zone_allowed_product and product_zone_compatible disagree")
+    if require_single_commodity and any(not value for matrix in matrices.values() for value in matrix.values()):
+        raise ValueError("single-commodity aggregate model requires unrestricted routing")
 
     if set(data["asset_capacity_tpd"]) != A:
         raise ValueError("asset_capacity_tpd keys must match A")
@@ -236,14 +288,17 @@ def validate_canonical_model_ready_data(
                 raise ValueError(f"maintenance task {task} with mode {mode} cannot fit inside D")
 
     z0 = _parse_pair_float_mapping(data["initial_inventory_tonnes"], float)
-    if set(z0) != {(zone, commodity) for zone in P for commodity in G}:
+    if set(z0) != {(zone, commodity) for zone in P for commodity in products}:
         raise ValueError("initial_inventory_tonnes must contain every (p,g) combination and no others")
+    for (zone, product), value in z0.items():
+        if value < 0 or (not zone_product[(zone, product)] and value != 0):
+            raise ValueError("initial inventory must be nonnegative and zero in incompatible zones")
     for zone in P:
         z_min = float(data["zone_min_inventory_tonnes"][zone])
         z_max = float(data["zone_max_inventory_tonnes"][zone])
         if z_min < 0.0 or z_max < z_min:
             raise ValueError(f"invalid stockyard bounds for {zone}")
-        total = sum(z0[(zone, commodity)] for commodity in G)
+        total = sum(z0[(zone, commodity)] for commodity in products)
         if not z_min <= total <= z_max:
             raise ValueError(f"aggregate initial inventory outside bounds for {zone}")
 

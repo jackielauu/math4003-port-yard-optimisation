@@ -4,11 +4,12 @@
 This module deliberately generates only the data used by the frozen MILP:
 sets/topology, shared capacities, maintenance mode/window data, stockyard
 bounds and initial inventory, minimum throughput, fixed activity capacity
-profiles, and fixed maintenance/activity incompatibility profiles.
+profiles, fixed maintenance/activity incompatibility profiles, and product routing.
 
 Single- and multi-commodity instances use the same implementation. A
 single-commodity instance is the special case ``G = ["G1"]``; a
-multi-commodity instance uses ``G = ["G1", "G2", "G3", "G4"]``.
+multi-commodity instance uses ``G = ["G1", "G2", "G3", "G4"]``
+plus ``SPECIAL_PRODUCTS = ["S1"]``. Routing matrices are mandatory.
 """
 
 from __future__ import annotations
@@ -19,10 +20,19 @@ import hashlib
 import json
 import math
 import random
+import sys
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
+
+# Support direct script execution as well as package imports.
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from model_data_loader import (
+    CANONICAL_MODEL_READY_KEYS, CANONICAL_MODEL_READY_KEY_SET,
+    validate_canonical_model_ready_data,
+)
 
 EXPERIMENTAL_SCENARIO_NAMES = (
     "F1_system_scale_L",
@@ -41,7 +51,7 @@ EXPERIMENTAL_SCENARIO_NAMES = (
 SCENARIO_NAMES = EXPERIMENTAL_SCENARIO_NAMES
 OCCASION_NAMES = SCENARIO_NAMES
 
-GENERATOR_RANDOMIZATION_VERSION = "frozen_schema_hard_instances_v1"
+GENERATOR_RANDOMIZATION_VERSION = "frozen_schema_routing_restricted_v2"
 RNG_STREAM_VERSION = "matched_single_multi_streams_v1"
 RNG_STREAM_NAMES = (
     "topology",
@@ -80,50 +90,24 @@ REFERENCE_SCALE_LEVEL = "M"
 YARD_ZONES = ("Z1", "Z2", "Z3", "Z4")
 DEFAULT_SEEDS = tuple(range(1, 11))
 
-CANONICAL_MODEL_READY_KEYS = (
-    "D",
-    "N",
-    "E",
-    "A",
-    "A_NS",
-    "P",
-    "G",
-    "M",
-    "M_a",
-    "K",
-    "arc_from",
-    "arc_to",
-    "predecessors",
-    "successors",
-    "asset_capacity_tpd",
-    "arc_capacity_tpd",
-    "maintenance_duration_days",
-    "maintenance_available_capacity_fraction",
-    "maintenance_earliest_start",
-    "maintenance_latest_start",
-    "zone_min_inventory_tonnes",
-    "zone_max_inventory_tonnes",
-    "initial_inventory_tonnes",
-    "overflow_penalty_per_tonne",
-    "minimum_throughput_tpd",
-    "special_activity_capacity_factor",
-    "maintenance_activity_incompatible",
-)
-CANONICAL_MODEL_READY_KEY_SET = set(CANONICAL_MODEL_READY_KEYS)
+# Preserve the former general-zone permissions; G4 is a new general grade.
+ZONE_ALLOWED_PRODUCTS = {
+    "Z1": ("G1", "G2", "G4"),
+    "Z2": ("G1", "G2", "G3", "G4"),
+    "Z3": ("G2", "G3", "G4"),
+    "Z4": ("S1",),
+}
+
 
 FORBIDDEN_MODEL_READY_KEYS = {
     "supply_tonnes",
     "demand_tonnes",
     "maintenance_relative_cost",
-    "SPECIAL_PRODUCTS",
     "product_is_special",
     "product_grade_specs",
     "product_blending_allowed",
     "product_volume_share",
-    "product_arc_compatible",
     "arc_allowed_product",
-    "zone_allowed_product",
-    "product_zone_compatible",
     "product_asset_compatible",
     "product_may_share_zone",
     "special_product_required_assets",
@@ -261,6 +245,7 @@ class DissertationScenario:
             "A_NS": assets,
             "P": zones,
             "G": self.commodities,
+            **build_routing_data(self.arcs, zones, self.config),
             "M": [task.task_id for task in self.maintenance_tasks],
             "M_a": maintenance_by_asset,
             "K": list(MODE_ORDER),
@@ -337,7 +322,7 @@ class DissertationScenario:
         for (zone_id, commodity), value in self.initial_inventory_tonnes.items():
             if zone_id not in zones:
                 raise ValueError(f"initial inventory references invalid zone {zone_id}")
-            if commodity not in data["G"]:
+            if commodity not in data["G"] + data["SPECIAL_PRODUCTS"]:
                 raise ValueError(f"initial inventory references invalid commodity {commodity}")
             inventory_by_zone[zone_id] += value
         for zone in self.zones:
@@ -410,8 +395,10 @@ def build_scenario(scenario_name: str, config: GeneratorConfig | None = None) ->
         "system_scale_profile": profile,
         "canonical_model_ready_keys": list(CANONICAL_MODEL_READY_KEYS),
         "notes": (
-            "Canonical frozen-schema benchmark. Special-product, supply, demand, "
-            "product-compatibility, grade, footprint, and campaign fields are not exported."
+            "Canonical benchmark with mandatory product routing. Multi-commodity instances "
+            "add S1 on a dedicated route through Z4; G4 may use all general zones. "
+            "Single-commodity instances remain unrestricted. Supply, demand, grade, "
+            "footprint, and campaign fields are not exported."
         ),
     }
     scenario = DissertationScenario(
@@ -599,8 +586,10 @@ def split_initial_inventory(
         return {(zone_id, "G1"): value for zone_id, value in single_inventory_by_zone.items()}
 
     result: dict[tuple[str, str], float] = {}
-    commodities = [f"G{i}" for i in range(1, config.commodity_count + 1)]
+    products = [f"G{i}" for i in range(1, config.commodity_count + 1)] + ["S1"]
     for zone_id, total in single_inventory_by_zone.items():
+        commodities = list(ZONE_ALLOWED_PRODUCTS[zone_id])
+        result.update({(zone_id, product): 0.0 for product in products})
         rng = rng_for(config.seed, zone_id, "commodity_split")
         weights = [rng.uniform(0.6, 1.4) for _ in commodities]
         weight_sum = sum(weights)
@@ -988,16 +977,16 @@ def write_scenario(
 ) -> Path:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(
-            scenario.to_json_dict(include_reference_schedule=include_reference_schedule),
-            indent=2,
-            sort_keys=False,
+    # Path.write_text(newline=...) requires Python 3.10; open supports 3.9.
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write(
+            json.dumps(
+                scenario.to_json_dict(include_reference_schedule=include_reference_schedule),
+                indent=2,
+                sort_keys=False,
+            )
+            + "\n"
         )
-        + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
     return path
 
 
@@ -1047,7 +1036,7 @@ def generate_benchmark_suite(
         "commodity_representation": (
             "single commodity G=['G1']"
             if base_config.commodity_count == 1
-            else "multi commodity G=['G1','G2','G3','G4']"
+            else "multi commodity G=['G1','G2','G3','G4'], SPECIAL_PRODUCTS=['S1']"
         ),
         "scenario_names": list(scenario_names),
         "seeds": list(seeds),
@@ -1144,14 +1133,50 @@ def write_seed_diversity_csv(path: Path, rows: Sequence[Mapping[str, Any]]) -> N
 
 
 def validate_model_ready_schema(model_ready_data: Mapping[str, Any]) -> None:
-    keys = set(model_ready_data)
-    if keys != CANONICAL_MODEL_READY_KEY_SET:
-        missing = sorted(CANONICAL_MODEL_READY_KEY_SET - keys)
-        extra = sorted(keys - CANONICAL_MODEL_READY_KEY_SET)
-        raise ValueError(f"non-canonical model_ready_data keys; missing={missing}, extra={extra}")
-    forbidden = FORBIDDEN_MODEL_READY_KEYS & keys
-    if forbidden:
-        raise ValueError(f"forbidden model_ready_data keys present: {sorted(forbidden)}")
+    validate_canonical_model_ready_data(model_ready_data)
+
+
+def build_routing_data(arcs: Sequence[Arc], zones: Sequence[str], config: GeneratorConfig) -> dict[str, Any]:
+    """Restrict S1 to one existing source-Z4-sink route on the current topology.
+
+    The old fixed asset IDs do not span the newer scale profiles. Select the
+    first incoming/outgoing arc at each stage deterministically instead.
+    Single-commodity scenarios retain their unrestricted aggregate meaning.
+    """
+    general = [f"G{i}" for i in range(1, config.commodity_count + 1)]
+    special = ["S1"] if config.commodity_count > 1 else []
+    products = general + special
+    route = set()
+    if special:
+        for start, terminal, backwards in (("Z4", "RAIL_SOURCE", True), ("Z4", "VESSEL_SINK", False)):
+            node = start
+            visited = set()
+            while node != terminal:
+                if node in visited:
+                    raise ValueError("cycle in special-product route")
+                visited.add(node)
+                candidates = [arc for arc in arcs if (arc.to_node if backwards else arc.from_node) == node]
+                if not candidates:
+                    raise ValueError("no complete special-product route through Z4")
+                arc = candidates[0]
+                route.add(arc.arc_id)
+                node = arc.from_node if backwards else arc.to_node
+    zone_allowed = {
+        (zone, product): int(not special or product in ZONE_ALLOWED_PRODUCTS[zone])
+        for zone in zones for product in products
+    }
+    return {
+        "SPECIAL_PRODUCTS": special,
+        "product_arc_compatible": {
+            (product, arc.arc_id): int(
+                (product not in special or arc.arc_id in route)
+                and all(zone_allowed[(node, product)] for node in (arc.from_node, arc.to_node) if node in zones)
+            )
+            for product in products for arc in arcs
+        },
+        "zone_allowed_product": zone_allowed,
+        "product_zone_compatible": {(product, zone): value for (zone, product), value in zone_allowed.items()},
+    }
 
 
 def build_adjacency(nodes: Sequence[str], arcs: Sequence[Arc]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
@@ -1229,7 +1254,7 @@ def estimate_model_size(
     tasks: Sequence[MaintenanceTask],
 ) -> dict[str, int]:
     days = config.horizon_days
-    commodities = config.commodity_count
+    commodities = config.commodity_count + int(config.commodity_count > 1)
     maintenance_start_variables = sum(
         (task.latest_start_day - task.earliest_start_day + 1) * len(MODE_ORDER)
         for task in tasks

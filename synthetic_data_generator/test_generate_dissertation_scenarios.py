@@ -55,11 +55,37 @@ class FrozenSchemaGeneratorTests(unittest.TestCase):
                     self.assertEqual(data["G"], [f"G{i}" for i in range(1, commodity_count + 1)])
                     self.assertEqual(data["K"], ["F", "P30", "P70"])
 
-    def test_no_x1_or_special_product_text_is_exported(self):
+    def test_special_product_routing_is_exported(self):
         scenario = self.build("F4_operational_conflict_H", commodity_count=4)
-        payload = json.dumps(scenario.to_json_dict())
-        for forbidden_text in ("X1", "special_product", "product_arc_compatible", "zone_allowed_product"):
-            self.assertNotIn(forbidden_text, payload)
+        data = scenario.optimizer_objects()
+        self.assertEqual(data["SPECIAL_PRODUCTS"], ["S1"])
+        self.assertNotIn("X1", json.dumps(scenario.to_json_dict()))
+        self.assertEqual(data["zone_allowed_product"][("Z4", "S1")], 1)
+        for zone in ("Z1", "Z2", "Z3"):
+            self.assertEqual(data["zone_allowed_product"][(zone, "S1")], 0)
+        for product in data["G"]:
+            self.assertEqual(data["zone_allowed_product"][("Z4", product)], 0)
+
+    def test_special_route_is_complete_at_every_scale(self):
+        for level in ("L", "M", "H"):
+            data = self.build(f"F1_system_scale_{level}").optimizer_objects()
+            route = {arc for arc in data["E"] if data["product_arc_compatible"][("S1", arc)]}
+            node = "RAIL_SOURCE"
+            visited = []
+            used = set()
+            while node != "VESSEL_SINK":
+                self.assertNotIn(node, visited)
+                visited.append(node)
+                outgoing = [arc for arc in route if data["arc_from"][arc] == node]
+                self.assertEqual(len(outgoing), 1)
+                used.add(outgoing[0])
+                node = data["arc_to"][outgoing[0]]
+            self.assertIn("Z4", visited)
+            self.assertEqual(used, route)
+            self.assertEqual(len(route), 6)
+            for (zone, product), value in data["initial_inventory_tonnes"].items():
+                if not data["zone_allowed_product"][(zone, product)]:
+                    self.assertEqual(value, 0)
 
     def test_f1_scale_ladder_has_requested_asset_and_maintenance_counts(self):
         expected = {
@@ -232,7 +258,7 @@ class FrozenSchemaGeneratorTests(unittest.TestCase):
                 single_data = single.optimizer_objects()
                 multi_data = multi.optimizer_objects()
                 for key in scenario_generator.CANONICAL_MODEL_READY_KEYS:
-                    if key in {"G", "initial_inventory_tonnes"}:
+                    if key in {"G", "initial_inventory_tonnes", "SPECIAL_PRODUCTS", "product_arc_compatible", "zone_allowed_product", "product_zone_compatible"}:
                         continue
                     self.assertEqual(single_data[key], multi_data[key])
                 for zone in single_data["P"]:

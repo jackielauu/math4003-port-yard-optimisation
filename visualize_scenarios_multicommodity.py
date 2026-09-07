@@ -51,7 +51,7 @@ def extract_maintenance_schedule(data, variables):
 
 def extract_inventory(data, variables):
     z = variables["z"]
-    return {pz: [sum(z[pz, g, d].X for g in data["G"]) for d in data["D"]] for pz in data["P_"]}
+    return {pz: [sum(z[pz, g, d].X for g in data["PRODUCTS"]) for d in data["D"]] for pz in data["P_"]}
 
 
 def style_axes(ax, keep_spines):

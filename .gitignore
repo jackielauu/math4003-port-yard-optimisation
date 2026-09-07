@@ -225,3 +225,9 @@ __marimo__/
 
 # License files
 *.lic
+
+# Project-local Python runtime and download cache
+.tools/
+
+# Fresh environment installed from repository requirements
+.venv-requirements/

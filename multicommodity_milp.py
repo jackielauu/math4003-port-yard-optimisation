@@ -1,7 +1,8 @@
 """Multi-commodity monolithic MILP for the frozen canonical schema.
 
 This is the same physical model as monolithic_milp.py, with commodity index g
-only on material flow and stockyard inventory variables. Maintenance variables,
+over PRODUCTS = G + SPECIAL_PRODUCTS on flows and inventories. Incompatible
+flows and inventories are fixed to zero. Maintenance variables,
 overflow, total throughput, and physical capacities remain shared.
 """
 
@@ -20,8 +21,20 @@ def load_scenario(path):
     return data
 
 
+def apply_routing_bounds(data, f, z):
+    """Forbid both storage and transit through incompatible zones, plus disallowed arcs."""
+    arc_ok = data["arc_ok"]
+    zone_allowed = data["zone_allowed_product"]
+    for (i, j, product, day), var in f.items():
+        if not arc_ok(i, j, product):
+            var.ub = 0.0
+    for (zone, product, day), var in z.items():
+        if not zone_allowed[f"{zone}::{product}"]:
+            var.ub = 0.0
+
+
 def build_model(data, strict_capacity=False):
-    D, N, A, A_NS, P_, G = data["D"], data["N"], data["A"], data["A_NS"], data["P_"], data["G"]
+    D, N, A, A_NS, P_, G = data["D"], data["N"], data["A"], data["A_NS"], data["P_"], data["PRODUCTS"]
     M, M_a, K = data["M"], data["M_a"], data["K"]
     E, U = data["E"], data["U"]
     predecessors, successors = data["predecessors"], data["successors"]
@@ -40,6 +53,7 @@ def build_model(data, strict_capacity=False):
 
     f = model.addVars(E, G, D, lb=0.0, name="f")
     z = model.addVars(P_, G, D, lb=0.0, name="z")
+    apply_routing_bounds(data, f, z)
     o = model.addVars(P_, D, lb=0.0, name="o")   # aggregate overflow, per zone
     mu = model.addVars(D, lb=0.0, name="mu")     # aggregate throughput, per day
 

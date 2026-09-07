@@ -1,0 +1,13 @@
+# Shared solver, generator, test, and notebook environment.
+# Interpreter: Python 3.9.6 (see .python-version).
+# Install with: .venv-requirements/Scripts/python.exe -m pip install -r requirements.txt
+# Full Windows dependency snapshot: requirements-lock-py396-windows.txt.
+
+gurobipy==12.0.3
+matplotlib==3.9.4
+pytest==8.3.5
+ipykernel==6.29.5
+nbformat==5.10.4
+nbclient==0.10.2
+pandas==2.2.3
+notebook==7.3.3

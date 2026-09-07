@@ -141,7 +141,7 @@ def _extract_zone_inventory(data, variables):
             zone_inventory[zone] = [
                 {
                     "day": day,
-                    "inventory_tonnes": _clean_number(sum(_var_value(z[zone, product, day]) for product in data["G"])),
+                    "inventory_tonnes": _clean_number(sum(_var_value(z[zone, product, day]) for product in data["PRODUCTS"])),
                 }
                 for day in data["D"]
             ]
@@ -163,7 +163,7 @@ def _extract_product_inventory(data, variables):
     product_inventory = {}
     for zone in data["P_"]:
         product_inventory[zone] = {}
-        for product in data["G"]:
+        for product in data["PRODUCTS"]:
             product_inventory[zone][product] = [
                 {"day": day, "inventory_tonnes": _clean_number(_var_value(z[zone, product, day]))}
                 for day in data["D"]

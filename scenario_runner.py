@@ -155,7 +155,7 @@ def scenario_paths(inputs):
 
 def _is_scenario_json(filename):
     lower = filename.lower()
-    return lower.endswith(".json") and lower not in {"manifest.json", "benchmark_manifest.json"}
+    return lower.endswith(".json") and lower not in {"manifest.json", "benchmark_manifest.json", "notebook_validation.json"}
 
 
 def describe_path(path):
