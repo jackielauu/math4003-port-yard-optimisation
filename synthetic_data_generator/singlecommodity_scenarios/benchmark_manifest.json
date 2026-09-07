@@ -1,16 +1,19 @@
 {
-  "generator_file": "c:\\Ponpot_Work_Space\\math4003-port-yard-optimisation\\synthetic_data_generator\\generate_dissertation_scenarios_for_single_commodity.py",
-  "generator_randomization_version": "seeded_realization_v1",
-  "rng_stream_version": "named_streams_v1",
+  "generator_file": "generate_dissertation_scenarios.py",
+  "generator_randomization_version": "frozen_schema_hard_instances_v1",
+  "rng_stream_version": "matched_single_multi_streams_v1",
   "rng_stream_names": [
-    "common/supply",
-    "common/demand",
-    "common/initial_inventory",
-    "common/maintenance_pool",
-    "common/maintenance_windows",
-    "common/throughput",
-    "F4/activity_windows"
+    "topology",
+    "maintenance_pool",
+    "maintenance_windows",
+    "mode_duration_variation",
+    "throughput_profile",
+    "initial_inventory",
+    "commodity_split",
+    "fixed_activity_profiles"
   ],
+  "commodity_count": 1,
+  "commodity_representation": "single commodity G=['G1']",
   "scenario_names": [
     "F1_system_scale_L",
     "F1_system_scale_M",
@@ -37,624 +40,1507 @@
     9,
     10
   ],
-  "instance_count": 120,
   "expected_instance_count": 120,
-  "include_reference_schedule": false,
-  "all_structural_checks_pass": true,
-  "all_family_checks_pass": true,
-  "all_seed_diversity_checks_pass": true,
+  "instance_count": 120,
+  "canonical_model_ready_keys": [
+    "D",
+    "N",
+    "E",
+    "A",
+    "A_NS",
+    "P",
+    "G",
+    "M",
+    "M_a",
+    "K",
+    "arc_from",
+    "arc_to",
+    "predecessors",
+    "successors",
+    "asset_capacity_tpd",
+    "arc_capacity_tpd",
+    "maintenance_duration_days",
+    "maintenance_available_capacity_fraction",
+    "maintenance_earliest_start",
+    "maintenance_latest_start",
+    "zone_min_inventory_tonnes",
+    "zone_max_inventory_tonnes",
+    "initial_inventory_tonnes",
+    "overflow_penalty_per_tonne",
+    "minimum_throughput_tpd",
+    "special_activity_capacity_factor",
+    "maintenance_activity_incompatible"
+  ],
+  "forbidden_model_ready_keys": [
+    "H",
+    "SPECIAL_PRODUCTS",
+    "W_h",
+    "arc_allowed_product",
+    "demand_tonnes",
+    "maintenance_relative_cost",
+    "product_arc_compatible",
+    "product_asset_compatible",
+    "product_blending_allowed",
+    "product_grade_specs",
+    "product_is_special",
+    "product_may_share_zone",
+    "product_volume_share",
+    "product_zone_compatible",
+    "special_activity_minimum_total_tonnes",
+    "special_activity_minimum_tpd",
+    "special_activity_product",
+    "special_activity_required_zone",
+    "special_product_campaign_minimum_tonnes",
+    "special_product_compatible_arcs",
+    "special_product_compatible_zones",
+    "special_product_minimum_reserved_footprint_m2",
+    "special_product_minimum_tpd",
+    "special_product_required_assets",
+    "special_product_segregation_buffer_m2",
+    "special_product_tonnes_per_square_metre",
+    "supply_tonnes",
+    "zone_allowed_product"
+  ],
   "files": [
     {
-      "instance_id": "F1_system_scale_L_seed_001",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_001\\F1_system_scale_L_seed_001.json",
-      "sha256": "4fbb6480586b3792f33968a6252bc7c80f504a6673fed834bc08323fd5424c58"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_001",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_001\\F1_system_scale_M_seed_001.json",
-      "sha256": "c638afaddf6d29dc63e034a0a8e310c6243a6503e40d6f7731b69498bd20af30"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_001",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_001\\F1_system_scale_H_seed_001.json",
-      "sha256": "25d41bdb3d4f7f509a91cc185dab18199bc97b683a12cb057fbd1f33e47cd73d"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_001",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_001\\F2_mode_tradeoff_L_seed_001.json",
-      "sha256": "ad37baa9a0f15b54e639f8cdedfdcc0161ede681ae3e8b05d0f184f7331010b9"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_001",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_001\\F2_mode_tradeoff_M_seed_001.json",
-      "sha256": "0a440ef12b2fc853746eeb65c88deafef929f8c8097c335b344f70feffe7384b"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_001",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_001\\F2_mode_tradeoff_H_seed_001.json",
-      "sha256": "13aeb9ef8aafa8c40e7cca57fbe7a1327827dca504d2845e81433b047942015f"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_001",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_001\\F3_yard_flow_L_seed_001.json",
-      "sha256": "044ec9134ca6d2f6bdac64e35e17b017b34e9a541bd64b3e18b80b9564f2d9cf"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_001",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_001\\F3_yard_flow_M_seed_001.json",
-      "sha256": "71b8e2fa2d27a9e81c57508664e974d02ac9bcd822443c251e703fb8ef938a34"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_001",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_001\\F3_yard_flow_H_seed_001.json",
-      "sha256": "52f361e8bc5acec16b0d37f9113ae93c0b9268fbd24677ac5b95f92e105aaad3"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_001",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_001\\F4_operational_conflict_L_seed_001.json",
-      "sha256": "4e79be8c6671960a2d1dc4cb502a71b4f1610885c7b122c96f7f85f44f1d0847"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_001",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_001\\F4_operational_conflict_M_seed_001.json",
-      "sha256": "0cadf158c97bc2ffdf9848fcb0db6d1caf338872d7899162b4239da9b3163da0"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_001",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_001\\F4_operational_conflict_H_seed_001.json",
-      "sha256": "aeb780d622ee74bf9b9bc08d46113203b5681878353059daf5f750c4631c919c"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_002",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_002\\F1_system_scale_L_seed_002.json",
-      "sha256": "fa61d934fa75f9b7e545b566c6ae0d1f6f5a45e9df7683a4a4a8e4faca167f8b"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_002",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_002\\F1_system_scale_M_seed_002.json",
-      "sha256": "89afaee95f2dc4bc0eac2075dbb954e394f222fa8714576b81d0835693f1184a"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_002",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_002\\F1_system_scale_H_seed_002.json",
-      "sha256": "87353cec32369e22b710d35ffc24a855340578f4b514148d9cd8edc144196b52"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_002",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_002\\F2_mode_tradeoff_L_seed_002.json",
-      "sha256": "9d47027980a8eb7f00fb9645d2c9472093917bcabbe736b67994a7650a6425e4"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_002",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_002\\F2_mode_tradeoff_M_seed_002.json",
-      "sha256": "a41df5995c981353642fc364431a6507bde3904028769616ddb6426239d2d352"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_002",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_002\\F2_mode_tradeoff_H_seed_002.json",
-      "sha256": "e0d84deabc6d6255b9c1380401b72d00303d06e779c8e63b05f1f38be142cb06"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_002",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_002\\F3_yard_flow_L_seed_002.json",
-      "sha256": "7cb97e801589cc6c9a976626e7bedd5c6f987b7003d52328df183dbc0b83bc1a"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_002",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_002\\F3_yard_flow_M_seed_002.json",
-      "sha256": "f4123d884cbdc089f02b6dd02bf396027271e23c0c3c744d4e41b3d75e9fe6c0"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_002",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_002\\F3_yard_flow_H_seed_002.json",
-      "sha256": "555c575143cdb78d3978419e1765ac77f7a3928298ae86da96c1b238214e20a2"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_002",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_002\\F4_operational_conflict_L_seed_002.json",
-      "sha256": "0ba897961e1fb8a6505a8d9945a98ea7dc3221990dc343c35e397003c9bda6fb"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_002",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_002\\F4_operational_conflict_M_seed_002.json",
-      "sha256": "25846526ff9705cc4637eea1f8196c4c6f4fbb479af2e3a068230429ea119826"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_002",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_002\\F4_operational_conflict_H_seed_002.json",
-      "sha256": "bf146443ba540454a1e22f329191659bc550cf748873b9070e5e0903b3f16641"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_003",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_003\\F1_system_scale_L_seed_003.json",
-      "sha256": "c63ff47bed4376bbc38b8f384fb586f0eeef092e9496d87eef514eb2b3b56861"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_003",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_003\\F1_system_scale_M_seed_003.json",
-      "sha256": "179bb1a493ca9624ec4f0da29e9caba0516d0266c859ac89539316ddefe48f70"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_003",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_003\\F1_system_scale_H_seed_003.json",
-      "sha256": "2bb6b247873f5aba8937e5759aec1b5990fa9330283af6ca97cfaf692e40e711"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_003",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_003\\F2_mode_tradeoff_L_seed_003.json",
-      "sha256": "ad65bbd335fb190b8558b24c9b16b02513bf75a3deb3fd7c3a8e24dbc7a88f02"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_003",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_003\\F2_mode_tradeoff_M_seed_003.json",
-      "sha256": "2f8aa41519b4e1e51e64e68233975b340a578d27b2b356f7d1bd85e48dec9852"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_003",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_003\\F2_mode_tradeoff_H_seed_003.json",
-      "sha256": "33ddd64d7d8e4cd5bca20cd4def2d45bf22c53b6004cff48306b7e24b7e029fa"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_003",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_003\\F3_yard_flow_L_seed_003.json",
-      "sha256": "dbc323a4af04a40bc86ebd7503d1554f7c9f83b8d36d942c7563320878632058"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_003",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_003\\F3_yard_flow_M_seed_003.json",
-      "sha256": "e2ed1ed7c0bd69f24e2278891b54982963c797e7d05fffea21d16f560c6e7406"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_003",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_003\\F3_yard_flow_H_seed_003.json",
-      "sha256": "fab98aadfbf295b4c16419f7b379131ea8374c7ef7416da6813070f3e078c4f4"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_003",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_003\\F4_operational_conflict_L_seed_003.json",
-      "sha256": "92fa8f36bd825b9ec32f651463ea6bb3119500db207206aa7efb6469a59aad01"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_003",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_003\\F4_operational_conflict_M_seed_003.json",
-      "sha256": "7c554e5a01c10d4423a5c43e403ff4793ab4e14130f0c678c821d1caf8fb1361"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_003",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_003\\F4_operational_conflict_H_seed_003.json",
-      "sha256": "41398fe99703013d409763521a59e31681de0bceb932643868b393e116cd687f"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_004",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_004\\F1_system_scale_L_seed_004.json",
-      "sha256": "c2ea5913be23d01ac8c10ddd4cfe20295134639e0e0874c31991957287cd9d01"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_004",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_004\\F1_system_scale_M_seed_004.json",
-      "sha256": "c34a29c1e31466daf6777f03686f76661d2449b1c974ad2857ceca36ff96cf95"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_004",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_004\\F1_system_scale_H_seed_004.json",
-      "sha256": "a8749d5634000d213335df5dd798b2d4e55e05bed001e57c43daaa8e06e26e1d"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_004",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_004\\F2_mode_tradeoff_L_seed_004.json",
-      "sha256": "f1b328acf2e6c305e95ab54bcfa39ccd52da86c63c6add713df13a1253244f77"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_004",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_004\\F2_mode_tradeoff_M_seed_004.json",
-      "sha256": "35b1d793af703392e30e4508ca1afca6419343da0a1633a63f942cfdc759511a"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_004",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_004\\F2_mode_tradeoff_H_seed_004.json",
-      "sha256": "c1da616f252f3f38bb66e0198e0e6ca5434d57d8bdb825d4fc8953cf0e5609ab"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_004",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_004\\F3_yard_flow_L_seed_004.json",
-      "sha256": "612061cef75e8917e68674e950892147f36c298dcababc039c1ac2f41face635"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_004",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_004\\F3_yard_flow_M_seed_004.json",
-      "sha256": "e055feefa9615cca1b8dfed5f78a08d1dd519f670592a1cf5fe9dcdf7b6f3860"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_004",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_004\\F3_yard_flow_H_seed_004.json",
-      "sha256": "008094262f2f5a1779fb9aa2b78eafa3cdd93a4abb2b1c627aad3a097dd552a3"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_004",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_004\\F4_operational_conflict_L_seed_004.json",
-      "sha256": "c50a94f256352279b4c14c0a89ffa3bda2b737014820cf4d04700fbde09bafda"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_004",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_004\\F4_operational_conflict_M_seed_004.json",
-      "sha256": "74740aa259125540778b3d3b1e90f4a7a2717e308f05045360144c434c426c6a"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_004",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_004\\F4_operational_conflict_H_seed_004.json",
-      "sha256": "9ccaf27dfd25dd22b8f1e7e79d0f467a5c586a9c70fa08042a8a8eb822b82182"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_005",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_005\\F1_system_scale_L_seed_005.json",
-      "sha256": "0d9fdf99f57000641a2b99d02ba96509fc9bc1bc26b14babbfe239e4bc1a7c08"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_005",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_005\\F1_system_scale_M_seed_005.json",
-      "sha256": "20a4adbf847f1eab5d6e6ba68ae8e7c2d320a6c00e4d313ea58198c1516181a9"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_005",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_005\\F1_system_scale_H_seed_005.json",
-      "sha256": "45385aab5cffeaff1154d54cecf3e866d47b421dab9b4a800497b290fa9aeec5"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_005",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_005\\F2_mode_tradeoff_L_seed_005.json",
-      "sha256": "109191c32192a1b801505a4c7c4c8a87f98189b1e262c90b7c568d9c3c0ac1d7"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_005",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_005\\F2_mode_tradeoff_M_seed_005.json",
-      "sha256": "8b303a9eae1b698e6a28ec7ebcb032c951f694f02712c94a1fdb1570509bd82e"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_005",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_005\\F2_mode_tradeoff_H_seed_005.json",
-      "sha256": "3e8f884443bb1e3e4a22f1125a4a531903824f384d973e5791e56308dd91fe27"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_005",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_005\\F3_yard_flow_L_seed_005.json",
-      "sha256": "c065babca006445b4c12b58e7ad5e264d4f59998ccc605a5c768c6b365632262"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_005",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_005\\F3_yard_flow_M_seed_005.json",
-      "sha256": "917aa0cb5f1622f170ba81c459298b9bcac900cb3dacda92963e5ffea7e94847"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_005",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_005\\F3_yard_flow_H_seed_005.json",
-      "sha256": "908cf5e2ff908f44796e6bf6600e78569fb93ff4d9fd4640c1bb883301d39c5f"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_005",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_005\\F4_operational_conflict_L_seed_005.json",
-      "sha256": "6ed532311e8924e067b227462b7b08d4b51af055239313911284dfa09c21778e"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_005",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_005\\F4_operational_conflict_M_seed_005.json",
-      "sha256": "cb90d256e75f979c2b844ac379627b873399fd690060ca521b69d218d76533f8"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_005",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_005\\F4_operational_conflict_H_seed_005.json",
-      "sha256": "8fd99b9f4628946c14e80feecab91b6781c01afb15e3bbf5a5567f6963aed2b4"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_006",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_006\\F1_system_scale_L_seed_006.json",
-      "sha256": "7216fc931594efdb5f28d2ab9b808af0ef1a05fc36791957f4e8114f65901180"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_006",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_006\\F1_system_scale_M_seed_006.json",
-      "sha256": "79568def3326eafd167bb84501fe30c45dc7b77bb43e9ff9d5e13d0d9996bf74"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_006",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_006\\F1_system_scale_H_seed_006.json",
-      "sha256": "29fb9b6ca169d18d7d4d512548fb8a993793cb16b1d878d2ecffc07a85ddf4c3"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_006",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_006\\F2_mode_tradeoff_L_seed_006.json",
-      "sha256": "f87dc0f703e2408901049c62f37af70d0327cccf20303ba9453ef2a9d8172ab2"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_006",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_006\\F2_mode_tradeoff_M_seed_006.json",
-      "sha256": "d37e4b6df845e9ee3007882bef6518b6475f23b5ce9e8cd4df34910ce987d82a"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_006",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_006\\F2_mode_tradeoff_H_seed_006.json",
-      "sha256": "20d7795616beee8bafd55c45d4526a937e76015cb6ba183c7721f37469cee373"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_006",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_006\\F3_yard_flow_L_seed_006.json",
-      "sha256": "9988cb824f3ecc417eb27a5e2e53efa69ad08c99a8e78bc6d7621453ce47d257"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_006",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_006\\F3_yard_flow_M_seed_006.json",
-      "sha256": "3e553ac80621ff65aae6b79b730c45be7ad08f11da62ad3df823a70e3b40782e"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_006",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_006\\F3_yard_flow_H_seed_006.json",
-      "sha256": "5af28f2bce2f74f1e4122c5e64777e463c5f57b31b1f3b619c4a32a3fe9caf12"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_006",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_006\\F4_operational_conflict_L_seed_006.json",
-      "sha256": "47bd963e188105703f1364f93c8e513967654bb5eda83667f62736235a6cef70"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_006",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_006\\F4_operational_conflict_M_seed_006.json",
-      "sha256": "516ca3ae4d4e406c8722ee772487bb82bc82160a5c70285491c9971f9af7ff33"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_006",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_006\\F4_operational_conflict_H_seed_006.json",
-      "sha256": "6666043c6e79a7dfaf8582593c1ae175d65ecbe23a5a750800cab4fdba49928f"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_007",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_007\\F1_system_scale_L_seed_007.json",
-      "sha256": "fafa85da34cdeac5e51b6a996ded1de481171ee6f78739b4d8ace24cef289ba0"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_007",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_007\\F1_system_scale_M_seed_007.json",
-      "sha256": "28f84398d96ede4a3388398874432129557c55436b7b13697aa9b9a45978376d"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_007",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_007\\F1_system_scale_H_seed_007.json",
-      "sha256": "bd2115ee83164b17309fc7ae907d086521ffb84910de1fd9f53714f4fbc81eb0"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_007",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_007\\F2_mode_tradeoff_L_seed_007.json",
-      "sha256": "8722b03762aab8e3091da8bdcbc4f1a94ab0b454cb1eaabe35078509742c94bf"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_007",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_007\\F2_mode_tradeoff_M_seed_007.json",
-      "sha256": "d83f3aec545f1da84066e7f3596bc6a5631631ad5962463f2439addbed209f27"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_007",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_007\\F2_mode_tradeoff_H_seed_007.json",
-      "sha256": "0d8d9fd0a7b5cc7ed817a14f34b30d5c9c413cd3426ca405e70c09f2a69deda1"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_007",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_007\\F3_yard_flow_L_seed_007.json",
-      "sha256": "8d9f6c8ebfa42348219a056a062b2135c7fc72b86489e7672506e258f7e5bab7"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_007",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_007\\F3_yard_flow_M_seed_007.json",
-      "sha256": "b2e9dca1ae41a9487b28554e6e4437225de9d3f0d55759d622b01420f35ce57e"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_007",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_007\\F3_yard_flow_H_seed_007.json",
-      "sha256": "6eb862b8535d87e89913f4c959c534fdb0600b3fbaa142621cae9afd731e4e27"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_007",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_007\\F4_operational_conflict_L_seed_007.json",
-      "sha256": "390d04461f582faa70c7209eb39d4006abd4db81b1fa229ac4dd5b038ea0e78c"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_007",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_007\\F4_operational_conflict_M_seed_007.json",
-      "sha256": "0d6d365dd7a0bc73f7e1543ed476092dd5e5438f7270c789055132520460b227"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_007",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_007\\F4_operational_conflict_H_seed_007.json",
-      "sha256": "cd5c78a37d190e1a8710322633f809a832368973b9acc8cf07f1d556e2971c31"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_008",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_008\\F1_system_scale_L_seed_008.json",
-      "sha256": "5fc2f6261b033c9416a4a91737cdd9ac85ef002a08ec6dab834c3e5b4b463e39"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_008",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_008\\F1_system_scale_M_seed_008.json",
-      "sha256": "12c94fb35aa52acb463a2091fe4454deac37f7f5c2d8a313ce316d4f698b82bb"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_008",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_008\\F1_system_scale_H_seed_008.json",
-      "sha256": "a66a0047693f21447967bcaba8fa69253a9edd3c5ac23aa5ac691b3e7843145a"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_008",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_008\\F2_mode_tradeoff_L_seed_008.json",
-      "sha256": "bd4e8eaaa02916771b9afe35d46ae279d2570ecade3996b6237068eee2a751b2"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_008",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_008\\F2_mode_tradeoff_M_seed_008.json",
-      "sha256": "43dd9021950c09759d5d8265806d32dc949afaf4951a06f862ee77591f4c3f49"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_008",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_008\\F2_mode_tradeoff_H_seed_008.json",
-      "sha256": "64b8b3e98935a9d1ae74256b6a172a5de570354ded6354a861fb3fafe730b976"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_008",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_008\\F3_yard_flow_L_seed_008.json",
-      "sha256": "db3b6319261349172332d0ca34436188b9f713e3412647a4615399aa4544d30c"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_008",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_008\\F3_yard_flow_M_seed_008.json",
-      "sha256": "8c5bd24682569bbaa8281928309061100f354f4e971369dae3a29a91adae27fb"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_008",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_008\\F3_yard_flow_H_seed_008.json",
-      "sha256": "3a8bbc18d730721413eb4dba812ad6258f5c48e9f2637d250ee2a7ee430ef3ae"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_008",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_008\\F4_operational_conflict_L_seed_008.json",
-      "sha256": "40bc44b25b3c6a20da823088ecde9c4659e00ab39f629dcb0aa460fc6a7a24b4"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_008",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_008\\F4_operational_conflict_M_seed_008.json",
-      "sha256": "489c7cf997c47fcff1d9cbf66b3551d536183af562c87c3d49b08470ce263d20"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_008",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_008\\F4_operational_conflict_H_seed_008.json",
-      "sha256": "615127db4fbd70f03dcaf40ac988abed01572ad06eb819c807a4205fe7146b56"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_009",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_009\\F1_system_scale_L_seed_009.json",
-      "sha256": "b7cb2e7a6cc61a9072cc3b2b9c58e1ebbd7d8265e6e88318ffd8cf1ba4ab5107"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_009",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_009\\F1_system_scale_M_seed_009.json",
-      "sha256": "1d92e49c297ebd873673e1b73484511e027ddf00c8e11d49b61309c5f417598e"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_009",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_009\\F1_system_scale_H_seed_009.json",
-      "sha256": "98cff91728bbc195faae5dba9526196ad53b840573fafa9698016362bd349f00"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_009",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_009\\F2_mode_tradeoff_L_seed_009.json",
-      "sha256": "dc91e8e49a8a2dd1f8b21baca724e40eda4d3bcd4cae170bab74d1ed25598f4a"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_009",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_009\\F2_mode_tradeoff_M_seed_009.json",
-      "sha256": "ca8d2c3bbe66e9ff9786a13e9d12e48da2a208dc26085035cf0bbcc1155ffde9"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_009",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_009\\F2_mode_tradeoff_H_seed_009.json",
-      "sha256": "1067c1859a807b07c3dbefacd0f5503d34408cc5409a3c1479e3e8f14561e927"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_009",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_009\\F3_yard_flow_L_seed_009.json",
-      "sha256": "6ae5db16502f7c9e1e54d30e1c0e1dd14886d6fdb06a5a791fbb516251fab5f0"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_009",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_009\\F3_yard_flow_M_seed_009.json",
-      "sha256": "d3cfbdf1ff844e2158f025922e95f51f5d656fcf09720d73bd8d95c6278a21b3"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_009",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_009\\F3_yard_flow_H_seed_009.json",
-      "sha256": "8dd4e126db38f6148fe84882cb048be2eccc28295fe85bf8408f274f85479d06"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_009",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_009\\F4_operational_conflict_L_seed_009.json",
-      "sha256": "7ef5bc3d7e79a70b785c2b0c68dfbe47507b0027530614b6d8561d68bd64121b"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_009",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_009\\F4_operational_conflict_M_seed_009.json",
-      "sha256": "f415429cd3b8bf5ba42e6aa93a1454149f9ec5c48de727b0c14d10e5055c21b9"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_009",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_009\\F4_operational_conflict_H_seed_009.json",
-      "sha256": "d74566ff852be59158d1e82a24dec826d92c409f0478791b97ab763d48b24e62"
-    },
-    {
-      "instance_id": "F1_system_scale_L_seed_010",
-      "path": "singlecommodity_scenarios\\F1_system_scale_L\\seed_010\\F1_system_scale_L_seed_010.json",
-      "sha256": "44aca8d5532130df27bf99c80165b9637a7b35eac5f0c1870db5d35f9f1ac01d"
-    },
-    {
-      "instance_id": "F1_system_scale_M_seed_010",
-      "path": "singlecommodity_scenarios\\F1_system_scale_M\\seed_010\\F1_system_scale_M_seed_010.json",
-      "sha256": "4194add78eb7a741e40968b651b46fe644ecd9b7f489ab175cd1b9daec6a523a"
-    },
-    {
-      "instance_id": "F1_system_scale_H_seed_010",
-      "path": "singlecommodity_scenarios\\F1_system_scale_H\\seed_010\\F1_system_scale_H_seed_010.json",
-      "sha256": "dda303a0e63e201a174f6921ab68a1b7931476218150e5ef0c30a5cf2b191746"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_L_seed_010",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_L\\seed_010\\F2_mode_tradeoff_L_seed_010.json",
-      "sha256": "c48fa110714f1ca03a71f3d07490f42dd4b2bbbd460a4daa9b5f710781ac09ac"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_M_seed_010",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_M\\seed_010\\F2_mode_tradeoff_M_seed_010.json",
-      "sha256": "d4c8b18e847a8727754daed46099294de4bee4342520e9cbc57f8f74964c6d12"
-    },
-    {
-      "instance_id": "F2_mode_tradeoff_H_seed_010",
-      "path": "singlecommodity_scenarios\\F2_mode_tradeoff_H\\seed_010\\F2_mode_tradeoff_H_seed_010.json",
-      "sha256": "52fbcc5a3c2cc24c418c8fc160f8832baf783a6055ff1508e941322a3e91ddc1"
-    },
-    {
-      "instance_id": "F3_yard_flow_L_seed_010",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_L\\seed_010\\F3_yard_flow_L_seed_010.json",
-      "sha256": "00156858022b65ded65b84025206ef941738d71711f28b099a2a50d86d8a0e8e"
-    },
-    {
-      "instance_id": "F3_yard_flow_M_seed_010",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_M\\seed_010\\F3_yard_flow_M_seed_010.json",
-      "sha256": "6a427013a39d610328272994a3c1d78246523ab2657867c13d8ad5305d2e8be6"
-    },
-    {
-      "instance_id": "F3_yard_flow_H_seed_010",
-      "path": "singlecommodity_scenarios\\F3_yard_flow_H\\seed_010\\F3_yard_flow_H_seed_010.json",
-      "sha256": "1e1c4f30aeb4303d33499d49ed11ffadf1ebb406f7a41c7a6823aad834278236"
-    },
-    {
-      "instance_id": "F4_operational_conflict_L_seed_010",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_L\\seed_010\\F4_operational_conflict_L_seed_010.json",
-      "sha256": "9c106b4240a8356d6889a3d5e5d504e32495857a4de3d4d3b9c50623a8d0e4db"
-    },
-    {
-      "instance_id": "F4_operational_conflict_M_seed_010",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_M\\seed_010\\F4_operational_conflict_M_seed_010.json",
-      "sha256": "aca3ad7022ad5c4db3a4fe3892574deeb6fc5bd4b9fabf381e0aa3b082a50573"
-    },
-    {
-      "instance_id": "F4_operational_conflict_H_seed_010",
-      "path": "singlecommodity_scenarios\\F4_operational_conflict_H\\seed_010\\F4_operational_conflict_H_seed_010.json",
-      "sha256": "945d856755834bcb248be2c027a79ba43bee316b89f96945413078ac950af215"
+      "scenario_name": "F1_system_scale_L",
+      "seed": 1,
+      "file": "F1_system_scale_L/seed_001/F1_system_scale_L_seed_001.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.53464,
+      "mu_min_ratio_max": 0.702285,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 2,
+      "file": "F1_system_scale_L/seed_002/F1_system_scale_L_seed_002.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.535418,
+      "mu_min_ratio_max": 0.694497,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 3,
+      "file": "F1_system_scale_L/seed_003/F1_system_scale_L_seed_003.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.533119,
+      "mu_min_ratio_max": 0.700315,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 4,
+      "file": "F1_system_scale_L/seed_004/F1_system_scale_L_seed_004.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.531821,
+      "mu_min_ratio_max": 0.696793,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 5,
+      "file": "F1_system_scale_L/seed_005/F1_system_scale_L_seed_005.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.529145,
+      "mu_min_ratio_max": 0.696661,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 6,
+      "file": "F1_system_scale_L/seed_006/F1_system_scale_L_seed_006.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.533335,
+      "mu_min_ratio_max": 0.697873,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 7,
+      "file": "F1_system_scale_L/seed_007/F1_system_scale_L_seed_007.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.531071,
+      "mu_min_ratio_max": 0.696625,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 8,
+      "file": "F1_system_scale_L/seed_008/F1_system_scale_L_seed_008.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.536531,
+      "mu_min_ratio_max": 0.698682,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 9,
+      "file": "F1_system_scale_L/seed_009/F1_system_scale_L_seed_009.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.531346,
+      "mu_min_ratio_max": 0.695822,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_L",
+      "seed": 10,
+      "file": "F1_system_scale_L/seed_010/F1_system_scale_L_seed_010.json",
+      "asset_count": 12,
+      "arc_count": 34,
+      "maintenance_operation_count": 30,
+      "no_maintenance_throughput_tpd": 165600.0,
+      "mu_min_ratio_min": 0.530749,
+      "mu_min_ratio_max": 0.701306,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 1,
+      "file": "F1_system_scale_M/seed_001/F1_system_scale_M_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.53464,
+      "mu_min_ratio_max": 0.702285,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 2,
+      "file": "F1_system_scale_M/seed_002/F1_system_scale_M_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.535418,
+      "mu_min_ratio_max": 0.694497,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 3,
+      "file": "F1_system_scale_M/seed_003/F1_system_scale_M_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533119,
+      "mu_min_ratio_max": 0.700315,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 4,
+      "file": "F1_system_scale_M/seed_004/F1_system_scale_M_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.531821,
+      "mu_min_ratio_max": 0.696793,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 5,
+      "file": "F1_system_scale_M/seed_005/F1_system_scale_M_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.529145,
+      "mu_min_ratio_max": 0.696661,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 6,
+      "file": "F1_system_scale_M/seed_006/F1_system_scale_M_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533335,
+      "mu_min_ratio_max": 0.697873,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 7,
+      "file": "F1_system_scale_M/seed_007/F1_system_scale_M_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.531071,
+      "mu_min_ratio_max": 0.696625,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 8,
+      "file": "F1_system_scale_M/seed_008/F1_system_scale_M_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.536531,
+      "mu_min_ratio_max": 0.698682,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 9,
+      "file": "F1_system_scale_M/seed_009/F1_system_scale_M_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.531346,
+      "mu_min_ratio_max": 0.695822,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_M",
+      "seed": 10,
+      "file": "F1_system_scale_M/seed_010/F1_system_scale_M_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530749,
+      "mu_min_ratio_max": 0.701306,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 1,
+      "file": "F1_system_scale_H/seed_001/F1_system_scale_H_seed_001.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.53464,
+      "mu_min_ratio_max": 0.702285,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 2,
+      "file": "F1_system_scale_H/seed_002/F1_system_scale_H_seed_002.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.535418,
+      "mu_min_ratio_max": 0.694497,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 3,
+      "file": "F1_system_scale_H/seed_003/F1_system_scale_H_seed_003.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.533119,
+      "mu_min_ratio_max": 0.700315,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 4,
+      "file": "F1_system_scale_H/seed_004/F1_system_scale_H_seed_004.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.531821,
+      "mu_min_ratio_max": 0.696793,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 5,
+      "file": "F1_system_scale_H/seed_005/F1_system_scale_H_seed_005.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.529145,
+      "mu_min_ratio_max": 0.696661,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 6,
+      "file": "F1_system_scale_H/seed_006/F1_system_scale_H_seed_006.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.533335,
+      "mu_min_ratio_max": 0.697873,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 7,
+      "file": "F1_system_scale_H/seed_007/F1_system_scale_H_seed_007.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.531071,
+      "mu_min_ratio_max": 0.696625,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 8,
+      "file": "F1_system_scale_H/seed_008/F1_system_scale_H_seed_008.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.536531,
+      "mu_min_ratio_max": 0.698682,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 9,
+      "file": "F1_system_scale_H/seed_009/F1_system_scale_H_seed_009.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.531346,
+      "mu_min_ratio_max": 0.695822,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F1_system_scale_H",
+      "seed": 10,
+      "file": "F1_system_scale_H/seed_010/F1_system_scale_H_seed_010.json",
+      "asset_count": 32,
+      "arc_count": 80,
+      "maintenance_operation_count": 100,
+      "no_maintenance_throughput_tpd": 441600.0,
+      "mu_min_ratio_min": 0.530749,
+      "mu_min_ratio_max": 0.701306,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 1,
+      "file": "F2_mode_tradeoff_L/seed_001/F2_mode_tradeoff_L_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530154,
+      "mu_min_ratio_max": 0.698227,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 2,
+      "file": "F2_mode_tradeoff_L/seed_002/F2_mode_tradeoff_L_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530134,
+      "mu_min_ratio_max": 0.69857,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 3,
+      "file": "F2_mode_tradeoff_L/seed_003/F2_mode_tradeoff_L_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.528874,
+      "mu_min_ratio_max": 0.693287,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 4,
+      "file": "F2_mode_tradeoff_L/seed_004/F2_mode_tradeoff_L_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.538308,
+      "mu_min_ratio_max": 0.697831,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 5,
+      "file": "F2_mode_tradeoff_L/seed_005/F2_mode_tradeoff_L_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533297,
+      "mu_min_ratio_max": 0.697622,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 6,
+      "file": "F2_mode_tradeoff_L/seed_006/F2_mode_tradeoff_L_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.52888,
+      "mu_min_ratio_max": 0.696516,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 7,
+      "file": "F2_mode_tradeoff_L/seed_007/F2_mode_tradeoff_L_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.532818,
+      "mu_min_ratio_max": 0.695558,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 8,
+      "file": "F2_mode_tradeoff_L/seed_008/F2_mode_tradeoff_L_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533888,
+      "mu_min_ratio_max": 0.696735,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 9,
+      "file": "F2_mode_tradeoff_L/seed_009/F2_mode_tradeoff_L_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533866,
+      "mu_min_ratio_max": 0.698972,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_L",
+      "seed": 10,
+      "file": "F2_mode_tradeoff_L/seed_010/F2_mode_tradeoff_L_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.535278,
+      "mu_min_ratio_max": 0.697183,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 1,
+      "file": "F2_mode_tradeoff_M/seed_001/F2_mode_tradeoff_M_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530154,
+      "mu_min_ratio_max": 0.698227,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 2,
+      "file": "F2_mode_tradeoff_M/seed_002/F2_mode_tradeoff_M_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530134,
+      "mu_min_ratio_max": 0.69857,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 3,
+      "file": "F2_mode_tradeoff_M/seed_003/F2_mode_tradeoff_M_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.528874,
+      "mu_min_ratio_max": 0.693287,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 4,
+      "file": "F2_mode_tradeoff_M/seed_004/F2_mode_tradeoff_M_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.538308,
+      "mu_min_ratio_max": 0.697831,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 5,
+      "file": "F2_mode_tradeoff_M/seed_005/F2_mode_tradeoff_M_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533297,
+      "mu_min_ratio_max": 0.697622,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 6,
+      "file": "F2_mode_tradeoff_M/seed_006/F2_mode_tradeoff_M_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.52888,
+      "mu_min_ratio_max": 0.696516,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 7,
+      "file": "F2_mode_tradeoff_M/seed_007/F2_mode_tradeoff_M_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.532818,
+      "mu_min_ratio_max": 0.695558,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 8,
+      "file": "F2_mode_tradeoff_M/seed_008/F2_mode_tradeoff_M_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533888,
+      "mu_min_ratio_max": 0.696735,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 9,
+      "file": "F2_mode_tradeoff_M/seed_009/F2_mode_tradeoff_M_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533866,
+      "mu_min_ratio_max": 0.698972,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_M",
+      "seed": 10,
+      "file": "F2_mode_tradeoff_M/seed_010/F2_mode_tradeoff_M_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.535278,
+      "mu_min_ratio_max": 0.697183,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 1,
+      "file": "F2_mode_tradeoff_H/seed_001/F2_mode_tradeoff_H_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530154,
+      "mu_min_ratio_max": 0.698227,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 2,
+      "file": "F2_mode_tradeoff_H/seed_002/F2_mode_tradeoff_H_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.530134,
+      "mu_min_ratio_max": 0.69857,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 3,
+      "file": "F2_mode_tradeoff_H/seed_003/F2_mode_tradeoff_H_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.528874,
+      "mu_min_ratio_max": 0.693287,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 4,
+      "file": "F2_mode_tradeoff_H/seed_004/F2_mode_tradeoff_H_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.538308,
+      "mu_min_ratio_max": 0.697831,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 5,
+      "file": "F2_mode_tradeoff_H/seed_005/F2_mode_tradeoff_H_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533297,
+      "mu_min_ratio_max": 0.697622,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 6,
+      "file": "F2_mode_tradeoff_H/seed_006/F2_mode_tradeoff_H_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.52888,
+      "mu_min_ratio_max": 0.696516,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 7,
+      "file": "F2_mode_tradeoff_H/seed_007/F2_mode_tradeoff_H_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.532818,
+      "mu_min_ratio_max": 0.695558,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 8,
+      "file": "F2_mode_tradeoff_H/seed_008/F2_mode_tradeoff_H_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533888,
+      "mu_min_ratio_max": 0.696735,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 9,
+      "file": "F2_mode_tradeoff_H/seed_009/F2_mode_tradeoff_H_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533866,
+      "mu_min_ratio_max": 0.698972,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F2_mode_tradeoff_H",
+      "seed": 10,
+      "file": "F2_mode_tradeoff_H/seed_010/F2_mode_tradeoff_H_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.535278,
+      "mu_min_ratio_max": 0.697183,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 1,
+      "file": "F3_yard_flow_L/seed_001/F3_yard_flow_L_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.537955,
+      "mu_min_ratio_max": 0.702093,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 2,
+      "file": "F3_yard_flow_L/seed_002/F3_yard_flow_L_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.529954,
+      "mu_min_ratio_max": 0.70004,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 3,
+      "file": "F3_yard_flow_L/seed_003/F3_yard_flow_L_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.53015,
+      "mu_min_ratio_max": 0.699902,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 4,
+      "file": "F3_yard_flow_L/seed_004/F3_yard_flow_L_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.534929,
+      "mu_min_ratio_max": 0.6942,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 5,
+      "file": "F3_yard_flow_L/seed_005/F3_yard_flow_L_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533865,
+      "mu_min_ratio_max": 0.699863,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 6,
+      "file": "F3_yard_flow_L/seed_006/F3_yard_flow_L_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.531099,
+      "mu_min_ratio_max": 0.695614,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 7,
+      "file": "F3_yard_flow_L/seed_007/F3_yard_flow_L_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.532429,
+      "mu_min_ratio_max": 0.693046,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 8,
+      "file": "F3_yard_flow_L/seed_008/F3_yard_flow_L_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.528099,
+      "mu_min_ratio_max": 0.701122,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 9,
+      "file": "F3_yard_flow_L/seed_009/F3_yard_flow_L_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.536765,
+      "mu_min_ratio_max": 0.697789,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_L",
+      "seed": 10,
+      "file": "F3_yard_flow_L/seed_010/F3_yard_flow_L_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.533365,
+      "mu_min_ratio_max": 0.697607,
+      "fixed_activity_window_count": 0
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 1,
+      "file": "F3_yard_flow_M/seed_001/F3_yard_flow_M_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575757,
+      "mu_min_ratio_max": 0.735807,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 2,
+      "file": "F3_yard_flow_M/seed_002/F3_yard_flow_M_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.578268,
+      "mu_min_ratio_max": 0.738295,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 3,
+      "file": "F3_yard_flow_M/seed_003/F3_yard_flow_M_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575476,
+      "mu_min_ratio_max": 0.738559,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 4,
+      "file": "F3_yard_flow_M/seed_004/F3_yard_flow_M_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.573211,
+      "mu_min_ratio_max": 0.741775,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 5,
+      "file": "F3_yard_flow_M/seed_005/F3_yard_flow_M_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575023,
+      "mu_min_ratio_max": 0.738117,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 6,
+      "file": "F3_yard_flow_M/seed_006/F3_yard_flow_M_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.576997,
+      "mu_min_ratio_max": 0.739696,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 7,
+      "file": "F3_yard_flow_M/seed_007/F3_yard_flow_M_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.576608,
+      "mu_min_ratio_max": 0.73986,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 8,
+      "file": "F3_yard_flow_M/seed_008/F3_yard_flow_M_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575122,
+      "mu_min_ratio_max": 0.736132,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 9,
+      "file": "F3_yard_flow_M/seed_009/F3_yard_flow_M_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.572416,
+      "mu_min_ratio_max": 0.735369,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_M",
+      "seed": 10,
+      "file": "F3_yard_flow_M/seed_010/F3_yard_flow_M_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575884,
+      "mu_min_ratio_max": 0.740095,
+      "fixed_activity_window_count": 1
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 1,
+      "file": "F3_yard_flow_H/seed_001/F3_yard_flow_H_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.594824,
+      "mu_min_ratio_max": 0.798705,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 2,
+      "file": "F3_yard_flow_H/seed_002/F3_yard_flow_H_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.593956,
+      "mu_min_ratio_max": 0.799985,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 3,
+      "file": "F3_yard_flow_H/seed_003/F3_yard_flow_H_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.594807,
+      "mu_min_ratio_max": 0.800406,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 4,
+      "file": "F3_yard_flow_H/seed_004/F3_yard_flow_H_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.595908,
+      "mu_min_ratio_max": 0.794515,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 5,
+      "file": "F3_yard_flow_H/seed_005/F3_yard_flow_H_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.590763,
+      "mu_min_ratio_max": 0.797865,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 6,
+      "file": "F3_yard_flow_H/seed_006/F3_yard_flow_H_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.592715,
+      "mu_min_ratio_max": 0.798992,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 7,
+      "file": "F3_yard_flow_H/seed_007/F3_yard_flow_H_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.589102,
+      "mu_min_ratio_max": 0.793323,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 8,
+      "file": "F3_yard_flow_H/seed_008/F3_yard_flow_H_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.595432,
+      "mu_min_ratio_max": 0.796719,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 9,
+      "file": "F3_yard_flow_H/seed_009/F3_yard_flow_H_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.590403,
+      "mu_min_ratio_max": 0.790932,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F3_yard_flow_H",
+      "seed": 10,
+      "file": "F3_yard_flow_H/seed_010/F3_yard_flow_H_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.593369,
+      "mu_min_ratio_max": 0.800238,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 1,
+      "file": "F4_operational_conflict_L/seed_001/F4_operational_conflict_L_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.573437,
+      "mu_min_ratio_max": 0.740138,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 2,
+      "file": "F4_operational_conflict_L/seed_002/F4_operational_conflict_L_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.576031,
+      "mu_min_ratio_max": 0.740444,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 3,
+      "file": "F4_operational_conflict_L/seed_003/F4_operational_conflict_L_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57327,
+      "mu_min_ratio_max": 0.739939,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 4,
+      "file": "F4_operational_conflict_L/seed_004/F4_operational_conflict_L_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.569595,
+      "mu_min_ratio_max": 0.740686,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 5,
+      "file": "F4_operational_conflict_L/seed_005/F4_operational_conflict_L_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.572231,
+      "mu_min_ratio_max": 0.731424,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 6,
+      "file": "F4_operational_conflict_L/seed_006/F4_operational_conflict_L_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57118,
+      "mu_min_ratio_max": 0.740771,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 7,
+      "file": "F4_operational_conflict_L/seed_007/F4_operational_conflict_L_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.5719,
+      "mu_min_ratio_max": 0.735713,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 8,
+      "file": "F4_operational_conflict_L/seed_008/F4_operational_conflict_L_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575216,
+      "mu_min_ratio_max": 0.738168,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 9,
+      "file": "F4_operational_conflict_L/seed_009/F4_operational_conflict_L_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57379,
+      "mu_min_ratio_max": 0.737024,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_L",
+      "seed": 10,
+      "file": "F4_operational_conflict_L/seed_010/F4_operational_conflict_L_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.571865,
+      "mu_min_ratio_max": 0.739267,
+      "fixed_activity_window_count": 2
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 1,
+      "file": "F4_operational_conflict_M/seed_001/F4_operational_conflict_M_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.573437,
+      "mu_min_ratio_max": 0.740138,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 2,
+      "file": "F4_operational_conflict_M/seed_002/F4_operational_conflict_M_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.576031,
+      "mu_min_ratio_max": 0.740444,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 3,
+      "file": "F4_operational_conflict_M/seed_003/F4_operational_conflict_M_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57327,
+      "mu_min_ratio_max": 0.739939,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 4,
+      "file": "F4_operational_conflict_M/seed_004/F4_operational_conflict_M_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.569595,
+      "mu_min_ratio_max": 0.740686,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 5,
+      "file": "F4_operational_conflict_M/seed_005/F4_operational_conflict_M_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.572231,
+      "mu_min_ratio_max": 0.731424,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 6,
+      "file": "F4_operational_conflict_M/seed_006/F4_operational_conflict_M_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57118,
+      "mu_min_ratio_max": 0.740771,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 7,
+      "file": "F4_operational_conflict_M/seed_007/F4_operational_conflict_M_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.5719,
+      "mu_min_ratio_max": 0.735713,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 8,
+      "file": "F4_operational_conflict_M/seed_008/F4_operational_conflict_M_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575216,
+      "mu_min_ratio_max": 0.738168,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 9,
+      "file": "F4_operational_conflict_M/seed_009/F4_operational_conflict_M_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57379,
+      "mu_min_ratio_max": 0.737024,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_M",
+      "seed": 10,
+      "file": "F4_operational_conflict_M/seed_010/F4_operational_conflict_M_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.571865,
+      "mu_min_ratio_max": 0.739267,
+      "fixed_activity_window_count": 4
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 1,
+      "file": "F4_operational_conflict_H/seed_001/F4_operational_conflict_H_seed_001.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.573437,
+      "mu_min_ratio_max": 0.740138,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 2,
+      "file": "F4_operational_conflict_H/seed_002/F4_operational_conflict_H_seed_002.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.576031,
+      "mu_min_ratio_max": 0.740444,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 3,
+      "file": "F4_operational_conflict_H/seed_003/F4_operational_conflict_H_seed_003.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57327,
+      "mu_min_ratio_max": 0.739939,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 4,
+      "file": "F4_operational_conflict_H/seed_004/F4_operational_conflict_H_seed_004.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.569595,
+      "mu_min_ratio_max": 0.740686,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 5,
+      "file": "F4_operational_conflict_H/seed_005/F4_operational_conflict_H_seed_005.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.572231,
+      "mu_min_ratio_max": 0.731424,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 6,
+      "file": "F4_operational_conflict_H/seed_006/F4_operational_conflict_H_seed_006.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57118,
+      "mu_min_ratio_max": 0.740771,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 7,
+      "file": "F4_operational_conflict_H/seed_007/F4_operational_conflict_H_seed_007.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.5719,
+      "mu_min_ratio_max": 0.735713,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 8,
+      "file": "F4_operational_conflict_H/seed_008/F4_operational_conflict_H_seed_008.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.575216,
+      "mu_min_ratio_max": 0.738168,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 9,
+      "file": "F4_operational_conflict_H/seed_009/F4_operational_conflict_H_seed_009.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.57379,
+      "mu_min_ratio_max": 0.737024,
+      "fixed_activity_window_count": 6
+    },
+    {
+      "scenario_name": "F4_operational_conflict_H",
+      "seed": 10,
+      "file": "F4_operational_conflict_H/seed_010/F4_operational_conflict_H_seed_010.json",
+      "asset_count": 20,
+      "arc_count": 51,
+      "maintenance_operation_count": 60,
+      "no_maintenance_throughput_tpd": 276000.0,
+      "mu_min_ratio_min": 0.571865,
+      "mu_min_ratio_max": 0.739267,
+      "fixed_activity_window_count": 6
     }
-  ],
-  "commodity_representation": "single_commodity",
-  "commodity_aggregation": {
-    "supply": "S_d = sum_g S_gd",
-    "demand": "D_d = sum_g D_gd",
-    "initial_inventory": "z0_p = sum_g z0_pg"
-  },
-  "underlying_generated_products": [
-    "P1",
-    "P2",
-    "P3",
-    "X1"
   ]
 }
