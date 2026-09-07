@@ -1,4 +1,6 @@
-# Shared solver, generator, test, and notebook environment.
+# Shared solver, Benders, generator, test, and notebook environment.
+# Covers monolithic_milp.py, multicommodity_milp.py, benders_*.py,
+# run_*.py, visualize_*.py, and synthetic_data_generator/.
 # Interpreter: Python 3.9.6 (see .python-version).
 # Install with: .venv-requirements/Scripts/python.exe -m pip install -r requirements.txt
 # Full Windows dependency snapshot: requirements-lock-py396-windows.txt.
