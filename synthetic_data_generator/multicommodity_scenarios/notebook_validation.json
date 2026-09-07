@@ -1,0 +1,612 @@
+{
+  "generator_randomization_version": "frozen_schema_routing_restricted_v2",
+  "commodity_count": 4,
+  "instance_count": 120,
+  "all_structural_checks_pass": true,
+  "all_seed_diversity_checks_pass": true,
+  "generator_regression_tests_run": 17,
+  "generator_regression_tests_pass": true,
+  "solver_certified": false,
+  "files": [
+    {
+      "file": "F1_system_scale_L/seed_001/F1_system_scale_L_seed_001.json",
+      "sha256": "8c8e981ead43a282c345a0b9503fec05354c0626b7d235e89b2138ee067bbef4",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_002/F1_system_scale_L_seed_002.json",
+      "sha256": "a3540ebea5f4503b1aff929820a79a3d74b18ffdde6d9a4f756358e083e9c6d0",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_003/F1_system_scale_L_seed_003.json",
+      "sha256": "17709abb91aaede340f5a8441079678c807829e4cb026b15b65082e7b7421c96",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_004/F1_system_scale_L_seed_004.json",
+      "sha256": "5169b8bcbaab45c4a6814c14eb7482aa094267cddb7b2962d678e2b97cf49dcf",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_005/F1_system_scale_L_seed_005.json",
+      "sha256": "1f2703fe0ea60afa5f079f40a150d02b8a58c462d8f0534a4ac421c238d07d74",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_006/F1_system_scale_L_seed_006.json",
+      "sha256": "82c5255c1f74dfdb52b2a5e725ac9fa9c30a2ea74094d2e14c92a8f22d309386",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_007/F1_system_scale_L_seed_007.json",
+      "sha256": "0f28888258e6f0590eabec17b8623115dbc66b0e37f4a6d47444cee5cd97dda4",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_008/F1_system_scale_L_seed_008.json",
+      "sha256": "e1fa8b295a08afc4b5c95d494475bc6292d435f3e41106177629c76c5cdcd5c3",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_009/F1_system_scale_L_seed_009.json",
+      "sha256": "3def75cce19b68ada6768b2f487ef89561bd63136b8c9e865b2131206b7ccb2e",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_L/seed_010/F1_system_scale_L_seed_010.json",
+      "sha256": "3f75a899477e4cd07a9db07a8287bc9eaf61a4f1764fd9d90e5f92791b938bcf",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_001/F1_system_scale_M_seed_001.json",
+      "sha256": "bd88bb0832f9dc293547b1934c8f6b689974418cd748d0c49279912cc8c45c58",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_002/F1_system_scale_M_seed_002.json",
+      "sha256": "9cbcead3e36f00e6a7b78f1137a3b9cc10810562d2f80a93b9b516131b59a34e",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_003/F1_system_scale_M_seed_003.json",
+      "sha256": "67325bb282aee090464664a2a9798220e8db79cc706baebbaa778a49014c9435",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_004/F1_system_scale_M_seed_004.json",
+      "sha256": "499a5c70f39ccef23020173e36ad3370cb3ce9ad616fda5f17e228a1e7863eba",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_005/F1_system_scale_M_seed_005.json",
+      "sha256": "11db5cc176276c1d92ce42a472350826d968e8fb92fb1147ac95e846dc5ca535",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_006/F1_system_scale_M_seed_006.json",
+      "sha256": "ab4488c5232537551ad73d5d617b3f4abf99334f479318dd194aa60b7cf84b01",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_007/F1_system_scale_M_seed_007.json",
+      "sha256": "e7f5153ce168def92966c8c1c12b61a0747d4a3a2c7d8c950a6412387a24621f",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_008/F1_system_scale_M_seed_008.json",
+      "sha256": "5cc891cd2a3e2cb9802b410387334b67e391ee526e1cc6f5a81f3e6655d0a971",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_009/F1_system_scale_M_seed_009.json",
+      "sha256": "18ba706cc2c24deda2d3d5382f6ca6812067e18c7b60e3b2823620a0d24d036f",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_M/seed_010/F1_system_scale_M_seed_010.json",
+      "sha256": "cf143dc29d61ccb783aec88c778effcb271c59d1ae7b15414b7c147dcb947552",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_001/F1_system_scale_H_seed_001.json",
+      "sha256": "177b21d72af649b900b9218a4d546e9cb88e8ff8459f31aae71edc5ede2a0d34",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_002/F1_system_scale_H_seed_002.json",
+      "sha256": "bededd4891f737e82819ccba2ebe6c30459a8edf80c9cc8b0b9882ead6bac27b",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_003/F1_system_scale_H_seed_003.json",
+      "sha256": "79766d4068a9811755afe7d3b74b927671e271d27f791edbce8b1931f0913d16",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_004/F1_system_scale_H_seed_004.json",
+      "sha256": "c3137bfa26843b40c0c7c961a55ffbe875526ad8dce47f6ef01687aa14cc942a",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_005/F1_system_scale_H_seed_005.json",
+      "sha256": "4832767570dceb146fbb4937e886fb802d9b074f99f5bd75571e54e11c226943",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_006/F1_system_scale_H_seed_006.json",
+      "sha256": "01a348eef496b6ecd96daa9c41dcb81c6d183d6dd3488fd6dca2454bb2ead067",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_007/F1_system_scale_H_seed_007.json",
+      "sha256": "befd26400028d288068e928101b879160e695b1728d4c4f9d9742f39590f49b1",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_008/F1_system_scale_H_seed_008.json",
+      "sha256": "961c8cac2cc8803fa1f14ba2ed525070e14722b5b80ab296c3ca672cde316636",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_009/F1_system_scale_H_seed_009.json",
+      "sha256": "73af21e82ce9234ac80fb1b239b2af55ae105ab68025962c4121cdca79385fcf",
+      "structural_pass": true
+    },
+    {
+      "file": "F1_system_scale_H/seed_010/F1_system_scale_H_seed_010.json",
+      "sha256": "818afd70f68c6ba6551474561067a0e3ca4f6f5fcd7af0a0e9d0b8d448da982b",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_001/F2_mode_tradeoff_L_seed_001.json",
+      "sha256": "361849614d770f84ec0d75b61ec08187ac637a56cf73b3bbcfcf819a7f6d4a8c",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_002/F2_mode_tradeoff_L_seed_002.json",
+      "sha256": "92c7d62ddbba3d699494809d4594debc2688ddf55d4133362cb6dc086a840764",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_003/F2_mode_tradeoff_L_seed_003.json",
+      "sha256": "41c59b84ef38ca675fa2eadebcbf9e0234e0ce7de558dde79a817d69fe0a9cfb",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_004/F2_mode_tradeoff_L_seed_004.json",
+      "sha256": "907e8bc47da6952f0b796963d7bfc2ddbcb1169164e4b2e6c1cc213029956460",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_005/F2_mode_tradeoff_L_seed_005.json",
+      "sha256": "4a07f8248601e1d1fbaefb31574906a48c42b5be0614a9772212f17a8a3b9f7f",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_006/F2_mode_tradeoff_L_seed_006.json",
+      "sha256": "e87cbdbecad7af7ab270fc62ceb47a8e074f87d08c744ea2a50f54bf240c8c35",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_007/F2_mode_tradeoff_L_seed_007.json",
+      "sha256": "7896aa65f27959a4907eb2c030d38d1efdc61e03ea0ce29fe04e408bf527bc37",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_008/F2_mode_tradeoff_L_seed_008.json",
+      "sha256": "6021c1c42c081705961e7f301cc48be9072b6ec69f329790c888b0fc049b0b92",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_009/F2_mode_tradeoff_L_seed_009.json",
+      "sha256": "5aab7672e18aaea249839124641aa9b6fac735bf81cd871227dd73bffd65cbe3",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_L/seed_010/F2_mode_tradeoff_L_seed_010.json",
+      "sha256": "4a30c08534bc1b1d36ca7c1757393fd92428268c374603a6032afe25cff11788",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_001/F2_mode_tradeoff_M_seed_001.json",
+      "sha256": "2c134a22d265e5ce147a6a9ee7febc66e0f79ab99349da4a943dd991d1de3364",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_002/F2_mode_tradeoff_M_seed_002.json",
+      "sha256": "0434953af4018e671c51a4e9f2c9f5b095b13dd0af246827b27e4512e391e549",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_003/F2_mode_tradeoff_M_seed_003.json",
+      "sha256": "ab62daec96bf06d378d70ffffb7ef101ddcca83ad8f57e08453b7324a5e8e4ed",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_004/F2_mode_tradeoff_M_seed_004.json",
+      "sha256": "9b3248e33d8908a7c251401e1b957db642b293d6d905ec2f86aa4bd1fb182306",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_005/F2_mode_tradeoff_M_seed_005.json",
+      "sha256": "0d9e3a83179f593b325f38031a51e61d3435b03736571ab62512a6f7d49a7182",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_006/F2_mode_tradeoff_M_seed_006.json",
+      "sha256": "9c163f608d2d54997a5c53c8f8044fc21c06b0929139e150cc0da7c4f0368d59",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_007/F2_mode_tradeoff_M_seed_007.json",
+      "sha256": "72a24caf9563549305d47dfd2d2ee21392f53b9369a68b66641baeaf47e870ad",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_008/F2_mode_tradeoff_M_seed_008.json",
+      "sha256": "6950c6b4934632dec5149d77bfb3468dc85f728661fabd3459f52a0f90fb5040",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_009/F2_mode_tradeoff_M_seed_009.json",
+      "sha256": "5f19028b7a669204a2dc030853c0405a3a46402558f972244df00f4933ba1ae2",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_M/seed_010/F2_mode_tradeoff_M_seed_010.json",
+      "sha256": "042c885e25b9141bd3bac914bb9c477c897a45f51a7edf2ea7b62cb2103c7afa",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_001/F2_mode_tradeoff_H_seed_001.json",
+      "sha256": "893b0e6c707787e0d31e4c21c863a512f7febe8e23781b8ecbfb3a0fc6caaf72",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_002/F2_mode_tradeoff_H_seed_002.json",
+      "sha256": "98abc636333409ab41bcea7ebbc49b69c375b65e2ed860ff004fb5620a19e1aa",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_003/F2_mode_tradeoff_H_seed_003.json",
+      "sha256": "a9ee74ea5a31d62e8fbd18be3c221b189bc9a69e977299d6d8cc7e36d45ea5b0",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_004/F2_mode_tradeoff_H_seed_004.json",
+      "sha256": "f25338fd8b0becdc3ad9685d17142ec52c8626306a6eaaba9e7032a99690b2bc",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_005/F2_mode_tradeoff_H_seed_005.json",
+      "sha256": "07558310602b2b67b33d3db8f83fc43947b8fd82e1d9e4623397364c839ad379",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_006/F2_mode_tradeoff_H_seed_006.json",
+      "sha256": "6f048ceff614f662f82bf448293cafe8eb27ff8b826d8d42b69fd91f2c31a259",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_007/F2_mode_tradeoff_H_seed_007.json",
+      "sha256": "cdf61cb3fb34aa03a43b1bbeb8558a94c0302e4acd3f5bf3c35f499911ae1b72",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_008/F2_mode_tradeoff_H_seed_008.json",
+      "sha256": "eb529dd398f0d89596badde83394738bf1d50eeb6c0a194f1e07d1ec9db49344",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_009/F2_mode_tradeoff_H_seed_009.json",
+      "sha256": "3b3c96a5ef062ea3f16bd4fd0eb79730a357374a77f529b6d8b6de04b737b9be",
+      "structural_pass": true
+    },
+    {
+      "file": "F2_mode_tradeoff_H/seed_010/F2_mode_tradeoff_H_seed_010.json",
+      "sha256": "d4dcb7968b478251b0dc4997386796f4fe848b071fd68dc517f796b124004c32",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_001/F3_yard_flow_L_seed_001.json",
+      "sha256": "5b7fed122738aade5c5edb8df3bd28076d2746e33e2e42d7960b3e316ebb7159",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_002/F3_yard_flow_L_seed_002.json",
+      "sha256": "10622dfb82bb7ec148550046df8d42cc89968a92686fd85c028cdddb3db641cc",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_003/F3_yard_flow_L_seed_003.json",
+      "sha256": "e200f117a96411a936314e9307d8c71e3fd9007adfc9b10839764dae4f879086",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_004/F3_yard_flow_L_seed_004.json",
+      "sha256": "b0c828e67556cfe7e5aabbcd2728ffc8b51ceca9ce49f5cd1679076b523a1641",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_005/F3_yard_flow_L_seed_005.json",
+      "sha256": "c63928f08479cb566b50de5846b404f25cdc6eb222a8eadd9296576a929c8fe3",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_006/F3_yard_flow_L_seed_006.json",
+      "sha256": "714fcc87f70537da163a033545674f9748533ab65cf80bef0b9b35691e443b81",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_007/F3_yard_flow_L_seed_007.json",
+      "sha256": "13b9f3aefe63d96712a65a9c9af65f3a987a8f613e0e32cb82b1143f57c6ac8f",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_008/F3_yard_flow_L_seed_008.json",
+      "sha256": "3a00e4789fbbcac03f4fcaa3c6616eb984ea3e81d7a7604e9c78f94a6fe7bd18",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_009/F3_yard_flow_L_seed_009.json",
+      "sha256": "c294b9ec4129bfc332f2f61507c0fefa958e82f29cd964a770937205ddf5649a",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_L/seed_010/F3_yard_flow_L_seed_010.json",
+      "sha256": "e6f68d83c38c5a36be5ad67460e65a2dd88ee5cae67186554be8cbc72858b0d2",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_001/F3_yard_flow_M_seed_001.json",
+      "sha256": "c25b247e610e321f1a754a14e4b37bc7a7edc06b0574fdce66c9e1e5a4f8b3c5",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_002/F3_yard_flow_M_seed_002.json",
+      "sha256": "81947e9bd71933024b011ab72d3fdf668cec7d5aaef4ba4077f5caa3cf6b5f3b",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_003/F3_yard_flow_M_seed_003.json",
+      "sha256": "ec0343c3d5adacbd81427835144f92eb021bb26036b0f1c8eacfb6d735ebbe3f",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_004/F3_yard_flow_M_seed_004.json",
+      "sha256": "7c0f5597130de0bd637cb003f36b793189b52b8e154b66fdb3184d10fc6aba86",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_005/F3_yard_flow_M_seed_005.json",
+      "sha256": "a798f8545573c40044a67ad61a2ca7eeadd74534b7eda66fe650a4b9e9c4709f",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_006/F3_yard_flow_M_seed_006.json",
+      "sha256": "afebf1e9e5fb6e06815f8af1d106d82cc352cc4903d0db372a8327a4e8d68fbc",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_007/F3_yard_flow_M_seed_007.json",
+      "sha256": "a289a75281c5bb82077b9e24998fa4fcaab77499673f6e9735b42d08f01a379f",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_008/F3_yard_flow_M_seed_008.json",
+      "sha256": "064d6706c456469fe4bdd91b8a774fd55983f597bbf23f9096972f79a3692f4c",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_009/F3_yard_flow_M_seed_009.json",
+      "sha256": "0639fe13c894cb1d7c978851d0dbf4f120e7ac7267fe51922de24f8b9a3da9c8",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_M/seed_010/F3_yard_flow_M_seed_010.json",
+      "sha256": "635362f84aa8723338eac66c2142b9c250dc2d0f0b0ef89317081b4eeb7115dd",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_001/F3_yard_flow_H_seed_001.json",
+      "sha256": "f11f58fb2e5fab169d040c14f78919b31a2733cf743ffc9514d98c26bb308b76",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_002/F3_yard_flow_H_seed_002.json",
+      "sha256": "6ded40566dd89ecb162154171603330cc14f88ffa80b0159a6e877590df71779",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_003/F3_yard_flow_H_seed_003.json",
+      "sha256": "e86836ced299652cbcb60988db525e92f06537a1b42a55022fd3042a2c962eb3",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_004/F3_yard_flow_H_seed_004.json",
+      "sha256": "af89482b5e1f714051cf155e06f68b1592de4be84104492a05b5c203c97ebc49",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_005/F3_yard_flow_H_seed_005.json",
+      "sha256": "b83b2e84d49377eb1407a85c25a0a40ea66218756fa2a4cffeb6978e9ff958a9",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_006/F3_yard_flow_H_seed_006.json",
+      "sha256": "c6cede61767c0a5566d8518ab2e0ca6d43ec9efb267ec321afbcfad4c7e712a2",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_007/F3_yard_flow_H_seed_007.json",
+      "sha256": "f10a0e35a9e593891bc7e34cd921d99f776966b700fc7e1189aaa03b75e019b4",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_008/F3_yard_flow_H_seed_008.json",
+      "sha256": "952837c280fbe2da7222cf103c6cf5af4313a88f13fe6d95c70578e9564c3505",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_009/F3_yard_flow_H_seed_009.json",
+      "sha256": "6b3a8988be955a51e090011b81f85d727340f417ea301d80b0e786459d3300d7",
+      "structural_pass": true
+    },
+    {
+      "file": "F3_yard_flow_H/seed_010/F3_yard_flow_H_seed_010.json",
+      "sha256": "93be2579363a94b55ed5d80d59d6be1bd0a75026c608b0a6162b030f9e5a6c84",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_001/F4_operational_conflict_L_seed_001.json",
+      "sha256": "3c1140873c9cc4a874cf0e957dcca82115932f9dd52d810803e3d4ae90ad41e8",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_002/F4_operational_conflict_L_seed_002.json",
+      "sha256": "b4acda7633a7529de3ef662e3bad08b1ae8f27e3916711ab6e23071da5545f09",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_003/F4_operational_conflict_L_seed_003.json",
+      "sha256": "463ae86cdaf2f6dfe6449b3132db9cd8bac77bc2b617f0a7193af9fecd531297",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_004/F4_operational_conflict_L_seed_004.json",
+      "sha256": "55a1e1246c76120b8f7194e4eeff944344508badd75ad4860d57da3fdce2852c",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_005/F4_operational_conflict_L_seed_005.json",
+      "sha256": "d7e67905b4b49c28c65af2d99063e03ebb3f8df4b76788cbf8eb71c5d4ced9c9",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_006/F4_operational_conflict_L_seed_006.json",
+      "sha256": "abf190ca2af716461334fe393f0b412d08742c3a74715ce497ecf2ee323b989a",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_007/F4_operational_conflict_L_seed_007.json",
+      "sha256": "8d82007e613ca4cdc29e3542ba910086ae141690fdb9fae9e738f88c118a0479",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_008/F4_operational_conflict_L_seed_008.json",
+      "sha256": "5eeff955a98d69cae685821c6f7c333b4f15052619b0b516b7938c671c2f4696",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_009/F4_operational_conflict_L_seed_009.json",
+      "sha256": "470695cfc957d4234fa33c806b2fd4b2a9504cdcf7a596a6a66f929f9e6cc960",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_L/seed_010/F4_operational_conflict_L_seed_010.json",
+      "sha256": "41d437810f9a7bc8bdd003fd09662c1fa8728c18a5d7c12ac5b041899e09e289",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_001/F4_operational_conflict_M_seed_001.json",
+      "sha256": "9cc7340fc8aa508519f9bf3ed02280ad229f651a3eda3b81db266f3576dfe7c3",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_002/F4_operational_conflict_M_seed_002.json",
+      "sha256": "0f35734651258803814035424c0a95a3d0acfefb6ae01551d35fc8fbc2e1526a",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_003/F4_operational_conflict_M_seed_003.json",
+      "sha256": "d6257165ebf5142685aa2e26605fa414a8d69669bccc2bb84a986351bef0ba04",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_004/F4_operational_conflict_M_seed_004.json",
+      "sha256": "a9f941379dfc6113f41978721c4750c98a8a9b8907d1d486302b7ef83e12c38b",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_005/F4_operational_conflict_M_seed_005.json",
+      "sha256": "fe6fb744f2a2a00378950475026919ace3a20ace15fb7e239730d8596fb10ea3",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_006/F4_operational_conflict_M_seed_006.json",
+      "sha256": "f638fd8488a80ed4f658acf0923fb6b342703e396e9e5ef0a835a4321a14bc48",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_007/F4_operational_conflict_M_seed_007.json",
+      "sha256": "4f50fde777e174a338e796ec2ba9d1dde61e90eae11cc31d61b58ba142dd6c96",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_008/F4_operational_conflict_M_seed_008.json",
+      "sha256": "30c22228539d49763fadb63d2eba3ec8758af4ae86c02dcb192804aafd8473cd",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_009/F4_operational_conflict_M_seed_009.json",
+      "sha256": "e7906b78888e8278dee8608f0011b7560051e3f216bc5cf36d784eee4ff83b20",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_M/seed_010/F4_operational_conflict_M_seed_010.json",
+      "sha256": "e106a8dcf478b649df5a4b0c147f27f0b515b30606d1886b01f7f02b044d1365",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_001/F4_operational_conflict_H_seed_001.json",
+      "sha256": "15a0cec20d115491974c961a4dc9141c5c8d19099e744e8044605581e50bb7ff",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_002/F4_operational_conflict_H_seed_002.json",
+      "sha256": "87e308fc6f9f4a2de48b943354e1a317371281735900530a0667da9120f410e9",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_003/F4_operational_conflict_H_seed_003.json",
+      "sha256": "ca633d713fc089cd074f8f3fb43c2660d3ffd144c82390ac93b75256d899234e",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_004/F4_operational_conflict_H_seed_004.json",
+      "sha256": "2b2c0da2363562a8565ce292d41dbe7f5f0deceac2dc5eee863d7bf2d77d9bf5",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_005/F4_operational_conflict_H_seed_005.json",
+      "sha256": "b875f7fc7b0cd363b48e97d9e8c4e98d4fcc8f4de1224e9d6df1bed1ff6b0372",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_006/F4_operational_conflict_H_seed_006.json",
+      "sha256": "70854bcd3a451923ee60bbf20682a7b8ff59a34419244ba4994ea5aed115a1e2",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_007/F4_operational_conflict_H_seed_007.json",
+      "sha256": "b729cfb6d467ed21d542b4b9929ffcb16257eb81f3bab611af50f7102e5ccf0e",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_008/F4_operational_conflict_H_seed_008.json",
+      "sha256": "29a7d9750bfb0507706a68cdf3fbf29ffd42fbf77fd6d732f8c51371eaad05a9",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_009/F4_operational_conflict_H_seed_009.json",
+      "sha256": "7be2d64c0f240d94f425c4b448daacb7da17174e26d6896cc6be6b1eed9a6a9b",
+      "structural_pass": true
+    },
+    {
+      "file": "F4_operational_conflict_H/seed_010/F4_operational_conflict_H_seed_010.json",
+      "sha256": "2b37dd4306c7ba7977fde279c08de12a641fbd9b83398fbe557f25860e2df264",
+      "structural_pass": true
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 family,case_count,asset_count_min,asset_count_max,maintenance_count_min,maintenance_count_max,mu_ratio_max
-F1_system_scale,30,12,32,30,100,0.702285
-F2_mode_tradeoff,30,20,20,60,60,0.698972
-F3_yard_flow,30,20,20,60,60,0.800406
-F4_operational_conflict,30,20,20,60,60,0.740771
+F1_system_scale,30,12,32,30,100,0.701345
+F2_mode_tradeoff,30,20,20,60,60,0.700981
+F3_yard_flow,30,20,20,60,60,0.800907
+F4_operational_conflict,30,20,20,60,60,0.741323
