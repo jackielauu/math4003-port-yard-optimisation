@@ -1,7 +1,8 @@
-"""Solve every generated dissertation scenario with monolithic_milp's model and
-plot the resulting maintenance schedule (Gantt, one row per asset) and stockyard
+"""Solve dissertation scenarios with monolithic_milp's model and plot the
+resulting maintenance schedule (Gantt, one row per asset) and stockyard
 inventory profile (one line per zone) for each, saving each as a PNG."""
 
+import argparse
 import glob
 import os
 
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 
 from monolithic_milp import build_model, load_scenario
 
-SCENARIO_DIR = "synthetic_data_generator/generated_dissertation_scenarios"
+SCENARIO_DIR = "synthetic_data_generator/singlecommodity_scenarios"
 OUTPUT_DIR = "synthetic_data_generator/scenario_plots"
 
 SURFACE = "#fcfcfb"
@@ -33,9 +34,16 @@ MODE_LABELS = {
 MODE_COLORS = dict(zip(MODE_LABELS, CATEGORICAL))
 
 
-def scenario_paths():
-    paths = sorted(glob.glob(os.path.join(SCENARIO_DIR, "*.json")))
-    return [p for p in paths if os.path.basename(p) != "manifest.json"]
+def default_scenario_paths():
+    """seed_001 across every family/severity combination -- a fast, representative sample."""
+    families = sorted(
+        os.path.basename(p) for p in glob.glob(os.path.join(SCENARIO_DIR, "*")) if os.path.isdir(p)
+    )
+    return [os.path.join(SCENARIO_DIR, fam, "seed_001", f"{fam}_seed_001.json") for fam in families]
+
+
+def all_scenario_paths():
+    return sorted(glob.glob(os.path.join(SCENARIO_DIR, "*", "seed_*", "*.json")))
 
 
 def extract_maintenance_schedule(data, variables):
@@ -129,8 +137,17 @@ def plot_scenario(name, data, variables, out_path):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--all", action="store_true", help="plot the full 120-scenario battery instead of the seed_001 sample")
+    parser.add_argument("--limit", type=int, default=None, help="cap the number of scenarios plotted")
+    args = parser.parse_args()
+
+    paths = all_scenario_paths() if args.all else default_scenario_paths()
+    if args.limit:
+        paths = paths[: args.limit]
+
     os.makedirs(OUTPUT_DIR, exist_ok=True)
-    for path in scenario_paths():
+    for path in paths:
         name = os.path.splitext(os.path.basename(path))[0]
         data = load_scenario(path)
         model, variables = build_model(data)
