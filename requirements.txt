@@ -1,0 +1,13 @@
+# Environment used for the MILP/Benders code in this repo (monolithic_milp.py,
+# multicommodity_milp.py, benders_*.py, run_*.py, visualize_*.py).
+#
+# Python 3.9.6
+# Gurobi 12.0.3
+#
+# Note: synthetic_data_generator/ has its own, separate requirement
+# (Python 3.10+, see synthetic_data_generator/REQUIREMENTS.txt) -- the
+# generator scripts are not required to run the solver/Benders code below,
+# only to regenerate scenario JSON files.
+
+gurobipy==12.0.3
+matplotlib==3.9.4
