@@ -50,9 +50,10 @@ def modules(model):
     return milp, benders
 
 
-def schedule_options(no_overlap, cap):
+def schedule_options(no_overlap, cap, valid_inequalities=True):
     from schedule_constraints import ScheduleOptions
-    return ScheduleOptions(same_asset_no_overlap=no_overlap, max_concurrent_ops=cap)
+    return ScheduleOptions(same_asset_no_overlap=no_overlap, max_concurrent_ops=cap,
+                           downstream_stage_cuts=valid_inequalities, upstream_prefix_cuts=valid_inequalities)
 
 
 def families(model):
@@ -129,7 +130,7 @@ def run_task(task):
 
     gp.setParam("Threads", task["threads"])
     milp, benders = modules(task["model"])
-    options = schedule_options(task["no_overlap"], task["cap"])
+    options = schedule_options(task["no_overlap"], task["cap"], task.get("valid_inequalities", True))
     record = dict(task, status="ERROR", objective=None, bound=None, gap=None, wall_seconds=None,
                   iterations=None, feasibility_cuts=None, optimality_cuts=None, master_seconds=None,
                   sub_seconds=None, nodes=None, error=None, timeline=None, history=None, schedule=None)
@@ -249,6 +250,8 @@ def main():
     parser.add_argument("--allow-overlap", action="store_true",
                         help="drop the same-asset no-overlap constraint from both methods (default: enforced)")
     parser.add_argument("--cap", type=int, default=None, help="re-add a max-operations-per-day cap (default: off)")
+    parser.add_argument("--no-valid-inequalities", action="store_true",
+                        help="leave the two master-only valid inequalities out of the Benders master (ablation)")
     parser.add_argument("--tol", type=float, default=1e-3, help="relative gap target for both methods")
     parser.add_argument("--workers", type=int, default=4)
     parser.add_argument("--threads", type=int, default=2, help="Gurobi threads per run")
@@ -263,8 +266,8 @@ def main():
     master_time_limit = None if args.master_time_limit <= 0 else args.master_time_limit
     instances = select_instances(args.model, args.instances, not args.allow_overlap, args.cap)
     tasks = [dict(model=args.model, family=f, seed=s, method=m, no_overlap=not args.allow_overlap, cap=args.cap,
-                  tol=args.tol, time_limit=args.time_limit, master_time_limit=master_time_limit,
-                  threads=args.threads)
+                  valid_inequalities=not args.no_valid_inequalities, tol=args.tol, time_limit=args.time_limit,
+                  master_time_limit=master_time_limit, threads=args.threads)
              for f, s in instances for m in args.methods]
     os.makedirs("results", exist_ok=True)
     out = args.out or f"results/compare_{args.model}_{time.strftime('%Y%m%d_%H%M%S')}.jsonl"
