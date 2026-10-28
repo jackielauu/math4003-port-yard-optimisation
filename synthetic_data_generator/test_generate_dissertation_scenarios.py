@@ -106,6 +106,30 @@ class FrozenSchemaGeneratorTests(unittest.TestCase):
                     asset_count,
                 )
 
+    def test_extended_f1_levels_scale_up_and_stay_out_of_the_benchmark(self):
+        expected = {
+            "F1_system_scale_XL": (48, 160),
+            "F1_system_scale_XXL": (64, 250),
+        }
+        self.assertEqual(tuple(expected), scenario_generator.EXTENDED_SCALE_SCENARIO_NAMES)
+        for name, (asset_count, maintenance_count) in expected.items():
+            self.assertNotIn(name, scenario_generator.SCENARIO_NAMES)
+            for commodity_count in (1, 4):
+                with self.subTest(name=name, commodity_count=commodity_count):
+                    scenario = self.build(name, seed=2, commodity_count=commodity_count)
+                    self.assertEqual(scenario.diagnostics["asset_count"], asset_count)
+                    self.assertEqual(scenario.diagnostics["maintenance_operation_count"], maintenance_count)
+                    scenario.validate()
+                    self.assertEqual(set(scenario.optimizer_objects()), set(scenario_generator.CANONICAL_MODEL_READY_KEYS))
+                    for task in scenario.maintenance_tasks:
+                        self.assertLessEqual(task.earliest_start_day, task.latest_start_day)
+                        self.assertLess(task.mode_durations["F"], task.mode_durations["P30"])
+                        self.assertLess(task.mode_durations["P30"], task.mode_durations["P70"])
+                        self.assertLessEqual(
+                            task.latest_start_day + max(task.mode_durations.values()),
+                            scenario.config.horizon_days,
+                        )
+
     def test_non_f1_families_use_reference_medium_topology(self):
         for name in scenario_generator.SCENARIO_NAMES:
             if name.startswith("F1_"):

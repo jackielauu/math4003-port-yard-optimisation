@@ -49,6 +49,13 @@ EXPERIMENTAL_SCENARIO_NAMES = (
     "F4_operational_conflict_H",
 )
 SCENARIO_NAMES = EXPERIMENTAL_SCENARIO_NAMES
+# Larger F1 levels for testing where the direct MILP starts to struggle. Kept out of
+# SCENARIO_NAMES so the 120-instance benchmark ("all") is unchanged; generate them on
+# request into their own output directory.
+EXTENDED_SCALE_SCENARIO_NAMES = (
+    "F1_system_scale_XL",
+    "F1_system_scale_XXL",
+)
 OCCASION_NAMES = SCENARIO_NAMES
 
 GENERATOR_RANDOMIZATION_VERSION = "frozen_schema_routing_restricted_v2"
@@ -84,8 +91,10 @@ SYSTEM_SCALE_PROFILES = {
     "L": {"train_unloader": 3, "stacker": 3, "reclaimer": 4, "shiploader": 2},
     "M": {"train_unloader": 5, "stacker": 5, "reclaimer": 6, "shiploader": 4},
     "H": {"train_unloader": 8, "stacker": 8, "reclaimer": 10, "shiploader": 6},
+    "XL": {"train_unloader": 12, "stacker": 12, "reclaimer": 15, "shiploader": 9},
+    "XXL": {"train_unloader": 16, "stacker": 16, "reclaimer": 20, "shiploader": 12},
 }
-MAINTENANCE_OPERATION_COUNTS = {"L": 30, "M": 60, "H": 100}
+MAINTENANCE_OPERATION_COUNTS = {"L": 30, "M": 60, "H": 100, "XL": 160, "XXL": 250}
 REFERENCE_SCALE_LEVEL = "M"
 YARD_ZONES = ("Z1", "Z2", "Z3", "Z4")
 DEFAULT_SEEDS = tuple(range(1, 11))
@@ -348,7 +357,7 @@ class DissertationScenario:
 
 
 def build_scenario(scenario_name: str, config: GeneratorConfig | None = None) -> DissertationScenario:
-    if scenario_name not in SCENARIO_NAMES:
+    if scenario_name not in SCENARIO_NAMES + EXTENDED_SCALE_SCENARIO_NAMES:
         raise ValueError(f"unknown scenario_name: {scenario_name}")
     config = config or GeneratorConfig()
     config.validate()
@@ -1337,7 +1346,7 @@ def _parse_args() -> argparse.Namespace:
         "--occasion",
         dest="scenario",
         default="all",
-        choices=("all", *SCENARIO_NAMES),
+        choices=("all", *SCENARIO_NAMES, *EXTENDED_SCALE_SCENARIO_NAMES),
         help="Scenario family/level to generate, or all.",
     )
     parser.add_argument("--output-dir", type=Path, default=Path("generated_dissertation_scenarios"))
