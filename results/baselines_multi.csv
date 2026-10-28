@@ -1,0 +1,61 @@
+instance,model,baseline,variant,unscheduled,rule_violations,rules_ok,flow_status,objective,feasible
+F1_system_scale_L_seed_001,multi,earliest_random,seed 1,0,capacity_loss_over_100pct:19;same_asset_overlap:33,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 2,0,capacity_loss_over_100pct:18;same_asset_overlap:37,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 3,0,capacity_loss_over_100pct:19;same_asset_overlap:34,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 4,0,capacity_loss_over_100pct:23;same_asset_overlap:27,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 5,0,capacity_loss_over_100pct:15;same_asset_overlap:40,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 6,0,capacity_loss_over_100pct:12;same_asset_overlap:25,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 7,0,capacity_loss_over_100pct:15;same_asset_overlap:41,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 8,0,capacity_loss_over_100pct:11;same_asset_overlap:22,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 9,0,capacity_loss_over_100pct:15;same_asset_overlap:48,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,earliest_random,seed 10,0,capacity_loss_over_100pct:11;same_asset_overlap:33,False,INFEASIBLE,,False
+F1_system_scale_L_seed_001,multi,edd,overlap=cumulative,0,same_asset_overlap:93,False,OPTIMAL,12574283.699,False
+F1_system_scale_L_seed_001,multi,edd,overlap=strict,3,not_scheduled:3,False,NOT_EVALUATED,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 1,0,capacity_loss_over_100pct:44;same_asset_overlap:95,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 2,0,capacity_loss_over_100pct:42;same_asset_overlap:97,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 3,0,capacity_loss_over_100pct:47;same_asset_overlap:122,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 4,0,capacity_loss_over_100pct:37;same_asset_overlap:75,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 5,0,capacity_loss_over_100pct:45;same_asset_overlap:99,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 6,0,capacity_loss_over_100pct:39;same_asset_overlap:121,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 7,0,capacity_loss_over_100pct:60;same_asset_overlap:69,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 8,0,capacity_loss_over_100pct:48;same_asset_overlap:57,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 9,0,capacity_loss_over_100pct:54;same_asset_overlap:90,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,earliest_random,seed 10,0,capacity_loss_over_100pct:53;same_asset_overlap:71,False,INFEASIBLE,,False
+F1_system_scale_M_seed_001,multi,edd,overlap=cumulative,0,same_asset_overlap:219,False,OPTIMAL,19103723.746,False
+F1_system_scale_M_seed_001,multi,edd,overlap=strict,14,not_scheduled:14,False,NOT_EVALUATED,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 1,0,capacity_loss_over_100pct:49;same_asset_overlap:153,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 2,0,capacity_loss_over_100pct:53;same_asset_overlap:155,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 3,0,capacity_loss_over_100pct:40;same_asset_overlap:165,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 4,0,capacity_loss_over_100pct:45;same_asset_overlap:130,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 5,0,capacity_loss_over_100pct:71;same_asset_overlap:127,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 6,0,capacity_loss_over_100pct:60;same_asset_overlap:162,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 7,0,capacity_loss_over_100pct:49;same_asset_overlap:127,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 8,0,capacity_loss_over_100pct:47;same_asset_overlap:150,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 9,0,capacity_loss_over_100pct:71;same_asset_overlap:143,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,earliest_random,seed 10,0,capacity_loss_over_100pct:57;same_asset_overlap:118,False,INFEASIBLE,,False
+F1_system_scale_H_seed_001,multi,edd,overlap=cumulative,0,same_asset_overlap:364,False,OPTIMAL,27237042.119000003,False
+F1_system_scale_H_seed_001,multi,edd,overlap=strict,15,not_scheduled:15,False,NOT_EVALUATED,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 1,0,capacity_loss_over_100pct:53;same_asset_overlap:104,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 2,0,capacity_loss_over_100pct:40;same_asset_overlap:127,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 3,0,capacity_loss_over_100pct:47;same_asset_overlap:132,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 4,0,capacity_loss_over_100pct:46;same_asset_overlap:86,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 5,0,capacity_loss_over_100pct:52;same_asset_overlap:106,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 6,0,capacity_loss_over_100pct:48;same_asset_overlap:132,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 7,0,capacity_loss_over_100pct:39;same_asset_overlap:126,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 8,0,capacity_loss_over_100pct:52;same_asset_overlap:101,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 9,0,capacity_loss_over_100pct:52;same_asset_overlap:110,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,earliest_random,seed 10,0,capacity_loss_over_100pct:42;same_asset_overlap:99,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,edd,overlap=cumulative,0,same_asset_overlap:288,False,INFEASIBLE,,False
+F2_mode_tradeoff_H_seed_001,multi,edd,overlap=strict,15,not_scheduled:15,False,NOT_EVALUATED,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 1,0,capacity_loss_over_100pct:49;fixed_activity_day:37;same_asset_overlap:81,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 2,0,capacity_loss_over_100pct:48;fixed_activity_day:40;same_asset_overlap:94,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 3,0,capacity_loss_over_100pct:44;fixed_activity_day:60;same_asset_overlap:88,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 4,0,capacity_loss_over_100pct:43;fixed_activity_day:25;same_asset_overlap:67,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 5,0,capacity_loss_over_100pct:40;fixed_activity_day:51;same_asset_overlap:77,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 6,0,capacity_loss_over_100pct:48;fixed_activity_day:43;same_asset_overlap:99,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 7,0,capacity_loss_over_100pct:58;fixed_activity_day:37;same_asset_overlap:92,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 8,0,capacity_loss_over_100pct:54;fixed_activity_day:33;same_asset_overlap:64,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 9,0,capacity_loss_over_100pct:40;fixed_activity_day:53;same_asset_overlap:86,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,earliest_random,seed 10,0,capacity_loss_over_100pct:39;fixed_activity_day:58;same_asset_overlap:67,False,INFEASIBLE,,False
+F4_operational_conflict_H_seed_001,multi,edd,overlap=cumulative,0,same_asset_overlap:214,False,OPTIMAL,18507729.144799996,False
+F4_operational_conflict_H_seed_001,multi,edd,overlap=strict,7,not_scheduled:7,False,NOT_EVALUATED,,False

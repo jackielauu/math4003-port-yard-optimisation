@@ -12,6 +12,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 from model_data_loader import load_canonical_scenario
+from schedule_constraints import add_schedule_constraints
 
 
 def load_scenario(path):
@@ -33,7 +34,7 @@ def apply_routing_bounds(data, f, z):
             var.ub = 0.0
 
 
-def build_model(data, strict_capacity=False):
+def build_model(data, strict_capacity=False, schedule=None):
     D, N, A, A_NS, P_, G = data["D"], data["N"], data["A"], data["A_NS"], data["P_"], data["PRODUCTS"]
     M, M_a, K = data["M"], data["M_a"], data["K"]
     E, U = data["E"], data["U"]
@@ -93,6 +94,11 @@ def build_model(data, strict_capacity=False):
                     if lo <= hi:
                         expr += gp.quicksum(x[mm, k, tau] for tau in range(int(lo), int(hi) + 1))
                 model.addConstr(expr + h.get((a, d), 0) <= 1, name=f"fixed_activity[{a},{mm},{d}]")
+
+    # --- schedule constraints (see schedule_constraints.py): same-asset no-overlap
+    # is on in every formulation; the concurrency cap is off unless requested --
+    # kept here so the direct model always matches whatever the master enforces.
+    add_schedule_constraints(model, x, delta, data, schedule)
 
     # --- (4) flow conservation at non-storage processing assets -- PER PRODUCT ---
     for n in A_NS:

@@ -11,6 +11,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 from model_data_loader import load_canonical_scenario
+from schedule_constraints import add_schedule_constraints
 
 
 def load_scenario(path):
@@ -22,7 +23,7 @@ def load_scenario(path):
     return data
 
 
-def build_model(data, strict_capacity=False):
+def build_model(data, strict_capacity=False, schedule=None):
     """Build the Gurobi model. strict_capacity=True implements the strict
     no-overflow variant (o fixed to 0) mentioned alongside constraint (6);
     strict_capacity=False is the penalised-overflow base model implemented
@@ -85,6 +86,11 @@ def build_model(data, strict_capacity=False):
                     if lo <= hi:
                         expr += gp.quicksum(x[mm, k, tau] for tau in range(int(lo), int(hi) + 1))
                 model.addConstr(expr + h.get((a, d), 0) <= 1, name=f"fixed_activity[{a},{mm},{d}]")
+
+    # --- schedule constraints (see schedule_constraints.py): same-asset no-overlap
+    # is on in every formulation; the concurrency cap is off unless requested --
+    # kept here so the direct model always matches whatever the master enforces.
+    add_schedule_constraints(model, x, delta, data, schedule)
 
     # --- (4) flow conservation at non-storage processing assets ---
     for n in A_NS:

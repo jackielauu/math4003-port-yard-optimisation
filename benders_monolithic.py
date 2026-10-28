@@ -36,13 +36,15 @@ simplex basis (not barrier), hence Method=1 and InfUnbdInfo=1 on the subproblem.
 """
 
 import sys
+import time
 
 import gurobipy as gp
 from gurobipy import GRB
 
 from monolithic_milp import load_scenario
+from schedule_constraints import add_schedule_constraints
 
-__all__ = ["load_scenario", "build_master", "build_subproblem", "make_cut", "solve_benders"]
+__all__ = ["load_scenario", "build_master", "build_subproblem", "make_cut", "run_benders", "solve_benders"]
 
 
 def _active_starts(e_m, l_m, mm, dur, d):
@@ -50,7 +52,7 @@ def _active_starts(e_m, l_m, mm, dur, d):
     return range(int(lo), int(hi) + 1) if lo <= hi else range(0)
 
 
-def build_master(data):
+def build_master(data, schedule=None):
     D, N, M, M_a, K, A = data["D"], data["N"], data["M"], data["M_a"], data["K"], data["A"]
     U, predecessors, successors = data["U"], data["predecessors"], data["successors"]
     e_m, l_m, p, eta, h = data["e_m"], data["l_m"], data["p"], data["eta"], data["h"]
@@ -95,20 +97,11 @@ def build_master(data):
                         expr += x[mm, k, tau]
                 model.addConstr(expr + h.get((a, d), 0) <= 1, name=f"fixed_activity[{a},{mm},{d}]")
 
-    # --- (7-master) same-asset no-overlap (model_ideas.pdf section 1.5) ---
-    # Only binds when an asset has more than one maintenance operation -- a
-    # no-op otherwise, matching the note in monolithic_milp.py.
-    for a in A:
-        ops = M_a.get(a, [])
-        if len(ops) < 2:
-            continue
-        for d in D:
-            expr = gp.LinExpr()
-            for mm in ops:
-                for k in K:
-                    for tau in _active_starts(e_m, l_m, mm, p[(mm, k)], d):
-                        expr += x[mm, k, tau]
-            model.addConstr(expr <= 1, name=f"no_overlap[{a},{d}]")
+    # --- schedule constraints (see schedule_constraints.py): same-asset no-overlap
+    # is on in every formulation; the concurrency cap is off unless requested --
+    # minimum-flow valid inequalities are always on here since the master has no
+    # flow variables of its own to catch an unservable schedule otherwise.
+    add_schedule_constraints(model, x, delta, data, schedule, valid_inequalities=True)
 
     model.setObjective(theta, GRB.MAXIMIZE)
     model.update()
@@ -229,30 +222,55 @@ def make_feasibility_cut(delta, data, subproblem, cap7):
     return cut
 
 
-def solve_benders(data, max_iters=200, tol=1e-4, verbose=False):
-    """tol is a relative optimality gap (Gurobi's own MIPGap default is 1e-4)
-    -- objective values here run in the tens of millions of tonnes, so a fixed
-    absolute tolerance would be unrealistically tight."""
-    master, mvars = build_master(data)
+def run_benders(data, build_subproblem, max_iters=200, tol=1e-4, verbose=False, schedule=None,
+                time_limit=None, master_time_limit=None):
+    """Benders loop shared by the single- and multi-commodity models (they differ only
+    in `build_subproblem`). Stops on: relative gap of the best bounds <= tol (OPTIMAL),
+    `time_limit` seconds of wall clock (TIME_LIMIT), `max_iters`, or a master with no
+    schedule at all (MASTER_3). A master that hits its own time limit with an incumbent
+    is used as-is: its incumbent still yields a valid cut and its ObjBound a valid
+    upper bound. tol is a relative gap (Gurobi's MIPGap default is 1e-4)."""
+    t_start = time.perf_counter()
+    master, mvars = build_master(data, schedule)
     x, delta, theta = mvars["x"], mvars["delta"], mvars["theta"]
     master.Params.OutputFlag = 0
 
     history = []
-    best_lb = float("-inf")
+    best_lb, best_ub = float("-inf"), float("inf")
     best = dict(delta=None, x=None, subproblem_vars=None)
-    n_feasibility_cuts = 0
-    n_optimality_cuts = 0
+    counts = dict(feasibility=0, optimality=0)
+    times = dict(master=0.0, sub=0.0)
+
+    def result(status, iterations):
+        gap = None
+        if best_lb > float("-inf") and best_ub < float("inf"):
+            gap = (best_ub - best_lb) / max(abs(best_ub), 1.0)
+        return dict(
+            status=status, iterations=iterations, history=history,
+            best_objective=None if best_lb == float("-inf") else best_lb,
+            best_bound=None if best_ub == float("inf") else best_ub, gap=gap,
+            elapsed=time.perf_counter() - t_start, master_time=times["master"], sub_time=times["sub"],
+            best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
+            feasibility_cuts=counts["feasibility"], optimality_cuts=counts["optimality"],
+        )
 
     for k in range(max_iters):
-        master.optimize()
-        if master.Status != GRB.OPTIMAL:
-            return dict(
-                status=f"MASTER_{master.Status}", iterations=k, history=history, best_objective=None,
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
+        remaining = None if time_limit is None else time_limit - (time.perf_counter() - t_start)
+        if remaining is not None and remaining <= 0:
+            return result("TIME_LIMIT", k)
+        limits = [t for t in (remaining, master_time_limit) if t is not None]
+        if limits:
+            master.Params.TimeLimit = max(min(limits), 0.01)
 
-        ub = master.ObjVal
+        master.optimize()
+        times["master"] += master.Runtime
+        if master.SolCount == 0:
+            return result("TIME_LIMIT" if master.Status == GRB.TIME_LIMIT else f"MASTER_{master.Status}", k)
+
+        ub = master.ObjBound
+        best_ub = min(best_ub, ub)
         delta_value = {key: v.X for key, v in delta.items()}
+        master_seconds = master.Runtime
 
         subproblem, svars = build_subproblem(data, delta_value)
         subproblem.Params.OutputFlag = 0
@@ -260,23 +278,22 @@ def solve_benders(data, max_iters=200, tol=1e-4, verbose=False):
         subproblem.Params.InfUnbdInfo = 1
         subproblem.Params.Method = 1  # dual simplex
         subproblem.optimize()
+        times["sub"] += subproblem.Runtime
 
         if subproblem.Status == GRB.INFEASIBLE:
             cut = make_feasibility_cut(delta, data, subproblem, svars["cap7"])
             master.addConstr(cut >= 0, name=f"feasibility_cut[{k}]")
-            n_feasibility_cuts += 1
-            history.append(dict(iter=k, type="feasibility", ub=ub, lb=None))
+            counts["feasibility"] += 1
+            history.append(dict(iter=k, type="feasibility", ub=ub, lb=None,
+                                master_time=master_seconds, sub_time=subproblem.Runtime,
+                                elapsed=time.perf_counter() - t_start, best_ub=best_ub,
+                                best_lb=None if best_lb == float("-inf") else best_lb))
             if verbose:
                 print(f"iter {k}: UB={ub:.2f} subproblem infeasible -- added feasibility cut")
             continue
 
         if subproblem.Status != GRB.OPTIMAL:
-            return dict(
-                status=f"SUBPROBLEM_{subproblem.Status}", iterations=k, history=history,
-                best_objective=None if best_lb == float("-inf") else best_lb,
-                best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
+            return result(f"SUBPROBLEM_{subproblem.Status}", k)
 
         lb = subproblem.ObjVal
         if lb > best_lb:
@@ -288,26 +305,25 @@ def solve_benders(data, max_iters=200, tol=1e-4, verbose=False):
                 for name, vardict in svars.items() if name != "cap7"
             }
 
-        history.append(dict(iter=k, type="optimality", ub=ub, lb=lb))
+        history.append(dict(iter=k, type="optimality", ub=ub, lb=lb,
+                            master_time=master_seconds, sub_time=subproblem.Runtime,
+                            elapsed=time.perf_counter() - t_start, best_ub=best_ub, best_lb=best_lb))
         if verbose:
-            print(f"iter {k}: UB={ub:.2f} LB={lb:.2f} gap={ub - lb:.2f}")
+            print(f"iter {k}: UB={ub:.2f} LB={lb:.2f} best gap={best_ub - best_lb:.2f}")
 
-        if ub - lb <= tol * max(abs(ub), 1.0):
-            return dict(
-                status="OPTIMAL", iterations=k + 1, history=history, best_objective=best_lb,
-                best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
+        if best_ub - best_lb <= tol * max(abs(best_ub), 1.0):
+            return result("OPTIMAL", k + 1)
 
         cut = make_cut(delta, data, delta_value, subproblem, svars["cap7"])
         master.addConstr(theta <= cut, name=f"optimality_cut[{k}]")
-        n_optimality_cuts += 1
+        counts["optimality"] += 1
 
-    return dict(
-        status="MAX_ITERS", iterations=max_iters, history=history, best_objective=best_lb,
-        best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-        feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-    )
+    return result("MAX_ITERS", max_iters)
+
+
+def solve_benders(data, max_iters=200, tol=1e-4, verbose=False, schedule=None,
+                  time_limit=None, master_time_limit=None):
+    return run_benders(data, build_subproblem, max_iters, tol, verbose, schedule, time_limit, master_time_limit)
 
 
 if __name__ == "__main__":

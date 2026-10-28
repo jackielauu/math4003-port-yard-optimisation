@@ -1,0 +1,586 @@
+{
+  "schema_version": "rule_based_operational_evaluation_v1",
+  "instance": "F4_operational_conflict_L_seed_003",
+  "commodity_representation": "multi",
+  "method": "RULE_BASED_FIXED_MILP",
+  "construction_status": "INCOMPLETE",
+  "operational_status": "SKIPPED_INCOMPLETE_CONSTRUCTION",
+  "source_schedule_file": "results\\rule_based_baseline_schedules_v3\\F4_operational_conflict_L\\seed_003\\F4_operational_conflict_L_seed_003_rule_based_schedule.json",
+  "source_instance_file": null,
+  "model_module": "multicommodity_milp",
+  "model_variant": "penalised_overflow",
+  "task_count": 60,
+  "scheduled_count": 59,
+  "unscheduled_count": 1,
+  "maintenance_schedule": {
+    "M_ST4_03": {
+      "asset_id": "ST4",
+      "mode": "P70",
+      "start_day": 13,
+      "duration_days": 11,
+      "end_day": 23,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_08": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 6,
+      "duration_days": 21,
+      "end_day": 26,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_02": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 10,
+      "duration_days": 22,
+      "end_day": 31,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_06": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 16,
+      "end_day": 38,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU4_04": {
+      "asset_id": "TU4",
+      "mode": "P70",
+      "start_day": 11,
+      "duration_days": 18,
+      "end_day": 28,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU1_02": {
+      "asset_id": "TU1",
+      "mode": "P70",
+      "start_day": 17,
+      "duration_days": 17,
+      "end_day": 33,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC5_03": {
+      "asset_id": "RC5",
+      "mode": "P70",
+      "start_day": 10,
+      "duration_days": 16,
+      "end_day": 25,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST1_01": {
+      "asset_id": "ST1",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 17,
+      "end_day": 39,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST1_02": {
+      "asset_id": "ST1",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 16,
+      "end_day": 38,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_01": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 19,
+      "end_day": 41,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_07": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 22,
+      "end_day": 44,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_05": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 20,
+      "duration_days": 17,
+      "end_day": 36,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_01": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 22,
+      "duration_days": 20,
+      "end_day": 41,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU1_03": {
+      "asset_id": "TU1",
+      "mode": "P70",
+      "start_day": 18,
+      "duration_days": 19,
+      "end_day": 36,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_06": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 10,
+      "duration_days": 18,
+      "end_day": 27,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_04": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 15,
+      "duration_days": 15,
+      "end_day": 29,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC5_04": {
+      "asset_id": "RC5",
+      "mode": "P70",
+      "start_day": 20,
+      "duration_days": 9,
+      "end_day": 28,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU5_01": {
+      "asset_id": "TU5",
+      "mode": "P70",
+      "start_day": 15,
+      "duration_days": 18,
+      "end_day": 32,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_03": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 14,
+      "duration_days": 18,
+      "end_day": 31,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC5_05": {
+      "asset_id": "RC5",
+      "mode": "P70",
+      "start_day": 18,
+      "duration_days": 11,
+      "end_day": 28,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC5_01": {
+      "asset_id": "RC5",
+      "mode": "P70",
+      "start_day": 26,
+      "duration_days": 17,
+      "end_day": 42,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_02": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 24,
+      "duration_days": 13,
+      "end_day": 36,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_05": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 30,
+      "duration_days": 11,
+      "end_day": 40,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_07": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 32,
+      "duration_days": 22,
+      "end_day": 53,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC1_01": {
+      "asset_id": "RC1",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 21,
+      "end_day": 43,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC1_02": {
+      "asset_id": "RC1",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 24,
+      "end_day": 46,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC2_01": {
+      "asset_id": "RC2",
+      "mode": "P70",
+      "start_day": 23,
+      "duration_days": 18,
+      "end_day": 40,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC5_02": {
+      "asset_id": "RC5",
+      "mode": "P70",
+      "start_day": 33,
+      "duration_days": 17,
+      "end_day": 49,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU1_01": {
+      "asset_id": "TU1",
+      "mode": "P70",
+      "start_day": 33,
+      "duration_days": 12,
+      "end_day": 44,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_07": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 35,
+      "duration_days": 11,
+      "end_day": 45,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_04": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 39,
+      "duration_days": 10,
+      "end_day": 48,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_03": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 36,
+      "duration_days": 19,
+      "end_day": 54,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_06": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 45,
+      "duration_days": 11,
+      "end_day": 55,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_07": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 44,
+      "duration_days": 16,
+      "end_day": 59,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_01": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 45,
+      "duration_days": 22,
+      "end_day": 66,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_SL1_01": {
+      "asset_id": "SL1",
+      "mode": "P70",
+      "start_day": 39,
+      "duration_days": 25,
+      "end_day": 63,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST4_01": {
+      "asset_id": "ST4",
+      "mode": "P70",
+      "start_day": 46,
+      "duration_days": 20,
+      "end_day": 65,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_04": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 42,
+      "duration_days": 10,
+      "end_day": 51,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_SL4_01": {
+      "asset_id": "SL4",
+      "mode": "P70",
+      "start_day": 53,
+      "duration_days": 18,
+      "end_day": 70,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_04": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 59,
+      "duration_days": 10,
+      "end_day": 68,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC4_01": {
+      "asset_id": "RC4",
+      "mode": "P70",
+      "start_day": 46,
+      "duration_days": 22,
+      "end_day": 67,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_03": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 46,
+      "duration_days": 21,
+      "end_day": 66,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_SL1_02": {
+      "asset_id": "SL1",
+      "mode": "P70",
+      "start_day": 49,
+      "duration_days": 21,
+      "end_day": 69,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU4_01": {
+      "asset_id": "TU4",
+      "mode": "P70",
+      "start_day": 55,
+      "duration_days": 10,
+      "end_day": 64,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST1_03": {
+      "asset_id": "ST1",
+      "mode": "P70",
+      "start_day": 49,
+      "duration_days": 10,
+      "end_day": 58,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU1_04": {
+      "asset_id": "TU1",
+      "mode": "P70",
+      "start_day": 53,
+      "duration_days": 19,
+      "end_day": 71,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_03": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 54,
+      "duration_days": 19,
+      "end_day": 72,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU4_03": {
+      "asset_id": "TU4",
+      "mode": "P70",
+      "start_day": 64,
+      "duration_days": 10,
+      "end_day": 73,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_05": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 53,
+      "duration_days": 15,
+      "end_day": 67,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_SL4_02": {
+      "asset_id": "SL4",
+      "mode": "P70",
+      "start_day": 62,
+      "duration_days": 11,
+      "end_day": 72,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST5_01": {
+      "asset_id": "ST5",
+      "mode": "P70",
+      "start_day": 62,
+      "duration_days": 15,
+      "end_day": 76,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST1_04": {
+      "asset_id": "ST1",
+      "mode": "P70",
+      "start_day": 63,
+      "duration_days": 15,
+      "end_day": 77,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU3_01": {
+      "asset_id": "TU3",
+      "mode": "P70",
+      "start_day": 68,
+      "duration_days": 15,
+      "end_day": 82,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU4_02": {
+      "asset_id": "TU4",
+      "mode": "P70",
+      "start_day": 55,
+      "duration_days": 11,
+      "end_day": 65,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_TU2_06": {
+      "asset_id": "TU2",
+      "mode": "P70",
+      "start_day": 67,
+      "duration_days": 12,
+      "end_day": 78,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST3_02": {
+      "asset_id": "ST3",
+      "mode": "P70",
+      "start_day": 69,
+      "duration_days": 14,
+      "end_day": 82,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_RC6_01": {
+      "asset_id": "RC6",
+      "mode": "P70",
+      "start_day": 55,
+      "duration_days": 11,
+      "end_day": 65,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST4_02": {
+      "asset_id": "ST4",
+      "mode": "P70",
+      "start_day": 58,
+      "duration_days": 12,
+      "end_day": 69,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    },
+    "M_ST2_02": {
+      "asset_id": "ST2",
+      "mode": "P70",
+      "start_day": 65,
+      "duration_days": 11,
+      "end_day": 75,
+      "available_capacity_fraction": 0.7,
+      "capacity_loss_fraction": 0.30000000000000004
+    }
+  },
+  "unscheduled_tasks": [
+    {
+      "task_id": "M_ST2_05",
+      "asset_id": "ST2",
+      "earliest_start_day": 23,
+      "latest_start_day": 34,
+      "mode_priority_tried": [
+        "P70",
+        "P30",
+        "F"
+      ],
+      "reason": "no_capacity_compatible_mode_start_in_window"
+    }
+  ],
+  "objective": null,
+  "cumulative_throughput_tonnes": null,
+  "total_overflow_tonnes": null,
+  "daily_throughput_tonnes": {},
+  "stockyard_inventory_tonnes": {},
+  "stockyard_inventory_by_product_tonnes": {},
+  "stockyard_overflow_tonnes": {},
+  "plot_parameters": {},
+  "solver": {
+    "status": null,
+    "sol_count": 0,
+    "best_bound": null,
+    "mip_gap": null,
+    "runtime_seconds": null,
+    "node_count": null,
+    "num_vars": null,
+    "num_binary_vars": null,
+    "num_integer_vars": null,
+    "num_constraints": null,
+    "time_limit_seconds": 1800.0,
+    "threads": 1,
+    "seed": 1
+  },
+  "error": ""
+}

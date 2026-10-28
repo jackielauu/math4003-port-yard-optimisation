@@ -1,0 +1,11 @@
+label,source_status,not_scheduled,scheduled_more_than_once,unknown_job,invalid_mode,start_outside_window,ends_after_horizon,fixed_activity_day,same_asset_overlap,capacity_loss_over_100pct,throughput_below_minimum,inventory_below_minimum,inventory_above_max_plus_overflow,negative_overflow,objective_inconsistent,schedule_valid_excl_overlap,schedule_valid_with_no_overlap,operations_valid,resolve_status,resolve_objective,resolve_matches_reported
+F1_system_scale_L_seed_001 [multi] direct,OPTIMAL,0,0,0,0,0,0,0,21,0,0,0,0,0,0,True,False,,OPTIMAL,12690203.699,True
+F1_system_scale_M_seed_001 [multi] direct,OPTIMAL,0,0,0,0,0,0,0,46,0,0,0,0,0,0,True,False,,OPTIMAL,19418603.746000003,True
+F2_mode_tradeoff_H_seed_001 [multi] direct,OPTIMAL,0,0,0,0,0,0,0,27,0,0,0,0,0,0,True,False,,OPTIMAL,17273012.979000002,True
+F1_system_scale_H_seed_001 [multi] direct,OPTIMAL,0,0,0,0,0,0,0,64,0,0,0,0,0,0,True,False,,OPTIMAL,28421682.119,True
+F4_operational_conflict_H_seed_001 [multi] direct,OPTIMAL,0,0,0,0,0,0,0,11,0,0,0,0,0,0,True,False,,OPTIMAL,18942129.144799992,True
+F1_system_scale_L_seed_001 [multi] benders,TIME_LIMIT,0,0,0,0,0,0,0,55,0,0,0,0,0,0,True,False,,OPTIMAL,12615323.699,True
+F1_system_scale_M_seed_001 [multi] benders,TIME_LIMIT,0,0,0,0,0,0,0,188,0,0,0,0,0,0,True,False,,OPTIMAL,18842843.746,True
+F1_system_scale_H_seed_001 [multi] benders,TIME_LIMIT,0,0,0,0,0,0,0,59,0,0,0,0,0,0,True,False,,OPTIMAL,25970322.119000006,True
+F2_mode_tradeoff_H_seed_001 [multi] benders,TIME_LIMIT,0,0,0,0,0,0,0,54,0,0,0,0,0,0,True,False,,OPTIMAL,16749572.979000002,True
+F4_operational_conflict_H_seed_001 [multi] benders,TIME_LIMIT,0,0,0,0,0,0,0,142,0,0,0,0,0,0,True,False,,OPTIMAL,18443649.14479999,True

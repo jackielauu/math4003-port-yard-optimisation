@@ -1,0 +1,2 @@
+{"meta": {"root": ".", "scenario": "F4_operational_conflict_M", "seed": "seed_001", "drop_no_overlap": false, "n_assets": 20, "n_ops": 60, "assets_with_multiple_ops": 17, "master_bin_vars": 16200, "master_constrs_start": 12390, "no_overlap_constrs_removed": 0, "master_time_limit": 10.0, "threads": 2, "wall_cap": 240.0}}
+{"done": true, "reason": "master_no_solution_status_3", "elapsed": 0.03047729199999999, "cuts": 0}

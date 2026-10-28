@@ -1,0 +1,17 @@
+family,seed,conflicting_asset,ops_on_asset,ops_in_conflict,conflict_ops,min_days_needed,window_span_days,fixed_activity_blocked_days,days_available,days_check_explains,iis_constraints,iis_constraint_types
+F1_system_scale_H,seed_006,ST3,12,12,M_ST3_01 M_ST3_02 M_ST3_03 M_ST3_04 M_ST3_05 M_ST3_06 M_ST3_07 M_ST3_08 M_ST3_09 M_ST3_10 M_ST3_11 M_ST3_12,54,49,0,49,yes,32,assign_once:12 no_overlap:20
+F1_system_scale_H,seed_009,RC10,4,3,M_RC10_01 M_RC10_02 M_RC10_03,18,16,0,16,yes,7,assign_once:3 no_overlap:4
+F2_mode_tradeoff_H,seed_008,ST2,14,9,M_ST2_01 M_ST2_02 M_ST2_03 M_ST2_04 M_ST2_06 M_ST2_09 M_ST2_10 M_ST2_11 M_ST2_14,32,30,0,30,yes,29,assign_once:9 no_overlap:20
+F2_mode_tradeoff_M,seed_008,ST2,14,9,M_ST2_01 M_ST2_02 M_ST2_03 M_ST2_04 M_ST2_06 M_ST2_09 M_ST2_10 M_ST2_11 M_ST2_14,32,31,0,31,yes,30,assign_once:9 no_overlap:21
+F3_yard_flow_M,seed_002,ST5,8,7,M_ST5_01 M_ST5_02 M_ST5_03 M_ST5_04 M_ST5_05 M_ST5_06 M_ST5_07,35,33,0,33,yes,19,assign_once:7 no_overlap:12
+F3_yard_flow_M,seed_010,ST5,7,6,M_ST5_01 M_ST5_02 M_ST5_04 M_ST5_05 M_ST5_06 M_ST5_07,31,29,0,29,yes,15,assign_once:6 no_overlap:9
+F4_operational_conflict_H,seed_002,RC1,7,3,M_RC1_02 M_RC1_04 M_RC1_05,14,26,8,18,no (finer interval argument),16,assign_once:3 fixed_activity:9 no_overlap:4
+F4_operational_conflict_H,seed_003,ST2,6,5,M_ST2_02 M_ST2_03 M_ST2_04 M_ST2_05 M_ST2_06,27,30,6,24,yes,19,assign_once:5 fixed_activity:10 no_overlap:4
+F4_operational_conflict_H,seed_005,ST2,5,3,M_ST2_03 M_ST2_04 M_ST2_05,15,23,6,17,no (finer interval argument),11,assign_once:3 fixed_activity:6 no_overlap:2
+F4_operational_conflict_H,seed_006,RC1,5,3,M_RC1_03 M_RC1_04 M_RC1_05,16,28,8,20,no (finer interval argument),14,assign_once:3 fixed_activity:7 no_overlap:4
+F4_operational_conflict_H,seed_009,SL1,3,3,M_SL1_01 M_SL1_02 M_SL1_03,19,25,7,18,yes,10,assign_once:3 fixed_activity:5 no_overlap:2
+F4_operational_conflict_L,seed_005,ST1,11,4,M_ST1_03 M_ST1_04 M_ST1_09 M_ST1_11,20,18,0,18,yes,9,assign_once:4 no_overlap:5
+F4_operational_conflict_L,seed_009,ST1,7,4,M_ST1_01 M_ST1_02 M_ST1_03 M_ST1_04,16,21,5,16,no (finer interval argument),16,assign_once:4 fixed_activity:9 no_overlap:3
+F4_operational_conflict_M,seed_001,ST4,12,8,M_ST4_01 M_ST4_02 M_ST4_04 M_ST4_06 M_ST4_08 M_ST4_10 M_ST4_11 M_ST4_12,37,34,0,34,yes,20,assign_once:8 no_overlap:12
+F4_operational_conflict_M,seed_005,ST3,9,7,M_ST3_02 M_ST3_03 M_ST3_04 M_ST3_06 M_ST3_07 M_ST3_08 M_ST3_09,32,30,0,30,yes,19,assign_once:7 no_overlap:12
+F4_operational_conflict_M,seed_007,ST5,7,7,M_ST5_01 M_ST5_02 M_ST5_03 M_ST5_04 M_ST5_05 M_ST5_06 M_ST5_07,34,29,0,29,yes,14,assign_once:7 no_overlap:7

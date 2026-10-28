@@ -1,0 +1,42 @@
+[
+ {
+  "model": "single",
+  "data": "enhance-data-generator @ 3ef0440 (earlier dataset)",
+  "instance": "F1_system_scale_L_seed_001",
+  "n_ops": 8,
+  "direct": {
+   "status": "OPTIMAL",
+   "objective": 9470311.200000005,
+   "bound": 9470311.200000005,
+   "seconds": 0.05567662500000001
+  },
+  "benders": {
+   "status": "OPTIMAL",
+   "iterations": 24,
+   "best_objective": 9470311.200000005,
+   "feasibility_cuts": 18,
+   "optimality_cuts": 5,
+   "seconds": 1.7558986669999999
+  }
+ },
+ {
+  "model": "multi",
+  "data": "enhance-data-generator @ 3ef0440 (earlier dataset)",
+  "instance": "F1_system_scale_L_seed_001",
+  "n_ops": 8,
+  "direct": {
+   "status": "OPTIMAL",
+   "objective": 9470311.200000005,
+   "bound": 9470311.200000005,
+   "seconds": 0.4991984999999999
+  },
+  "benders": {
+   "status": "OPTIMAL",
+   "iterations": 90,
+   "best_objective": 9470311.200000005,
+   "feasibility_cuts": 31,
+   "optimality_cuts": 58,
+   "seconds": 15.571675583
+  }
+ }
+]

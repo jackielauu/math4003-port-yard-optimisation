@@ -20,7 +20,7 @@ import sys
 import gurobipy as gp
 from gurobipy import GRB
 
-from benders_monolithic import build_master, make_cut, make_feasibility_cut
+from benders_monolithic import build_master, make_cut, make_feasibility_cut, run_benders
 from multicommodity_milp import load_scenario, apply_routing_bounds
 
 __all__ = ["load_scenario", "build_master", "build_subproblem", "make_cut", "make_feasibility_cut", "solve_benders"]
@@ -102,82 +102,10 @@ def build_subproblem(data, delta_value):
     return model, dict(f=f, z=z, o=o, mu=mu, cap7=cap7)
 
 
-def solve_benders(data, max_iters=200, tol=1e-4, verbose=False):
-    """tol is a relative optimality gap -- see benders_monolithic.solve_benders."""
-    master, mvars = build_master(data)
-    x, delta, theta = mvars["x"], mvars["delta"], mvars["theta"]
-    master.Params.OutputFlag = 0
-
-    history = []
-    best_lb = float("-inf")
-    best = dict(delta=None, x=None, subproblem_vars=None)
-    n_feasibility_cuts = 0
-    n_optimality_cuts = 0
-
-    for k in range(max_iters):
-        master.optimize()
-        if master.Status != GRB.OPTIMAL:
-            return dict(
-                status=f"MASTER_{master.Status}", iterations=k, history=history, best_objective=None,
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
-
-        ub = master.ObjVal
-        delta_value = {key: v.X for key, v in delta.items()}
-
-        subproblem, svars = build_subproblem(data, delta_value)
-        subproblem.Params.OutputFlag = 0
-        subproblem.Params.InfUnbdInfo = 1
-        subproblem.Params.Method = 1  # dual simplex -- Farkas duals need a simplex basis
-        subproblem.optimize()
-
-        if subproblem.Status == GRB.INFEASIBLE:
-            cut = make_feasibility_cut(delta, data, subproblem, svars["cap7"])
-            master.addConstr(cut >= 0, name=f"feasibility_cut[{k}]")
-            n_feasibility_cuts += 1
-            history.append(dict(iter=k, type="feasibility", ub=ub, lb=None))
-            if verbose:
-                print(f"iter {k}: UB={ub:.2f} subproblem infeasible -- added feasibility cut")
-            continue
-
-        if subproblem.Status != GRB.OPTIMAL:
-            return dict(
-                status=f"SUBPROBLEM_{subproblem.Status}", iterations=k, history=history,
-                best_objective=None if best_lb == float("-inf") else best_lb,
-                best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
-
-        lb = subproblem.ObjVal
-        if lb > best_lb:
-            best_lb = lb
-            best["delta"] = delta_value
-            best["x"] = {key: v.X for key, v in x.items()}
-            best["subproblem_vars"] = {
-                name: {key: v.X for key, v in vardict.items()}
-                for name, vardict in svars.items() if name != "cap7"
-            }
-
-        history.append(dict(iter=k, type="optimality", ub=ub, lb=lb))
-        if verbose:
-            print(f"iter {k}: UB={ub:.2f} LB={lb:.2f} gap={ub - lb:.2f}")
-
-        if ub - lb <= tol * max(abs(ub), 1.0):
-            return dict(
-                status="OPTIMAL", iterations=k + 1, history=history, best_objective=best_lb,
-                best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-                feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-            )
-
-        cut = make_cut(delta, data, delta_value, subproblem, svars["cap7"])
-        master.addConstr(theta <= cut, name=f"optimality_cut[{k}]")
-        n_optimality_cuts += 1
-
-    return dict(
-        status="MAX_ITERS", iterations=max_iters, history=history, best_objective=best_lb,
-        best_delta=best["delta"], best_x=best["x"], best_subproblem_vars=best["subproblem_vars"],
-        feasibility_cuts=n_feasibility_cuts, optimality_cuts=n_optimality_cuts,
-    )
+def solve_benders(data, max_iters=200, tol=1e-4, verbose=False, schedule=None,
+                  time_limit=None, master_time_limit=None):
+    """See benders_monolithic.run_benders; only the subproblem differs."""
+    return run_benders(data, build_subproblem, max_iters, tol, verbose, schedule, time_limit, master_time_limit)
 
 
 if __name__ == "__main__":
