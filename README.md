@@ -1,6 +1,13 @@
 # math4003-port-yard-optimisation
 MATH4003 Honours Dissertation: Integrated Mid-Term Port Yard Planning in Iron Ore Supply Chains: A Benders Decomposition Approach
 
+**Author:** Jackie Lau
+**Degree:** MATH4003 Honours dissertation, Curtin University
+**Supervisors:** Dr Hoa Bui and Dr Ponpot Jartnillaphand
+
+The synthetic benchmark generator (`synthetic_data_generator/`) and the rule-based baseline schedules
+(`payload_rule_based_baseline/`) were provided by Dr Ponpot Jartnillaphand.
+
 ## Run Current Models on Scenario Data
 
 **Compatibility note:** the regenerated benchmark data in
