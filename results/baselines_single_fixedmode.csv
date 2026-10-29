@@ -1,0 +1,26 @@
+instance,model,baseline,variant,unscheduled,rule_violations,rules_ok,flow_status,objective,feasible,seconds,gap
+F1_system_scale_L_seed_001,single,edd,overlap=cumulative,0,same_asset_overlap:93,False,OPTIMAL,12574283.699,False,,
+F1_system_scale_L_seed_001,single,edd,overlap=strict,3,not_scheduled:3,False,NOT_EVALUATED,,False,,
+F1_system_scale_L_seed_001,single,fixed_mode,all F,0,,True,OPTIMAL,12546683.699,True,1.124115292,0.0008799137895600295
+F1_system_scale_L_seed_001,single,fixed_mode,all P30,0,,True,OPTIMAL,12392123.699000001,True,0.4438416249999999,0.0008908884601343322
+F1_system_scale_L_seed_001,single,fixed_mode,all P70,0,,False,INFEASIBLE,,False,0.0065149999999998265,
+F1_system_scale_M_seed_001,single,edd,overlap=cumulative,0,same_asset_overlap:219,False,OPTIMAL,19341083.746,False,,
+F1_system_scale_M_seed_001,single,edd,overlap=strict,14,not_scheduled:14,False,NOT_EVALUATED,,False,,
+F1_system_scale_M_seed_001,single,fixed_mode,all F,0,,True,OPTIMAL,19092923.746000003,True,34.930348708,0.0009665808948943334
+F1_system_scale_M_seed_001,single,fixed_mode,all P30,0,,False,INFEASIBLE,,False,0.0182135410000015,
+F1_system_scale_M_seed_001,single,fixed_mode,all P70,0,,False,INFEASIBLE,,False,0.0132670419999954,
+F1_system_scale_H_seed_001,single,edd,overlap=cumulative,0,same_asset_overlap:364,False,OPTIMAL,27778002.119000003,False,,
+F1_system_scale_H_seed_001,single,edd,overlap=strict,15,not_scheduled:15,False,NOT_EVALUATED,,False,,
+F1_system_scale_H_seed_001,single,fixed_mode,all F,0,,True,TIME_LIMIT,28077762.119000006,True,600.001552167,0.0016570307166406647
+F1_system_scale_H_seed_001,single,fixed_mode,all P30,0,,False,INFEASIBLE,,False,0.04013800000006995,
+F1_system_scale_H_seed_001,single,fixed_mode,all P70,0,,False,INFEASIBLE,,False,0.022106000000007953,
+F2_mode_tradeoff_H_seed_001,single,edd,overlap=cumulative,0,same_asset_overlap:288,False,INFEASIBLE,,False,,
+F2_mode_tradeoff_H_seed_001,single,edd,overlap=strict,15,not_scheduled:15,False,NOT_EVALUATED,,False,,
+F2_mode_tradeoff_H_seed_001,single,fixed_mode,all F,0,,True,OPTIMAL,17388932.979000002,True,7.444695417000048,0.0006348865691375438
+F2_mode_tradeoff_H_seed_001,single,fixed_mode,all P30,0,,False,INFEASIBLE,,False,0.021676750000096945,
+F2_mode_tradeoff_H_seed_001,single,fixed_mode,all P70,0,,False,INFEASIBLE,,False,0.017108666999888555,
+F4_operational_conflict_H_seed_001,single,edd,overlap=cumulative,0,same_asset_overlap:214,False,OPTIMAL,18673329.144799996,False,,
+F4_operational_conflict_H_seed_001,single,edd,overlap=strict,7,not_scheduled:7,False,NOT_EVALUATED,,False,,
+F4_operational_conflict_H_seed_001,single,fixed_mode,all F,0,,True,OPTIMAL,18599889.1448,True,15.24961604200007,0.0005935519246403154
+F4_operational_conflict_H_seed_001,single,fixed_mode,all P30,0,,False,INFEASIBLE,,False,0.015433166999969217,
+F4_operational_conflict_H_seed_001,single,fixed_mode,all P70,0,,False,INFEASIBLE,,False,0.009807166000086909,

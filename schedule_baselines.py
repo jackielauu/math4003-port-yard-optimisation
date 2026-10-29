@@ -79,6 +79,7 @@ def fixed_mode_optimum(module, data, mode, time_limit, threads):
     model.Params.TimeLimit = time_limit
     model.Params.Threads = threads
     model.Params.MIPGap = 1e-3
+    model.Params.DualReductions = 0  # report INFEASIBLE rather than INF_OR_UNBD (the model is bounded)
     for (m, k, d), var in variables["x"].items():
         if k != mode:
             var.UB = 0.0
