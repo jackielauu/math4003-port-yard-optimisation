@@ -1,0 +1,10 @@
+scenario_name,seed,commodity_count,asset_count,arc_count,maintenance_operation_count,window_width_min,window_width_mean,window_width_max,window_overlap_pairs,q0_tpd,mu_ratio_min,mu_ratio_mean,mu_ratio_max,fixed_activity_window_count,fixed_activity_incompatible_asset_days
+F1_system_scale_XS4,1,1,4,12,8,8.0,16.5,24.0,26,55200.0,0.53594,0.61463,0.694406,0,0
+F1_system_scale_XS4,2,1,4,12,8,9.0,14.375,24.0,19,55200.0,0.538039,0.614167,0.701478,0,0
+F1_system_scale_XS4,3,1,4,12,8,8.0,12.875,21.0,15,55200.0,0.53135,0.613272,0.699531,0,0
+F1_system_scale_XS6,1,1,6,20,14,9.0,15.642857,23.0,79,69600.0,0.53594,0.61463,0.694406,0,0
+F1_system_scale_XS6,2,1,6,20,14,8.0,17.571429,24.0,65,69600.0,0.538039,0.614167,0.701478,0,0
+F1_system_scale_XS6,3,1,6,20,14,8.0,13.642857,20.0,67,69600.0,0.53135,0.613272,0.699531,0,0
+F1_system_scale_XS8,1,1,8,26,20,8.0,16.55,24.0,154,110400.0,0.53594,0.61463,0.694406,0,0
+F1_system_scale_XS8,2,1,8,26,20,10.0,17.75,24.0,174,110400.0,0.538039,0.614167,0.701478,0,0
+F1_system_scale_XS8,3,1,8,26,20,8.0,17.35,24.0,148,110400.0,0.53135,0.613272,0.699531,0,0

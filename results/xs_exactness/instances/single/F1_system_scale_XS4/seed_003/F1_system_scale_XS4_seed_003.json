@@ -1,0 +1,587 @@
+{
+  "metadata": {
+    "scenario_name": "F1_system_scale_XS4",
+    "scenario_family": "F1_system_scale",
+    "level": "XS4",
+    "seed": 3,
+    "commodity_count": 1,
+    "generator_randomization_version": "frozen_schema_routing_restricted_v2",
+    "rng_stream_version": "matched_single_multi_streams_v1",
+    "rng_stream_names": [
+      "topology",
+      "maintenance_pool",
+      "maintenance_windows",
+      "mode_duration_variation",
+      "throughput_profile",
+      "initial_inventory",
+      "commodity_split",
+      "fixed_activity_profiles"
+    ],
+    "system_scale_level": "XS4",
+    "system_scale_profile": {
+      "train_unloader": 1,
+      "stacker": 1,
+      "reclaimer": 1,
+      "shiploader": 1
+    },
+    "canonical_model_ready_keys": [
+      "D",
+      "N",
+      "E",
+      "A",
+      "A_NS",
+      "P",
+      "G",
+      "SPECIAL_PRODUCTS",
+      "product_arc_compatible",
+      "zone_allowed_product",
+      "product_zone_compatible",
+      "M",
+      "M_a",
+      "K",
+      "arc_from",
+      "arc_to",
+      "predecessors",
+      "successors",
+      "asset_capacity_tpd",
+      "arc_capacity_tpd",
+      "maintenance_duration_days",
+      "maintenance_available_capacity_fraction",
+      "maintenance_earliest_start",
+      "maintenance_latest_start",
+      "zone_min_inventory_tonnes",
+      "zone_max_inventory_tonnes",
+      "initial_inventory_tonnes",
+      "overflow_penalty_per_tonne",
+      "minimum_throughput_tpd",
+      "special_activity_capacity_factor",
+      "maintenance_activity_incompatible"
+    ],
+    "notes": "Canonical benchmark with mandatory product routing. Multi-commodity instances add S1 on a dedicated route through Z4; G4 may use all general zones. Single-commodity instances remain unrestricted. Supply, demand, grade, footprint, and campaign fields are not exported."
+  },
+  "model_ready_data": {
+    "D": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59
+    ],
+    "N": [
+      "RAIL_SOURCE",
+      "TU1",
+      "ST1",
+      "RC1",
+      "SL1",
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4",
+      "VESSEL_SINK"
+    ],
+    "E": [
+      "RAIL_SOURCE__TU1",
+      "TU1__ST1",
+      "ST1__Z1",
+      "ST1__Z2",
+      "ST1__Z3",
+      "ST1__Z4",
+      "Z1__RC1",
+      "Z2__RC1",
+      "Z3__RC1",
+      "Z4__RC1",
+      "RC1__SL1",
+      "SL1__VESSEL_SINK"
+    ],
+    "A": [
+      "TU1",
+      "ST1",
+      "RC1",
+      "SL1"
+    ],
+    "A_NS": [
+      "TU1",
+      "ST1",
+      "RC1",
+      "SL1"
+    ],
+    "P": [
+      "Z1",
+      "Z2",
+      "Z3",
+      "Z4"
+    ],
+    "G": [
+      "G1"
+    ],
+    "SPECIAL_PRODUCTS": [],
+    "product_arc_compatible": {
+      "G1::RAIL_SOURCE__TU1": 1,
+      "G1::TU1__ST1": 1,
+      "G1::ST1__Z1": 1,
+      "G1::ST1__Z2": 1,
+      "G1::ST1__Z3": 1,
+      "G1::ST1__Z4": 1,
+      "G1::Z1__RC1": 1,
+      "G1::Z2__RC1": 1,
+      "G1::Z3__RC1": 1,
+      "G1::Z4__RC1": 1,
+      "G1::RC1__SL1": 1,
+      "G1::SL1__VESSEL_SINK": 1
+    },
+    "zone_allowed_product": {
+      "Z1::G1": 1,
+      "Z2::G1": 1,
+      "Z3::G1": 1,
+      "Z4::G1": 1
+    },
+    "product_zone_compatible": {
+      "G1::Z1": 1,
+      "G1::Z2": 1,
+      "G1::Z3": 1,
+      "G1::Z4": 1
+    },
+    "M": [
+      "M_RC1_01",
+      "M_RC1_02",
+      "M_ST1_01",
+      "M_ST1_02",
+      "M_ST1_03",
+      "M_ST1_04",
+      "M_ST1_05",
+      "M_TU1_01"
+    ],
+    "M_a": {
+      "TU1": [
+        "M_TU1_01"
+      ],
+      "ST1": [
+        "M_ST1_01",
+        "M_ST1_02",
+        "M_ST1_03",
+        "M_ST1_04",
+        "M_ST1_05"
+      ],
+      "RC1": [
+        "M_RC1_01",
+        "M_RC1_02"
+      ],
+      "SL1": []
+    },
+    "K": [
+      "F",
+      "P30",
+      "P70"
+    ],
+    "arc_from": {
+      "RAIL_SOURCE__TU1": "RAIL_SOURCE",
+      "TU1__ST1": "TU1",
+      "ST1__Z1": "ST1",
+      "ST1__Z2": "ST1",
+      "ST1__Z3": "ST1",
+      "ST1__Z4": "ST1",
+      "Z1__RC1": "Z1",
+      "Z2__RC1": "Z2",
+      "Z3__RC1": "Z3",
+      "Z4__RC1": "Z4",
+      "RC1__SL1": "RC1",
+      "SL1__VESSEL_SINK": "SL1"
+    },
+    "arc_to": {
+      "RAIL_SOURCE__TU1": "TU1",
+      "TU1__ST1": "ST1",
+      "ST1__Z1": "Z1",
+      "ST1__Z2": "Z2",
+      "ST1__Z3": "Z3",
+      "ST1__Z4": "Z4",
+      "Z1__RC1": "RC1",
+      "Z2__RC1": "RC1",
+      "Z3__RC1": "RC1",
+      "Z4__RC1": "RC1",
+      "RC1__SL1": "SL1",
+      "SL1__VESSEL_SINK": "VESSEL_SINK"
+    },
+    "predecessors": {
+      "RAIL_SOURCE": [],
+      "TU1": [
+        "RAIL_SOURCE"
+      ],
+      "ST1": [
+        "TU1"
+      ],
+      "RC1": [
+        "Z1",
+        "Z2",
+        "Z3",
+        "Z4"
+      ],
+      "SL1": [
+        "RC1"
+      ],
+      "Z1": [
+        "ST1"
+      ],
+      "Z2": [
+        "ST1"
+      ],
+      "Z3": [
+        "ST1"
+      ],
+      "Z4": [
+        "ST1"
+      ],
+      "VESSEL_SINK": [
+        "SL1"
+      ]
+    },
+    "successors": {
+      "RAIL_SOURCE": [
+        "TU1"
+      ],
+      "TU1": [
+        "ST1"
+      ],
+      "ST1": [
+        "Z1",
+        "Z2",
+        "Z3",
+        "Z4"
+      ],
+      "RC1": [
+        "SL1"
+      ],
+      "SL1": [
+        "VESSEL_SINK"
+      ],
+      "Z1": [
+        "RC1"
+      ],
+      "Z2": [
+        "RC1"
+      ],
+      "Z3": [
+        "RC1"
+      ],
+      "Z4": [
+        "RC1"
+      ],
+      "VESSEL_SINK": []
+    },
+    "asset_capacity_tpd": {
+      "TU1": 69600.0,
+      "ST1": 55200.0,
+      "RC1": 64800.0,
+      "SL1": 110400.0
+    },
+    "arc_capacity_tpd": {
+      "RAIL_SOURCE__TU1": 69600.0,
+      "TU1__ST1": 44160.0,
+      "ST1__Z1": 49680.0,
+      "ST1__Z2": 49680.0,
+      "ST1__Z3": 49680.0,
+      "ST1__Z4": 49680.0,
+      "Z1__RC1": 58320.0,
+      "Z2__RC1": 58320.0,
+      "Z3__RC1": 58320.0,
+      "Z4__RC1": 58320.0,
+      "RC1__SL1": 51840.0,
+      "SL1__VESSEL_SINK": 110400.0
+    },
+    "maintenance_duration_days": {
+      "M_RC1_01::F": 4,
+      "M_RC1_01::P30": 7,
+      "M_RC1_01::P70": 13,
+      "M_RC1_02::F": 3,
+      "M_RC1_02::P30": 5,
+      "M_RC1_02::P70": 11,
+      "M_ST1_01::F": 3,
+      "M_ST1_01::P30": 5,
+      "M_ST1_01::P70": 11,
+      "M_ST1_02::F": 3,
+      "M_ST1_02::P30": 5,
+      "M_ST1_02::P70": 10,
+      "M_ST1_03::F": 3,
+      "M_ST1_03::P30": 5,
+      "M_ST1_03::P70": 9,
+      "M_ST1_04::F": 3,
+      "M_ST1_04::P30": 4,
+      "M_ST1_04::P70": 10,
+      "M_ST1_05::F": 6,
+      "M_ST1_05::P30": 9,
+      "M_ST1_05::P70": 22,
+      "M_TU1_01::F": 6,
+      "M_TU1_01::P30": 10,
+      "M_TU1_01::P70": 18
+    },
+    "maintenance_available_capacity_fraction": {
+      "M_RC1_01::F": 0.0,
+      "M_RC1_01::P30": 0.3,
+      "M_RC1_01::P70": 0.7,
+      "M_RC1_02::F": 0.0,
+      "M_RC1_02::P30": 0.3,
+      "M_RC1_02::P70": 0.7,
+      "M_ST1_01::F": 0.0,
+      "M_ST1_01::P30": 0.3,
+      "M_ST1_01::P70": 0.7,
+      "M_ST1_02::F": 0.0,
+      "M_ST1_02::P30": 0.3,
+      "M_ST1_02::P70": 0.7,
+      "M_ST1_03::F": 0.0,
+      "M_ST1_03::P30": 0.3,
+      "M_ST1_03::P70": 0.7,
+      "M_ST1_04::F": 0.0,
+      "M_ST1_04::P30": 0.3,
+      "M_ST1_04::P70": 0.7,
+      "M_ST1_05::F": 0.0,
+      "M_ST1_05::P30": 0.3,
+      "M_ST1_05::P70": 0.7,
+      "M_TU1_01::F": 0.0,
+      "M_TU1_01::P30": 0.3,
+      "M_TU1_01::P70": 0.7
+    },
+    "maintenance_earliest_start": {
+      "M_RC1_01": 30,
+      "M_RC1_02": 20,
+      "M_ST1_01": 17,
+      "M_ST1_02": 42,
+      "M_ST1_03": 38,
+      "M_ST1_04": 27,
+      "M_ST1_05": 12,
+      "M_TU1_01": 35
+    },
+    "maintenance_latest_start": {
+      "M_RC1_01": 47,
+      "M_RC1_02": 31,
+      "M_ST1_01": 29,
+      "M_ST1_02": 50,
+      "M_ST1_03": 51,
+      "M_ST1_04": 34,
+      "M_ST1_05": 32,
+      "M_TU1_01": 42
+    },
+    "zone_min_inventory_tonnes": {
+      "Z1": 6210.0,
+      "Z2": 6210.0,
+      "Z3": 6210.0,
+      "Z4": 6210.0
+    },
+    "zone_max_inventory_tonnes": {
+      "Z1": 83490.0,
+      "Z2": 83490.0,
+      "Z3": 83490.0,
+      "Z4": 83490.0
+    },
+    "initial_inventory_tonnes": {
+      "Z1::G1": 23094.152,
+      "Z2::G1": 24426.41,
+      "Z3::G1": 23028.078,
+      "Z4::G1": 22617.346
+    },
+    "overflow_penalty_per_tonne": {
+      "Z1": 850.0,
+      "Z2": 875.0,
+      "Z3": 900.0,
+      "Z4": 925.0
+    },
+    "minimum_throughput_tpd": {
+      "0": 29859.485,
+      "1": 30295.055,
+      "2": 29330.518,
+      "3": 30514.334,
+      "4": 30237.011,
+      "5": 29500.145,
+      "6": 30270.214,
+      "7": 29618.232,
+      "8": 29702.89,
+      "9": 29690.689,
+      "10": 34486.705,
+      "11": 34614.846,
+      "12": 34679.494,
+      "13": 35160.395,
+      "14": 35228.303,
+      "15": 34732.811,
+      "16": 35048.556,
+      "17": 34941.989,
+      "18": 34891.779,
+      "19": 35053.538,
+      "20": 38015.178,
+      "21": 38105.604,
+      "22": 38040.121,
+      "23": 38614.135,
+      "24": 37491.082,
+      "25": 38457.122,
+      "26": 37381.932,
+      "27": 37709.259,
+      "28": 37059.7,
+      "29": 37053.746,
+      "30": 32744.785,
+      "31": 31955.128,
+      "32": 32311.604,
+      "33": 32569.241,
+      "34": 32559.572,
+      "35": 31696.535,
+      "36": 31900.02,
+      "37": 31495.114,
+      "38": 32384.75,
+      "39": 32276.016,
+      "40": 34816.943,
+      "41": 34746.183,
+      "42": 34874.26,
+      "43": 35283.237,
+      "44": 34920.315,
+      "45": 34733.229,
+      "46": 35011.041,
+      "47": 35441.303,
+      "48": 35090.651,
+      "49": 34926.57,
+      "50": 33621.419,
+      "51": 32480.146,
+      "52": 33186.341,
+      "53": 33510.754,
+      "54": 33874.584,
+      "55": 33622.971,
+      "56": 33318.94,
+      "57": 33545.696,
+      "58": 33363.279,
+      "59": 33111.765
+    },
+    "special_activity_capacity_factor": {},
+    "maintenance_activity_incompatible": {}
+  },
+  "diagnostics": {
+    "asset_count": 4,
+    "arc_count": 12,
+    "stage_asset_counts": {
+      "train_unloader": 1,
+      "stacker": 1,
+      "reclaimer": 1,
+      "shiploader": 1
+    },
+    "maintenance_operation_count": 8,
+    "maintenance_operations_per_asset": {
+      "TU1": 1,
+      "ST1": 5,
+      "RC1": 2,
+      "SL1": 0
+    },
+    "maintenance_window_width": {
+      "min": 8.0,
+      "mean": 12.875,
+      "max": 21.0
+    },
+    "maintenance_window_overlap_pairs": 15,
+    "mode_effective_outage_days": {
+      "F": {
+        "min": 3.0,
+        "mean": 3.875,
+        "max": 6.0
+      },
+      "P30": {
+        "min": 2.8,
+        "mean": 4.375,
+        "max": 7.0
+      },
+      "P70": {
+        "min": 2.7,
+        "mean": 3.9,
+        "max": 6.6
+      }
+    },
+    "no_maintenance_throughput_tpd": 55200.0,
+    "minimum_throughput_ratio_to_q0": {
+      "min": 0.53135,
+      "mean": 0.613272,
+      "max": 0.699531
+    },
+    "initial_yard_fill_ratio": {
+      "Z1": 0.27661,
+      "Z2": 0.292567,
+      "Z3": 0.275818,
+      "Z4": 0.270899
+    },
+    "initial_yard_fill_after_min_ratio": {
+      "Z1": 0.21848,
+      "Z2": 0.23572,
+      "Z3": 0.217625,
+      "Z4": 0.21231
+    },
+    "stockyard_flow_share": {
+      "Z1": 0.25,
+      "Z2": 0.25,
+      "Z3": 0.25,
+      "Z4": 0.25
+    },
+    "usable_storage_days": {
+      "Z1": 5.6,
+      "Z2": 5.6,
+      "Z3": 5.6,
+      "Z4": 5.6
+    },
+    "average_usable_storage_days": 5.6,
+    "fixed_activity_window_count": 0,
+    "fixed_activity_capacity_days": 0,
+    "fixed_capacity_reduction_severity": 0,
+    "fixed_activity_incompatible_asset_days": 0,
+    "estimated_model_size": {
+      "variables": 2049,
+      "constraints": 2528
+    },
+    "schema_key_count": 31,
+    "scenario_name": "F1_system_scale_XS4"
+  }
+}
