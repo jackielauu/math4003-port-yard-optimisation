@@ -92,6 +92,19 @@ The payload JSON files contain the selected maintenance schedule, stockyard inve
 python visualize_results.py results/payloads/multi_commodity --output-dir results/plots/multi_commodity
 ```
 
+The same plotter accepts evaluated rule-based baseline payloads. To plot both v3
+commodity representations, run these commands with separate output folders:
+
+```bash
+python visualize_results.py results/rule_based_baseline_evaluated_multi_v3 --output-dir results/plots/rule_based_baseline_evaluated_multi_v3
+python visualize_results.py results/rule_based_baseline_evaluated_single_v3 --output-dir results/plots/rule_based_baseline_evaluated_single_v3
+```
+
+Each evaluated payload produces the same maintenance, stockyard inventory, and
+daily throughput panels as the MILP plots. Multi-commodity inventory is aggregated
+by zone. Payloads without operational results produce a maintenance-only plot
+labelled with their operational status.
+
 In `run_model_tests.ipynb`, set:
 
 ```python

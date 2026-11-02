@@ -84,13 +84,32 @@ def plot_payload_file(payload_path, output_dir):
         payload = json.load(handle)
 
     os.makedirs(output_dir, exist_ok=True)
-    scenario = payload["metadata"]["scenario"]
+    if payload.get("schema_version") == "rule_based_baseline_v1":
+        # Instance labels omit the seed; the saved filename uniquely identifies it.
+        scenario = os.path.splitext(os.path.basename(payload_path))[0]
+    elif payload.get("schema_version") == "rule_based_operational_evaluation_v1":
+        scenario = payload["instance"]
+    else:
+        scenario = payload["metadata"]["scenario"]
     out_path = os.path.join(output_dir, f"{_safe_filename(scenario)}.png")
     plot_payload(payload, out_path)
     return out_path
 
 
 def plot_payload(payload, out_path):
+    if payload.get("schema_version") == "rule_based_baseline_v1":
+        return _plot_rule_based_payload(payload, out_path)
+    if payload.get("schema_version") == "rule_based_operational_evaluation_v1":
+        if not payload.get("daily_throughput_tonnes"):
+            schedule_payload = {
+                "schedule": payload["maintenance_schedule"],
+                "unscheduled_tasks": payload.get("unscheduled_tasks", []),
+                "task_count": payload["task_count"],
+                "status": payload["operational_status"],
+            }
+            return _plot_rule_based_payload(schedule_payload, out_path)
+        payload = _evaluated_rule_based_plot_payload(payload)
+
     import matplotlib
 
     matplotlib.use("Agg")
@@ -109,6 +128,93 @@ def plot_payload(payload, out_path):
     _plot_throughput(ax_throughput, payload)
 
     fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(out_path, dpi=150, facecolor=SURFACE)
+    plt.close(fig)
+
+
+def _evaluated_rule_based_plot_payload(payload):
+    """Adapt saved fixed-schedule operational results to the MILP plot schema."""
+    def zone_series(mapping, value_name):
+        return {
+            zone: [
+                {"day": int(day), value_name: value}
+                for day, value in sorted(values.items(), key=lambda item: int(item[0]))
+            ]
+            for zone, values in mapping.items()
+        }
+
+    schedule = [
+        dict(item, asset=item["asset_id"], operation=operation)
+        for operation, item in payload["maintenance_schedule"].items()
+    ]
+    inventory = zone_series(payload["stockyard_inventory_tonnes"], "inventory_tonnes")
+    throughput = [
+        {"day": int(day), "throughput_tonnes": value}
+        for day, value in sorted(
+            payload["daily_throughput_tonnes"].items(), key=lambda item: int(item[0])
+        )
+    ]
+    days = sorted({point["day"] for point in throughput} |
+                  {point["day"] for points in inventory.values() for point in points})
+    return {
+        "metadata": {
+            "scenario": payload["instance"],
+            "model": (f"Rule based fixed MILP / {payload['commodity_representation']} / "
+                      f"{payload['operational_status']}"),
+        },
+        "sets": {
+            "days": days,
+            "assets": sorted({item["asset"] for item in schedule}),
+            "zones": sorted(inventory),
+        },
+        "parameters": payload["plot_parameters"],
+        "solution": {
+            "maintenance_schedule": schedule,
+            "zone_inventory": inventory,
+            "throughput": throughput,
+            "overflow": zone_series(payload.get("stockyard_overflow_tonnes", {}),
+                                    "overflow_tonnes"),
+        },
+    }
+
+
+def _plot_rule_based_payload(payload, out_path):
+    """Plot saved heuristic maintenance decisions without inventing flow results."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.patches as mpatches
+    import matplotlib.pyplot as plt
+
+    schedule = [dict(item, asset=item["asset_id"]) for item in payload["schedule"].values()]
+    unscheduled = payload.get("unscheduled_tasks", [])
+    assets = sorted({item["asset"] for item in schedule} |
+                    {item["asset_id"] for item in unscheduled})
+    first_day = min((item["start_day"] for item in schedule), default=1)
+    last_day = max((item["start_day"] + item["duration_days"] - 1
+                    for item in schedule), default=first_day)
+    plotting_payload = {
+        "sets": {"assets": assets, "days": [first_day, last_day]},
+        "solution": {"maintenance_schedule": schedule},
+    }
+    fig, ax = plt.subplots(figsize=(12, max(4, len(assets) * 0.28 + 2)),
+                           facecolor=SURFACE)
+    _plot_maintenance_gantt(ax, plotting_payload, mpatches)
+    title = os.path.splitext(os.path.basename(out_path))[0].replace("_", " ")
+    fig.suptitle(f"{title}\nRule-based maintenance — {payload['status']}",
+                 color=INK_PRIMARY, fontsize=12)
+    note = f"Scheduled: {len(schedule)} / {payload['task_count']}."
+    if unscheduled:
+        note += " Unscheduled tasks: " + ", ".join(str(item["task_id"]) for item in unscheduled)
+    else:
+        note += " Unscheduled tasks: 0."
+    import textwrap
+    note = "\n".join(textwrap.wrap(note, width=120))
+    note += "\nInventory and throughput are not included in this schedule payload."
+    footer_height = 0.2 + 0.16 * len(note.splitlines())
+    fig.set_figheight(fig.get_figheight() + footer_height)
+    fig.text(0.02, 0.02, note, fontsize=8, color=INK_SECONDARY)
+    fig.tight_layout(rect=(0, footer_height / fig.get_figheight(), 1, 0.93))
     fig.savefig(out_path, dpi=150, facecolor=SURFACE)
     plt.close(fig)
 
